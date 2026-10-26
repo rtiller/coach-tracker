@@ -1,0 +1,326 @@
+{
+  "version": "v0.1.3.2-preview",
+  "engine": "webkit",
+  "url": "local",
+  "clock": "2026-10-24T12:00:00-05:00",
+  "scheme": "dark, Fri (Lower B) picked from the strip",
+  "shots": [
+    {
+      "file": "screens/v0.1.3.2/pair-cover-selected-day-1-before-382x560-dark.png",
+      "build": "v0.1.3.1 (4034d2d)",
+      "viewport": "382x560",
+      "safeB": 34,
+      "text": "100%",
+      "what": "before (v0.1.3.1): cover at the Safari visible height, Fri picked; the pinned strip, row and slot cover the last exercise and Mark day done",
+      "vh": 560,
+      "rows": [
+        [
+          214,
+          258
+        ],
+        [
+          260,
+          304
+        ],
+        [
+          306,
+          350
+        ],
+        [
+          352,
+          396
+        ]
+      ],
+      "done": [
+        406,
+        454
+      ],
+      "strip": [
+        275,
+        344
+      ],
+      "row": [
+        352,
+        396
+      ],
+      "slot": [
+        404,
+        460
+      ],
+      "pinned": true,
+      "version": "v0.1.3.1-preview",
+      "bytes": 95276
+    },
+    {
+      "file": "screens/v0.1.3.2/pair-cover-selected-day-2-after-382x560-dark.png",
+      "build": "this build",
+      "viewport": "382x560",
+      "safeB": 34,
+      "text": "100%",
+      "what": "after (v0.1.3.2): the same; the whole card, Mark day done included, then the strip and the row in the flow",
+      "vh": 560,
+      "rows": [
+        [
+          174,
+          218
+        ],
+        [
+          220,
+          264
+        ],
+        [
+          266,
+          310
+        ],
+        [
+          312,
+          356
+        ]
+      ],
+      "done": [
+        366,
+        414
+      ],
+      "strip": [
+        427,
+        496
+      ],
+      "row": [
+        504,
+        548
+      ],
+      "slot": [
+        556,
+        612
+      ],
+      "pinned": false,
+      "version": "v0.1.3.2-preview",
+      "bytes": 117786
+    },
+    {
+      "file": "screens/v0.1.3.2/after-inner-portrait-selected-day-669x751-dark.png",
+      "build": "this build",
+      "viewport": "669x751",
+      "safeB": 34,
+      "text": "100%",
+      "what": "after: inner portrait at the Safari visible height, Fri picked",
+      "vh": 751,
+      "rows": [
+        [
+          220,
+          266
+        ],
+        [
+          272,
+          318
+        ],
+        [
+          324,
+          370
+        ],
+        [
+          376,
+          422
+        ]
+      ],
+      "done": [
+        440,
+        496
+      ],
+      "strip": [
+        557,
+        646
+      ],
+      "row": null,
+      "slot": [
+        654,
+        710
+      ],
+      "pinned": false,
+      "version": "v0.1.3.2-preview",
+      "bytes": 120591
+    },
+    {
+      "file": "screens/v0.1.3.2/after-inner-landscape-selected-day-951x585-dark.png",
+      "build": "this build",
+      "viewport": "951x585",
+      "safeB": 34,
+      "text": "100%",
+      "what": "after: inner landscape at the Safari visible height, Fri picked",
+      "vh": 585,
+      "rows": [
+        [
+          139,
+          185
+        ],
+        [
+          191,
+          237
+        ],
+        [
+          243,
+          289
+        ],
+        [
+          295,
+          341
+        ]
+      ],
+      "done": [
+        359,
+        415
+      ],
+      "strip": [
+        476,
+        565
+      ],
+      "row": null,
+      "slot": [
+        573,
+        629
+      ],
+      "pinned": false,
+      "version": "v0.1.3.2-preview",
+      "bytes": 199410
+    },
+    {
+      "file": "screens/v0.1.3.2/after-cover-200text-selected-day-382x560-dark.png",
+      "build": "this build",
+      "viewport": "382x560",
+      "safeB": 34,
+      "text": "200%",
+      "what": "after: cover at 200% text, Fri picked, at rest (the card starts at its top; the rest is a scroll away)",
+      "vh": 560,
+      "rows": [
+        [
+          283,
+          390
+        ],
+        [
+          392,
+          500
+        ],
+        [
+          502,
+          610
+        ],
+        [
+          612,
+          761
+        ]
+      ],
+      "done": [
+        771,
+        827
+      ],
+      "strip": [
+        840,
+        1020
+      ],
+      "row": [
+        1028,
+        1124
+      ],
+      "slot": [
+        1132,
+        1219
+      ],
+      "pinned": false,
+      "version": "v0.1.3.2-preview",
+      "bytes": 94079
+    },
+    {
+      "file": "screens/v0.1.3.2/after-cover-200text-selected-day-end-382x560-dark.png",
+      "build": "this build",
+      "viewport": "382x560",
+      "safeB": 34,
+      "text": "200%",
+      "what": "after: cover at 200% text, Fri picked, at the end: Mark day done, the strip and the row clear",
+      "vh": 560,
+      "rows": [
+        [
+          -476,
+          -369
+        ],
+        [
+          -367,
+          -259
+        ],
+        [
+          -257,
+          -149
+        ],
+        [
+          -147,
+          2
+        ]
+      ],
+      "done": [
+        12,
+        68
+      ],
+      "strip": [
+        81,
+        261
+      ],
+      "row": [
+        269,
+        365
+      ],
+      "slot": [
+        373,
+        460
+      ],
+      "pinned": false,
+      "version": "v0.1.3.2-preview",
+      "bytes": 80763
+    },
+    {
+      "file": "screens/v0.1.3.2/after-cover-selected-day-undo-end-382x560-dark.png",
+      "build": "this build",
+      "viewport": "382x560",
+      "safeB": 34,
+      "text": "100%",
+      "what": "after: cover, Fri picked, skipped, at the end: Undo in its slot below the row",
+      "vh": 560,
+      "rows": [
+        [
+          22,
+          66
+        ],
+        [
+          68,
+          112
+        ],
+        [
+          114,
+          158
+        ],
+        [
+          160,
+          204
+        ]
+      ],
+      "done": [
+        214,
+        262
+      ],
+      "strip": [
+        275,
+        344
+      ],
+      "row": [
+        352,
+        396
+      ],
+      "slot": [
+        404,
+        460
+      ],
+      "pinned": false,
+      "version": "v0.1.3.2-preview",
+      "bytes": 99406
+    }
+  ],
+  "errors": []
+}

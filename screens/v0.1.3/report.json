@@ -1,0 +1,129 @@
+{
+  "version": "v0.1.3-preview",
+  "engine": "webkit",
+  "url": "local",
+  "clock": "2026-10-23T12:00:00-05:00",
+  "scheme": "dark and light, the Undo toast showing",
+  "shots": [
+    {
+      "file": "screens/v0.1.3/cover-today-top-382x644-dark.png",
+      "viewport": "382x644",
+      "scheme": "dark",
+      "what": "cover screen, today, at scroll top, Undo showing",
+      "bytes": 121827
+    },
+    {
+      "file": "screens/v0.1.3/cover-today-max-382x644-dark.png",
+      "viewport": "382x644",
+      "scheme": "dark",
+      "what": "cover screen, today, at max scroll, Undo showing",
+      "bytes": 127598
+    },
+    {
+      "file": "screens/v0.1.3/cover-thu-top-382x644-dark.png",
+      "viewport": "382x644",
+      "scheme": "dark",
+      "what": "cover screen, Thursday shown (another day), at scroll top, Undo showing",
+      "bytes": 117992
+    },
+    {
+      "file": "screens/v0.1.3/cover-thu-max-382x644-dark.png",
+      "viewport": "382x644",
+      "scheme": "dark",
+      "what": "cover screen, Thursday shown (another day), at max scroll, Undo showing",
+      "bytes": 124203
+    },
+    {
+      "file": "screens/v0.1.3/duo-inner-portrait-today-top-669x835-dark.png",
+      "viewport": "669x835",
+      "scheme": "dark",
+      "what": "inner portrait, today, at scroll top, Undo showing",
+      "bytes": 150094
+    },
+    {
+      "file": "screens/v0.1.3/duo-inner-portrait-today-max-669x835-dark.png",
+      "viewport": "669x835",
+      "scheme": "dark",
+      "what": "inner portrait, today, at max scroll, Undo showing",
+      "bytes": 150088
+    },
+    {
+      "file": "screens/v0.1.3/duo-inner-portrait-thu-top-669x835-dark.png",
+      "viewport": "669x835",
+      "scheme": "dark",
+      "what": "inner portrait, Thursday shown (another day), at scroll top, Undo showing",
+      "bytes": 158265
+    },
+    {
+      "file": "screens/v0.1.3/duo-inner-portrait-thu-max-669x835-dark.png",
+      "viewport": "669x835",
+      "scheme": "dark",
+      "what": "inner portrait, Thursday shown (another day), at max scroll, Undo showing",
+      "bytes": 158256
+    },
+    {
+      "file": "screens/v0.1.3/duo-inner-landscape-today-top-951x669-dark.png",
+      "viewport": "951x669",
+      "scheme": "dark",
+      "what": "inner landscape, today, at scroll top, Undo showing",
+      "bytes": 242860
+    },
+    {
+      "file": "screens/v0.1.3/duo-inner-landscape-today-max-951x669-dark.png",
+      "viewport": "951x669",
+      "scheme": "dark",
+      "what": "inner landscape, today, at max scroll, Undo showing",
+      "bytes": 226497
+    },
+    {
+      "file": "screens/v0.1.3/duo-inner-landscape-thu-top-951x669-dark.png",
+      "viewport": "951x669",
+      "scheme": "dark",
+      "what": "inner landscape, Thursday shown (another day), at scroll top, Undo showing",
+      "bytes": 254249
+    },
+    {
+      "file": "screens/v0.1.3/duo-inner-landscape-thu-max-951x669-dark.png",
+      "viewport": "951x669",
+      "scheme": "dark",
+      "what": "inner landscape, Thursday shown (another day), at max scroll, Undo showing",
+      "bytes": 234347
+    },
+    {
+      "file": "screens/v0.1.3/cover-200text-thu-top-382x644-dark.png",
+      "viewport": "382x644",
+      "scheme": "dark",
+      "what": "cover screen at 200% text, Thursday shown, scroll top, Undo showing",
+      "bytes": 102807
+    },
+    {
+      "file": "screens/v0.1.3/cover-200text-thu-max-382x644-dark.png",
+      "viewport": "382x644",
+      "scheme": "dark",
+      "what": "cover screen at 200% text, Thursday shown, max scroll, Undo showing",
+      "bytes": 102464
+    },
+    {
+      "file": "screens/v0.1.3/cover-today-top-382x644-light.png",
+      "viewport": "382x644",
+      "scheme": "light",
+      "what": "cover screen, today, scroll top, Undo showing",
+      "bytes": 122271
+    },
+    {
+      "file": "screens/v0.1.3/duo-inner-portrait-today-max-669x835-light.png",
+      "viewport": "669x835",
+      "scheme": "light",
+      "what": "inner portrait, today, max scroll, Undo showing",
+      "bytes": 150064
+    },
+    {
+      "file": "screens/v0.1.3/duo-inner-landscape-thu-max-951x669-light.png",
+      "viewport": "951x669",
+      "scheme": "light",
+      "what": "inner landscape, Thursday shown, max scroll, Undo showing",
+      "bytes": 233692
+    }
+  ],
+  "errors": []
+}

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<!-- coach-tracker v0.1.3.4-preview · generic workout tracker · the plan arrives in the #p= link fragment and is stored on this device only -->
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; base-uri 'none'; form-action 'none'" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#f3f0e9" media="(prefers-color-scheme: light)" />
+<meta name="theme-color" content="#1d211e" media="(prefers-color-scheme: dark)" />
+<meta name="referrer" content="no-referrer" />
+<meta name="apple-mobile-web-app-title" content="Workouts" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="mobile-web-app-capable" content="yes" />
+<link rel="icon" href="data:," />
+<meta name="format-detection" content="telephone=no" />
+<title>Workout Tracker</title>
+<meta name="description" content="A private workout tracker that keeps your plan and logs in this browser." />
+<meta property="og:description" content="A private workout tracker that keeps your plan and logs in this browser." />
+<script>/* Layout mode, one definition. html.duo-inner when the layout viewport's short side is at least 520 (the Duo inner
+   screen; every slab phone tops out near 440). Wider than tall adds html.L-duo (two panes), otherwise html.L-innerp (inner
+   portrait). Anything else is the phone layout (the Counter in short landscape, app6). The device screen is not used:
+   Safari on the real Duo reports the wrong one. Re-checked on resize, orientationchange and unfold; frozen while a text
+   field has focus and for 700ms after, so a keyboard never flips it. window.LAYOUT.matches is true for every layout but
+   two panes (the old cover query), with change listeners. */
+(function () { var h = document.documentElement, hold = 0, ls = [], cur = null;
+  var entry = function () { var a = document.activeElement; return !!a && (a.tagName === "TEXTAREA" || (a.tagName === "INPUT" && !/^(button|checkbox|radio|file|submit|reset|range|color)$/i.test(a.type))); };
+  var want = function () { var w = window.innerWidth, ht = window.innerHeight; /*WANT*/return Math.min(w, ht) >= 520 ? (w > ht ? "duo" : "innerp") : "phone";/*END*/ };
+  var apply = function (m) { cur = m; h.classList.toggle("duo-inner", m !== "phone"); h.classList.toggle("L-duo", m === "duo"); h.classList.toggle("L-innerp", m === "innerp"); };
+  var sync = function () { if (entry() || performance.now() < hold) return; var m = want(); if (m === cur) return; apply(m); ls.forEach(function (f) { try { f({ matches: m !== "duo" }); } catch (e) { setTimeout(function () { throw e; }); } }); };
+  apply(want());
+  window.addEventListener("resize", sync); window.addEventListener("orientationchange", sync);
+  try { var o = window.matchMedia("(orientation: landscape)"); if (o.addEventListener) o.addEventListener("change", sync); else o.addListener(sync); } catch (e) {}
+  document.addEventListener("focusout", function () { hold = performance.now() + 700; setTimeout(sync, 720); }, true);
+  window.LAYOUT = { get matches() { return cur !== "duo"; }, get mode() { return cur; }, sync: sync,
+    addEventListener: function (t, f) { ls.push(f); }, addListener: function (f) { ls.push(f); } };
+})();</script>
+<style>

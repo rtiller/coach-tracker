@@ -1,0 +1,361 @@
+{
+  "meta": {
+    "name": "Five day split",
+    "weeks": 10,
+    "blockWeeks": 5,
+    "deload": "last",
+    "units": "kg",
+    "deloadNote": "Deload week: keep the weights, cut every exercise to two sets."
+  },
+  "days": [
+    {
+      "key": "push",
+      "label": "Push",
+      "short": "Mon",
+      "focus": "Chest and shoulders",
+      "priority": true,
+      "rest": false,
+      "note": ""
+    },
+    {
+      "key": "pull",
+      "label": "Pull",
+      "short": "Tue",
+      "focus": "Back and arms",
+      "priority": false,
+      "rest": false,
+      "note": ""
+    },
+    {
+      "key": "legs",
+      "label": "Legs",
+      "short": "Wed",
+      "focus": "Squat day",
+      "priority": true,
+      "rest": false,
+      "note": ""
+    },
+    {
+      "key": "upper",
+      "label": "Upper",
+      "short": "Thu",
+      "focus": "Press and pull",
+      "priority": false,
+      "rest": false,
+      "note": ""
+    },
+    {
+      "key": "lower",
+      "label": "Lower",
+      "short": "Fri",
+      "focus": "Hinge day",
+      "priority": false,
+      "rest": false,
+      "note": ""
+    },
+    {
+      "key": "rest",
+      "label": "Rest",
+      "short": "Sat",
+      "focus": "",
+      "priority": false,
+      "rest": true,
+      "note": "Light cardio"
+    },
+    {
+      "key": "rest",
+      "label": "Rest",
+      "short": "Sun",
+      "focus": "",
+      "priority": false,
+      "rest": true,
+      "note": ""
+    }
+  ],
+  "blocks": {
+    "1": {
+      "push": [
+        {
+          "name": "Bench press",
+          "sets": "4 x 6-8",
+          "tags": [
+            "anchor"
+          ]
+        },
+        {
+          "name": "Incline dumbbell press",
+          "sets": "3 x 8-10",
+          "tags": []
+        },
+        {
+          "name": "Cable fly",
+          "sets": "3 x 12-15",
+          "tags": [
+            "accessory"
+          ]
+        },
+        {
+          "name": "Triceps pushdown",
+          "sets": "3 x 10-12",
+          "tags": [
+            "optional"
+          ]
+        }
+      ],
+      "pull": [
+        {
+          "name": "Pull-up",
+          "sets": "4 x 6-10",
+          "tags": [
+            "anchor"
+          ]
+        },
+        {
+          "name": "Barbell row",
+          "sets": "3 x 8-10",
+          "tags": []
+        },
+        {
+          "name": "Face pull",
+          "sets": "3 x 12-15",
+          "tags": [
+            "accessory"
+          ]
+        },
+        {
+          "name": "Hammer curl",
+          "sets": "3 x 10-12",
+          "tags": [
+            "optional"
+          ]
+        }
+      ],
+      "legs": [
+        {
+          "name": "Back squat",
+          "sets": "4 x 5-7",
+          "tags": [
+            "anchor"
+          ]
+        },
+        {
+          "name": "Romanian deadlift",
+          "sets": "3 x 8-10",
+          "tags": []
+        },
+        {
+          "name": "Leg extension",
+          "sets": "3 x 12-15",
+          "tags": []
+        },
+        {
+          "name": "Seated calf raise",
+          "sets": "4 x 12-15",
+          "tags": [
+            "accessory"
+          ]
+        }
+      ],
+      "upper": [
+        {
+          "name": "Overhead press",
+          "sets": "4 x 6-8",
+          "tags": [
+            "anchor"
+          ]
+        },
+        {
+          "name": "Lat pulldown",
+          "sets": "3 x 10-12",
+          "tags": []
+        },
+        {
+          "name": "Dumbbell bench press",
+          "sets": "3 x 10-12",
+          "tags": []
+        },
+        {
+          "name": "Rear delt fly",
+          "sets": "3 x 15",
+          "tags": [
+            "optional"
+          ]
+        }
+      ],
+      "lower": [
+        {
+          "name": "Deadlift",
+          "sets": "3 x 4-6",
+          "tags": [
+            "anchor"
+          ]
+        },
+        {
+          "name": "Bulgarian split squat",
+          "sets": "3 x 8/leg",
+          "tags": []
+        },
+        {
+          "name": "Leg curl",
+          "sets": "3 x 10-12",
+          "tags": []
+        },
+        {
+          "name": "Ab wheel",
+          "sets": "3 x 8-12",
+          "tags": [
+            "optional"
+          ]
+        }
+      ]
+    },
+    "2": {
+      "push": [
+        {
+          "name": "Bench press",
+          "sets": "5 x 6-8",
+          "tags": [
+            "anchor"
+          ]
+        },
+        {
+          "name": "Incline dumbbell press",
+          "sets": "3 x 8-10",
+          "tags": []
+        },
+        {
+          "name": "Cable fly",
+          "sets": "3 x 12-15",
+          "tags": [
+            "accessory"
+          ]
+        },
+        {
+          "name": "Triceps pushdown",
+          "sets": "3 x 10-12",
+          "tags": [
+            "optional"
+          ]
+        }
+      ],
+      "pull": [
+        {
+          "name": "Pull-up",
+          "sets": "4 x 6-10",
+          "tags": [
+            "anchor"
+          ]
+        },
+        {
+          "name": "Barbell row",
+          "sets": "3 x 8-10",
+          "tags": []
+        },
+        {
+          "name": "Face pull",
+          "sets": "3 x 12-15",
+          "tags": [
+            "accessory"
+          ]
+        },
+        {
+          "name": "Hammer curl",
+          "sets": "3 x 10-12",
+          "tags": [
+            "optional"
+          ]
+        }
+      ],
+      "legs": [
+        {
+          "name": "Back squat",
+          "sets": "5 x 5-7",
+          "tags": [
+            "anchor"
+          ]
+        },
+        {
+          "name": "Romanian deadlift",
+          "sets": "3 x 8-10",
+          "tags": []
+        },
+        {
+          "name": "Leg extension",
+          "sets": "3 x 12-15",
+          "tags": []
+        },
+        {
+          "name": "Seated calf raise",
+          "sets": "4 x 12-15",
+          "tags": [
+            "accessory"
+          ]
+        }
+      ],
+      "upper": [
+        {
+          "name": "Overhead press",
+          "sets": "4 x 6-8",
+          "tags": [
+            "anchor"
+          ]
+        },
+        {
+          "name": "Lat pulldown",
+          "sets": "3 x 10-12",
+          "tags": []
+        },
+        {
+          "name": "Dumbbell bench press",
+          "sets": "3 x 10-12",
+          "tags": []
+        },
+        {
+          "name": "Rear delt fly",
+          "sets": "3 x 15",
+          "tags": [
+            "optional"
+          ]
+        }
+      ],
+      "lower": [
+        {
+          "name": "Deadlift",
+          "sets": "3 x 4-6",
+          "tags": [
+            "anchor"
+          ]
+        },
+        {
+          "name": "Bulgarian split squat",
+          "sets": "3 x 8/leg",
+          "tags": []
+        },
+        {
+          "name": "Leg curl",
+          "sets": "3 x 10-12",
+          "tags": []
+        },
+        {
+          "name": "Ab wheel",
+          "sets": "3 x 8-12",
+          "tags": [
+            "optional"
+          ]
+        }
+      ]
+    }
+  },
+  "lifts": [
+    "Bench press",
+    "Back squat",
+    "Deadlift",
+    "Overhead press",
+    "Pull-up"
+  ],
+  "labels": {
+    "anchor": "Main lift",
+    "priority": "Focus",
+    "optional": "If time"
+  }
+}

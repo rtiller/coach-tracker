@@ -1,0 +1,269 @@
+{
+  "version": "v0.1.0-preview",
+  "engine": "webkit",
+  "url": "local build",
+  "clock": "2026-10-23T12:00:00-05:00",
+  "startDate": "2026-09-21 (week 5, Friday)",
+  "deviceScaleFactor": 2,
+  "indexBytes": 137775,
+  "count": 34,
+  "errors": [],
+  "shots": [
+    {
+      "file": "screens/v0.1.0/a-duo-outer-382x644-light.png",
+      "bytes": 110820,
+      "kind": "sample",
+      "sample": "a-3day-beginner-full-body",
+      "size": "382x644",
+      "mode": "light"
+    },
+    {
+      "file": "screens/v0.1.0/a-duo-inner-landscape-951x669-light.png",
+      "bytes": 228079,
+      "kind": "sample",
+      "sample": "a-3day-beginner-full-body",
+      "size": "951x669",
+      "mode": "light"
+    },
+    {
+      "file": "screens/v0.1.0/a-slab-390x844-light.png",
+      "bytes": 113427,
+      "kind": "sample",
+      "sample": "a-3day-beginner-full-body",
+      "size": "390x844",
+      "mode": "light"
+    },
+    {
+      "file": "screens/v0.1.0/b-duo-outer-382x644-light.png",
+      "bytes": 106474,
+      "kind": "sample",
+      "sample": "b-4day-upper-lower",
+      "size": "382x644",
+      "mode": "light"
+    },
+    {
+      "file": "screens/v0.1.0/b-duo-inner-landscape-951x669-light.png",
+      "bytes": 235653,
+      "kind": "sample",
+      "sample": "b-4day-upper-lower",
+      "size": "951x669",
+      "mode": "light"
+    },
+    {
+      "file": "screens/v0.1.0/b-slab-390x844-light.png",
+      "bytes": 107977,
+      "kind": "sample",
+      "sample": "b-4day-upper-lower",
+      "size": "390x844",
+      "mode": "light"
+    },
+    {
+      "file": "screens/v0.1.0/c-duo-outer-382x644-light.png",
+      "bytes": 102308,
+      "kind": "sample",
+      "sample": "c-5day-split-deload",
+      "size": "382x644",
+      "mode": "light"
+    },
+    {
+      "file": "screens/v0.1.0/c-duo-inner-landscape-951x669-light.png",
+      "bytes": 237340,
+      "kind": "sample",
+      "sample": "c-5day-split-deload",
+      "size": "951x669",
+      "mode": "light"
+    },
+    {
+      "file": "screens/v0.1.0/c-slab-390x844-light.png",
+      "bytes": 109644,
+      "kind": "sample",
+      "sample": "c-5day-split-deload",
+      "size": "390x844",
+      "mode": "light"
+    },
+    {
+      "file": "screens/v0.1.0/empty-slab-390x844-light.png",
+      "bytes": 158197,
+      "kind": "empty state",
+      "size": "390x844",
+      "mode": "light"
+    },
+    {
+      "file": "screens/v0.1.0/error-bad-link-slab-390x844-light.png",
+      "bytes": 121728,
+      "kind": "error (bad link, nothing changed)",
+      "size": "390x844",
+      "mode": "light"
+    },
+    {
+      "file": "screens/v0.1.0/update-plan-slab-390x844-light.png",
+      "bytes": 127250,
+      "kind": "Update plan",
+      "size": "390x844",
+      "mode": "light"
+    },
+    {
+      "file": "screens/v0.1.0/import-confirm-slab-390x844-light.png",
+      "bytes": 140273,
+      "kind": "Import confirm",
+      "size": "390x844",
+      "mode": "light"
+    },
+    {
+      "file": "screens/v0.1.0/empty-duo-inner-landscape-951x669-light.png",
+      "bytes": 166917,
+      "kind": "empty state",
+      "size": "951x669",
+      "mode": "light"
+    },
+    {
+      "file": "screens/v0.1.0/error-bad-link-duo-inner-landscape-951x669-light.png",
+      "bytes": 247868,
+      "kind": "error (bad link, nothing changed)",
+      "size": "951x669",
+      "mode": "light"
+    },
+    {
+      "file": "screens/v0.1.0/update-plan-duo-inner-landscape-951x669-light.png",
+      "bytes": 217226,
+      "kind": "Update plan",
+      "size": "951x669",
+      "mode": "light"
+    },
+    {
+      "file": "screens/v0.1.0/import-confirm-duo-inner-landscape-951x669-light.png",
+      "bytes": 228368,
+      "kind": "Import confirm",
+      "size": "951x669",
+      "mode": "light"
+    },
+    {
+      "file": "screens/v0.1.0/a-duo-outer-382x644-dark.png",
+      "bytes": 110303,
+      "kind": "sample",
+      "sample": "a-3day-beginner-full-body",
+      "size": "382x644",
+      "mode": "dark"
+    },
+    {
+      "file": "screens/v0.1.0/a-duo-inner-landscape-951x669-dark.png",
+      "bytes": 230109,
+      "kind": "sample",
+      "sample": "a-3day-beginner-full-body",
+      "size": "951x669",
+      "mode": "dark"
+    },
+    {
+      "file": "screens/v0.1.0/a-slab-390x844-dark.png",
+      "bytes": 112889,
+      "kind": "sample",
+      "sample": "a-3day-beginner-full-body",
+      "size": "390x844",
+      "mode": "dark"
+    },
+    {
+      "file": "screens/v0.1.0/b-duo-outer-382x644-dark.png",
+      "bytes": 106269,
+      "kind": "sample",
+      "sample": "b-4day-upper-lower",
+      "size": "382x644",
+      "mode": "dark"
+    },
+    {
+      "file": "screens/v0.1.0/b-duo-inner-landscape-951x669-dark.png",
+      "bytes": 236458,
+      "kind": "sample",
+      "sample": "b-4day-upper-lower",
+      "size": "951x669",
+      "mode": "dark"
+    },
+    {
+      "file": "screens/v0.1.0/b-slab-390x844-dark.png",
+      "bytes": 107802,
+      "kind": "sample",
+      "sample": "b-4day-upper-lower",
+      "size": "390x844",
+      "mode": "dark"
+    },
+    {
+      "file": "screens/v0.1.0/c-duo-outer-382x644-dark.png",
+      "bytes": 101529,
+      "kind": "sample",
+      "sample": "c-5day-split-deload",
+      "size": "382x644",
+      "mode": "dark"
+    },
+    {
+      "file": "screens/v0.1.0/c-duo-inner-landscape-951x669-dark.png",
+      "bytes": 238517,
+      "kind": "sample",
+      "sample": "c-5day-split-deload",
+      "size": "951x669",
+      "mode": "dark"
+    },
+    {
+      "file": "screens/v0.1.0/c-slab-390x844-dark.png",
+      "bytes": 109352,
+      "kind": "sample",
+      "sample": "c-5day-split-deload",
+      "size": "390x844",
+      "mode": "dark"
+    },
+    {
+      "file": "screens/v0.1.0/empty-slab-390x844-dark.png",
+      "bytes": 158142,
+      "kind": "empty state",
+      "size": "390x844",
+      "mode": "dark"
+    },
+    {
+      "file": "screens/v0.1.0/error-bad-link-slab-390x844-dark.png",
+      "bytes": 116719,
+      "kind": "error (bad link, nothing changed)",
+      "size": "390x844",
+      "mode": "dark"
+    },
+    {
+      "file": "screens/v0.1.0/update-plan-slab-390x844-dark.png",
+      "bytes": 128000,
+      "kind": "Update plan",
+      "size": "390x844",
+      "mode": "dark"
+    },
+    {
+      "file": "screens/v0.1.0/import-confirm-slab-390x844-dark.png",
+      "bytes": 134051,
+      "kind": "Import confirm",
+      "size": "390x844",
+      "mode": "dark"
+    },
+    {
+      "file": "screens/v0.1.0/empty-duo-inner-landscape-951x669-dark.png",
+      "bytes": 166660,
+      "kind": "empty state",
+      "size": "951x669",
+      "mode": "dark"
+    },
+    {
+      "file": "screens/v0.1.0/error-bad-link-duo-inner-landscape-951x669-dark.png",
+      "bytes": 244116,
+      "kind": "error (bad link, nothing changed)",
+      "size": "951x669",
+      "mode": "dark"
+    },
+    {
+      "file": "screens/v0.1.0/update-plan-duo-inner-landscape-951x669-dark.png",
+      "bytes": 217923,
+      "kind": "Update plan",
+      "size": "951x669",
+      "mode": "dark"
+    },
+    {
+      "file": "screens/v0.1.0/import-confirm-duo-inner-landscape-951x669-dark.png",
+      "bytes": 222202,
+      "kind": "Import confirm",
+      "size": "951x669",
+      "mode": "dark"
+    }
+  ]
+}

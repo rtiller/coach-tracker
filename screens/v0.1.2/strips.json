@@ -1,0 +1,56 @@
+[
+  {
+    "out": "screens/v0.1.2/frames-duo-outer-382x644-dark.png",
+    "files": [
+      "screens/v0.1.2/frame-duo-outer-382x644-000ms-dark.png",
+      "screens/v0.1.2/frame-duo-outer-382x644-050ms-dark.png",
+      "screens/v0.1.2/frame-duo-outer-382x644-100ms-dark.png",
+      "screens/v0.1.2/frame-duo-outer-382x644-200ms-dark.png"
+    ]
+  },
+  {
+    "out": "screens/v0.1.2/frames-duo-inner-portrait-669x835-dark.png",
+    "files": [
+      "screens/v0.1.2/frame-duo-inner-portrait-669x835-000ms-dark.png",
+      "screens/v0.1.2/frame-duo-inner-portrait-669x835-050ms-dark.png",
+      "screens/v0.1.2/frame-duo-inner-portrait-669x835-100ms-dark.png",
+      "screens/v0.1.2/frame-duo-inner-portrait-669x835-200ms-dark.png"
+    ]
+  },
+  {
+    "out": "screens/v0.1.2/frames-duo-inner-landscape-951x669-dark.png",
+    "files": [
+      "screens/v0.1.2/frame-duo-inner-landscape-951x669-000ms-dark.png",
+      "screens/v0.1.2/frame-duo-inner-landscape-951x669-050ms-dark.png",
+      "screens/v0.1.2/frame-duo-inner-landscape-951x669-100ms-dark.png",
+      "screens/v0.1.2/frame-duo-inner-landscape-951x669-200ms-dark.png"
+    ]
+  },
+  {
+    "out": "screens/v0.1.2/frames-duo-outer-382x644-light.png",
+    "files": [
+      "screens/v0.1.2/frame-duo-outer-382x644-000ms-light.png",
+      "screens/v0.1.2/frame-duo-outer-382x644-050ms-light.png",
+      "screens/v0.1.2/frame-duo-outer-382x644-100ms-light.png",
+      "screens/v0.1.2/frame-duo-outer-382x644-200ms-light.png"
+    ]
+  },
+  {
+    "out": "screens/v0.1.2/frames-duo-inner-portrait-669x835-light.png",
+    "files": [
+      "screens/v0.1.2/frame-duo-inner-portrait-669x835-000ms-light.png",
+      "screens/v0.1.2/frame-duo-inner-portrait-669x835-050ms-light.png",
+      "screens/v0.1.2/frame-duo-inner-portrait-669x835-100ms-light.png",
+      "screens/v0.1.2/frame-duo-inner-portrait-669x835-200ms-light.png"
+    ]
+  },
+  {
+    "out": "screens/v0.1.2/frames-duo-inner-landscape-951x669-light.png",
+    "files": [
+      "screens/v0.1.2/frame-duo-inner-landscape-951x669-000ms-light.png",
+      "screens/v0.1.2/frame-duo-inner-landscape-951x669-050ms-light.png",
+      "screens/v0.1.2/frame-duo-inner-landscape-951x669-100ms-light.png",
+      "screens/v0.1.2/frame-duo-inner-landscape-951x669-200ms-light.png"
+    ]
+  }
+]

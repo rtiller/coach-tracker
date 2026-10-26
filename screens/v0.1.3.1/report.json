@@ -1,0 +1,599 @@
+{
+  "version": "v0.1.3.1-preview",
+  "engine": "webkit",
+  "url": "local",
+  "clock": "2026-10-23T12:00:00-05:00",
+  "scheme": "dark, the Undo toast in its own slot",
+  "shots": [
+    {
+      "file": "screens/v0.1.3.1/cover-today-top-382x644-dark.png",
+      "viewport": "382x644",
+      "safeB": 0,
+      "what": "cover screen, today, at scroll top, Undo showing",
+      "vh": 644,
+      "shown": true,
+      "toast": [
+        522,
+        578
+      ],
+      "gap": 66,
+      "strip": [
+        393,
+        462
+      ],
+      "row": [
+        470,
+        514
+      ],
+      "done": [
+        477,
+        525
+      ],
+      "overlaps": [
+        "todayDone",
+        "today"
+      ],
+      "bytes": 111287
+    },
+    {
+      "file": "screens/v0.1.3.1/cover-today-max-382x644-dark.png",
+      "viewport": "382x644",
+      "safeB": 0,
+      "what": "cover screen, today, at max scroll, Undo showing",
+      "vh": 644,
+      "shown": true,
+      "toast": [
+        522,
+        578
+      ],
+      "gap": 66,
+      "strip": [
+        393,
+        462
+      ],
+      "row": [
+        470,
+        514
+      ],
+      "done": [
+        332,
+        380
+      ],
+      "overlaps": [],
+      "bytes": 117995
+    },
+    {
+      "file": "screens/v0.1.3.1/cover-thu-top-382x644-dark.png",
+      "viewport": "382x644",
+      "safeB": 0,
+      "what": "cover screen, Thursday shown (another day), at scroll top, Undo showing",
+      "vh": 644,
+      "shown": true,
+      "toast": [
+        522,
+        578
+      ],
+      "gap": 66,
+      "strip": [
+        393,
+        462
+      ],
+      "row": [
+        470,
+        514
+      ],
+      "done": [
+        495,
+        543
+      ],
+      "overlaps": [
+        "todayDone",
+        "today"
+      ],
+      "bytes": 123938
+    },
+    {
+      "file": "screens/v0.1.3.1/cover-thu-max-382x644-dark.png",
+      "viewport": "382x644",
+      "safeB": 0,
+      "what": "cover screen, Thursday shown (another day), at max scroll, Undo showing",
+      "vh": 644,
+      "shown": true,
+      "toast": [
+        522,
+        578
+      ],
+      "gap": 66,
+      "strip": [
+        393,
+        462
+      ],
+      "row": [
+        470,
+        514
+      ],
+      "done": [
+        332,
+        380
+      ],
+      "overlaps": [],
+      "bytes": 125956
+    },
+    {
+      "file": "screens/v0.1.3.1/cover-safari-today-top-382x560-dark.png",
+      "viewport": "382x560",
+      "safeB": 34,
+      "what": "cover screen at the Safari visible height, today, at scroll top, Undo showing",
+      "vh": 560,
+      "shown": true,
+      "toast": [
+        404,
+        460
+      ],
+      "gap": 100,
+      "strip": [
+        275,
+        344
+      ],
+      "row": [
+        352,
+        396
+      ],
+      "done": [
+        477,
+        525
+      ],
+      "overlaps": [
+        "today"
+      ],
+      "bytes": 91352
+    },
+    {
+      "file": "screens/v0.1.3.1/cover-safari-today-max-382x560-dark.png",
+      "viewport": "382x560",
+      "safeB": 34,
+      "what": "cover screen at the Safari visible height, today, at max scroll, Undo showing",
+      "vh": 560,
+      "shown": true,
+      "toast": [
+        404,
+        460
+      ],
+      "gap": 100,
+      "strip": [
+        275,
+        344
+      ],
+      "row": [
+        352,
+        396
+      ],
+      "done": [
+        214,
+        262
+      ],
+      "overlaps": [],
+      "bytes": 92344
+    },
+    {
+      "file": "screens/v0.1.3.1/cover-safari-thu-top-382x560-dark.png",
+      "viewport": "382x560",
+      "safeB": 34,
+      "what": "cover screen at the Safari visible height, Thursday shown (another day), at scroll top, Undo showing",
+      "vh": 560,
+      "shown": true,
+      "toast": [
+        404,
+        460
+      ],
+      "gap": 100,
+      "strip": [
+        275,
+        344
+      ],
+      "row": [
+        352,
+        396
+      ],
+      "done": [
+        495,
+        543
+      ],
+      "overlaps": [
+        "today"
+      ],
+      "bytes": 100637
+    },
+    {
+      "file": "screens/v0.1.3.1/cover-safari-thu-max-382x560-dark.png",
+      "viewport": "382x560",
+      "safeB": 34,
+      "what": "cover screen at the Safari visible height, Thursday shown (another day), at max scroll, Undo showing",
+      "vh": 560,
+      "shown": true,
+      "toast": [
+        404,
+        460
+      ],
+      "gap": 100,
+      "strip": [
+        275,
+        344
+      ],
+      "row": [
+        352,
+        396
+      ],
+      "done": [
+        214,
+        262
+      ],
+      "overlaps": [],
+      "bytes": 98981
+    },
+    {
+      "file": "screens/v0.1.3.1/duo-inner-portrait-safari-today-top-669x751-dark.png",
+      "viewport": "669x751",
+      "safeB": 34,
+      "what": "inner portrait at the Safari visible height, today, at scroll top, Undo showing",
+      "vh": 751,
+      "shown": true,
+      "toast": [
+        645,
+        701
+      ],
+      "gap": 50,
+      "strip": [
+        548,
+        637
+      ],
+      "row": null,
+      "done": [
+        614,
+        670
+      ],
+      "overlaps": [
+        "todayDone",
+        "today"
+      ],
+      "bytes": 129245
+    },
+    {
+      "file": "screens/v0.1.3.1/duo-inner-portrait-safari-today-max-669x751-dark.png",
+      "viewport": "669x751",
+      "safeB": 34,
+      "what": "inner portrait at the Safari visible height, today, at max scroll, Undo showing",
+      "vh": 751,
+      "shown": true,
+      "toast": [
+        645,
+        701
+      ],
+      "gap": 50,
+      "strip": [
+        548,
+        637
+      ],
+      "row": null,
+      "done": [
+        425,
+        481
+      ],
+      "overlaps": [],
+      "bytes": 122557
+    },
+    {
+      "file": "screens/v0.1.3.1/duo-inner-portrait-safari-thu-top-669x751-dark.png",
+      "viewport": "669x751",
+      "safeB": 34,
+      "what": "inner portrait at the Safari visible height, Thursday shown (another day), at scroll top, Undo showing",
+      "vh": 751,
+      "shown": true,
+      "toast": [
+        645,
+        701
+      ],
+      "gap": 50,
+      "strip": [
+        548,
+        637
+      ],
+      "row": null,
+      "done": [
+        614,
+        670
+      ],
+      "overlaps": [
+        "todayDone",
+        "today"
+      ],
+      "bytes": 139474
+    },
+    {
+      "file": "screens/v0.1.3.1/duo-inner-portrait-safari-thu-max-669x751-dark.png",
+      "viewport": "669x751",
+      "safeB": 34,
+      "what": "inner portrait at the Safari visible height, Thursday shown (another day), at max scroll, Undo showing",
+      "vh": 751,
+      "shown": true,
+      "toast": [
+        645,
+        701
+      ],
+      "gap": 50,
+      "strip": [
+        548,
+        637
+      ],
+      "row": null,
+      "done": [
+        425,
+        481
+      ],
+      "overlaps": [],
+      "bytes": 130783
+    },
+    {
+      "file": "screens/v0.1.3.1/duo-inner-landscape-safari-today-top-951x585-dark.png",
+      "viewport": "951x585",
+      "safeB": 34,
+      "what": "inner landscape at the Safari visible height, today, at scroll top, Undo showing",
+      "vh": 585,
+      "shown": true,
+      "toast": [
+        479,
+        535
+      ],
+      "gap": 50,
+      "strip": [
+        382,
+        471
+      ],
+      "row": null,
+      "done": [
+        608,
+        664
+      ],
+      "overlaps": [
+        "today"
+      ],
+      "bytes": 208854
+    },
+    {
+      "file": "screens/v0.1.3.1/duo-inner-landscape-safari-today-max-951x585-dark.png",
+      "viewport": "951x585",
+      "safeB": 34,
+      "what": "inner landscape at the Safari visible height, today, at max scroll, Undo showing",
+      "vh": 585,
+      "shown": true,
+      "toast": [
+        413,
+        469
+      ],
+      "gap": 116,
+      "strip": [
+        316,
+        405
+      ],
+      "row": null,
+      "done": [
+        193,
+        249
+      ],
+      "overlaps": [],
+      "bytes": 183969
+    },
+    {
+      "file": "screens/v0.1.3.1/duo-inner-landscape-safari-thu-top-951x585-dark.png",
+      "viewport": "951x585",
+      "safeB": 34,
+      "what": "inner landscape at the Safari visible height, Thursday shown (another day), at scroll top, Undo showing",
+      "vh": 585,
+      "shown": true,
+      "toast": [
+        479,
+        535
+      ],
+      "gap": 50,
+      "strip": [
+        382,
+        471
+      ],
+      "row": null,
+      "done": [
+        608,
+        664
+      ],
+      "overlaps": [
+        "today"
+      ],
+      "bytes": 213843
+    },
+    {
+      "file": "screens/v0.1.3.1/duo-inner-landscape-safari-thu-max-951x585-dark.png",
+      "viewport": "951x585",
+      "safeB": 34,
+      "what": "inner landscape at the Safari visible height, Thursday shown (another day), at max scroll, Undo showing",
+      "vh": 585,
+      "shown": true,
+      "toast": [
+        413,
+        469
+      ],
+      "gap": 116,
+      "strip": [
+        316,
+        405
+      ],
+      "row": null,
+      "done": [
+        193,
+        249
+      ],
+      "overlaps": [],
+      "bytes": 183295
+    },
+    {
+      "file": "screens/v0.1.3.1/cover-200text-today-top-382x644-dark.png",
+      "viewport": "382x644",
+      "safeB": 0,
+      "what": "cover screen at 200% text, today, scroll top, Undo showing",
+      "vh": 644,
+      "shown": true,
+      "toast": [
+        1325,
+        1412
+      ],
+      "gap": -768,
+      "strip": [
+        1085,
+        1265
+      ],
+      "row": [
+        1273,
+        1317
+      ],
+      "done": [
+        1016,
+        1072
+      ],
+      "overlaps": [],
+      "bytes": 98874
+    },
+    {
+      "file": "screens/v0.1.3.1/cover-200text-today-max-382x644-dark.png",
+      "viewport": "382x644",
+      "safeB": 0,
+      "what": "cover screen at 200% text, today, max scroll, Undo showing",
+      "vh": 644,
+      "shown": true,
+      "toast": [
+        491,
+        578
+      ],
+      "gap": 66,
+      "strip": [
+        251,
+        431
+      ],
+      "row": [
+        439,
+        483
+      ],
+      "done": [
+        182,
+        238
+      ],
+      "overlaps": [],
+      "bytes": 107290
+    },
+    {
+      "file": "screens/v0.1.3.1/cover-200text-thu-top-382x644-dark.png",
+      "viewport": "382x644",
+      "safeB": 0,
+      "what": "cover screen at 200% text, Thursday shown, scroll top, Undo showing",
+      "vh": 644,
+      "shown": true,
+      "toast": [
+        1470,
+        1557
+      ],
+      "gap": -913,
+      "strip": [
+        1177,
+        1358
+      ],
+      "row": [
+        1366,
+        1462
+      ],
+      "done": [
+        1108,
+        1164
+      ],
+      "overlaps": [],
+      "bytes": 102807
+    },
+    {
+      "file": "screens/v0.1.3.1/cover-200text-thu-max-382x644-dark.png",
+      "viewport": "382x644",
+      "safeB": 0,
+      "what": "cover screen at 200% text, Thursday shown, max scroll, Undo showing",
+      "vh": 644,
+      "shown": true,
+      "toast": [
+        491,
+        578
+      ],
+      "gap": 66,
+      "strip": [
+        198,
+        379
+      ],
+      "row": [
+        387,
+        483
+      ],
+      "done": [
+        129,
+        185
+      ],
+      "overlaps": [],
+      "bytes": 115355
+    },
+    {
+      "file": "screens/v0.1.3.1/pair-cover-safari-today-top-1-without-toast-382x560-dark.png",
+      "viewport": "382x560",
+      "safeB": 34,
+      "what": "before/after pair, before: cover at the Safari visible height, today, scroll top, no toast",
+      "vh": 560,
+      "shown": false,
+      "toast": null,
+      "gap": null,
+      "strip": [
+        275,
+        344
+      ],
+      "row": [
+        352,
+        396
+      ],
+      "done": [
+        477,
+        525
+      ],
+      "overlaps": [],
+      "bytes": 82138
+    },
+    {
+      "file": "screens/v0.1.3.1/pair-cover-safari-today-top-2-with-toast-382x560-dark.png",
+      "viewport": "382x560",
+      "safeB": 34,
+      "what": "before/after pair, after: the same page with the Undo toast in its slot below the row",
+      "vh": 560,
+      "shown": true,
+      "toast": [
+        404,
+        460
+      ],
+      "gap": 100,
+      "strip": [
+        275,
+        344
+      ],
+      "row": [
+        352,
+        396
+      ],
+      "done": [
+        477,
+        525
+      ],
+      "overlaps": [
+        "today"
+      ],
+      "bytes": 91352
+    }
+  ],
+  "errors": []
+}

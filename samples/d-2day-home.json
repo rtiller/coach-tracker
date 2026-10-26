@@ -1,0 +1,141 @@
+{
+  "meta": {
+    "name": "Home strength, two days",
+    "weeks": 6,
+    "blockWeeks": 6,
+    "deload": [
+      6
+    ],
+    "units": "kg"
+  },
+  "days": [
+    {
+      "key": "rest",
+      "label": "Rest",
+      "short": "Mon",
+      "focus": "",
+      "priority": false,
+      "rest": true,
+      "note": ""
+    },
+    {
+      "key": "homeA",
+      "label": "Home A",
+      "short": "Tue",
+      "focus": "Legs and push",
+      "priority": false,
+      "rest": false,
+      "note": ""
+    },
+    {
+      "key": "rest",
+      "label": "Rest",
+      "short": "Wed",
+      "focus": "",
+      "priority": false,
+      "rest": true,
+      "note": ""
+    },
+    {
+      "key": "rest",
+      "label": "Rest",
+      "short": "Thu",
+      "focus": "",
+      "priority": false,
+      "rest": true,
+      "note": ""
+    },
+    {
+      "key": "homeB",
+      "label": "Home B",
+      "short": "Fri",
+      "focus": "Hinge and pull",
+      "priority": false,
+      "rest": false,
+      "note": ""
+    },
+    {
+      "key": "rest",
+      "label": "Rest",
+      "short": "Sat",
+      "focus": "",
+      "priority": false,
+      "rest": true,
+      "note": "Long walk"
+    },
+    {
+      "key": "rest",
+      "label": "Rest",
+      "short": "Sun",
+      "focus": "",
+      "priority": false,
+      "rest": true,
+      "note": ""
+    }
+  ],
+  "blocks": {
+    "1": {
+      "homeA": [
+        {
+          "name": "Dumbbell goblet squat",
+          "sets": "3 x 10-12",
+          "tags": [
+            "anchor"
+          ]
+        },
+        {
+          "name": "Push-up",
+          "sets": "3 x 6-12",
+          "tags": []
+        },
+        {
+          "name": "Glute bridge",
+          "sets": "3 x 12-15",
+          "tags": []
+        },
+        {
+          "name": "Side plank",
+          "sets": "2 x 20s/side",
+          "tags": [
+            "optional"
+          ]
+        }
+      ],
+      "homeB": [
+        {
+          "name": "Dumbbell Romanian deadlift",
+          "sets": "3 x 10-12",
+          "tags": [
+            "anchor"
+          ]
+        },
+        {
+          "name": "One-arm dumbbell row",
+          "sets": "3 x 10/arm",
+          "tags": []
+        },
+        {
+          "name": "Step-up",
+          "sets": "3 x 8/leg",
+          "tags": []
+        },
+        {
+          "name": "Band pull-apart",
+          "sets": "2 x 15",
+          "tags": [
+            "accessory"
+          ]
+        }
+      ]
+    }
+  },
+  "lifts": [
+    "Dumbbell goblet squat",
+    "Dumbbell Romanian deadlift"
+  ],
+  "labels": {
+    "anchor": "Main lift",
+    "priority": "Focus",
+    "optional": "If time"
+  }
+}

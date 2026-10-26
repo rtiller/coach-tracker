@@ -1,0 +1,729 @@
+  /* Forked from a tested single-file tracker (layout v0.5.5). Light = Everyday palette tokens, dark derived from them. */
+  :root {
+    color-scheme: light dark;
+    /* Everyday (light) */
+    --ink: #f3f0e9;
+    --panel: #fbfaf6;
+    --panel2: #f1eee7;
+    --line: #e7e2d8;
+    --mist: #5f655f;
+    --bone: #1d211e;
+    --ember: #7d5a32;
+    --ember-dim: #f0e5d3;
+    --jade: #2f7a4c;
+    --jade-dim: #dfecd8;
+    --violet: #355c3c;
+    --violet-dim: #dfecd8;
+    --warn: #9a4a30;
+    --on-accent: #ffffff;
+    --on-done: #ffffff;
+    --safe-t: env(safe-area-inset-top, 0px);
+    --safe-b: env(safe-area-inset-bottom, 0px);
+    --safe-l: env(safe-area-inset-left, 0px);
+    --safe-r: env(safe-area-inset-right, 0px);
+    /* Safari's top status bar and blur band. In a normal tab with viewport-fit=cover, inset-top can read 0
+       while the status bar still overlaps (measured on a real phone: a band of about 46 to 55 CSS px). The floor clears it;
+       the gap is breathing room. Content at rest starts at max(inset, 50px) + 12px: 62px, or 71px at a 59px inset. */
+    --top-floor: 50px;
+    --top-gap: 12px;
+    --top-clear: max(var(--safe-t), var(--top-floor));
+    --top-buf: calc(var(--top-clear) + var(--top-gap));
+    --gut: 12px;
+    --pl: calc(var(--gut) + var(--safe-l));
+    --pr: calc(var(--gut) + var(--safe-r));
+    --gap: 10px;
+    --shadow-pop: 0 6px 24px rgba(29, 33, 30, 0.28); /* l-ink at 28% */
+    --scrim: rgba(29, 33, 30, 0.38); /* l-ink at 38% */
+    --mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
+    --disp: -apple-system, "SF Pro Display", system-ui, "Segoe UI", Roboto, sans-serif;
+    --body: -apple-system, "SF Pro Text", system-ui, "Segoe UI", Roboto, sans-serif;
+  }
+  /* Dark: derived from Everyday light tokens by swapping ink and surface.
+     Values precomputed (hex, no colour mixing function, for iOS before 16.2) from the formulas in design-system/interactive/templates/src/canvas.css html[data-mode="dark"],
+     driven here by prefers-color-scheme. Accent stays the same brown in both modes. */
+  :root {
+    --l-surface: #fbfaf6; --l-ink: #1d211e; --l-muted: #5f655f; --l-up: #2f7a4c;
+    --l-ta: #dfecd8; --l-tai: #355c3c; --l-tb: #f0e5d3; --l-tbi: #7d5a32;
+    --ember-text: var(--ember);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      color-scheme: dark;
+      --ink: var(--l-ink);
+      --panel: #2d302d; /* surface 7% into ink */
+      --panel2: #383b38; /* surface 12% into ink */
+      --line: #494c49; /* surface 20% into ink */
+      --bone: var(--l-surface);
+      --mist: #c4c6c1; /* muted 35% into surface */
+      /* brown family lifted toward surface, same derivation canvas.css uses for --c-up and --c-down */
+      --ember: #c2b29e; /* tbi 45% into surface */
+      --ember-text: var(--l-tb);
+      --ember-dim: #3f3525; /* tbi 35% into ink */
+      --jade: #9fc0aa; /* up 45% into surface */
+      --jade-dim: #283c2c; /* tai 45% into ink */
+      --violet: var(--l-ta);
+      --violet-dim: #283c2c; /* tai 45% into ink */
+      --on-accent: var(--l-ink); /* canvas.css dark: --c-on-accent */
+      --on-done: var(--l-ink);
+    }
+  }
+  @media (min-width: 370px) { :root { --gut: 18px; --gap: 12px; } }
+  @media __WIDE__ { :root { --gut: 24px; --gap: 16px; } }
+  /* very narrow split screen (334): seven days cannot get 44px plus 8px spacing in one row, so the week wraps to two rows (Mon to Thu, Fri to Sun) */
+  @media (max-width: 369px) { html .wstrip { grid-template-columns: repeat(4, minmax(44px, 1fr)); gap: 8px; } }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html {
+    font-size: 100%;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    overscroll-behavior-x: none;
+    overflow-x: hidden;
+    /* scrolled-to controls clear the top blur and, when the nav group pins, the group and toolbar zone */
+    scroll-padding-top: var(--top-buf);
+    scroll-padding-bottom: calc(50px + var(--safe-b) + 16px);
+  }
+  html, body {
+    background: var(--ink);
+    color: var(--bone);
+    font-family: var(--body);
+    line-height: 1.45;
+    -webkit-tap-highlight-color: transparent;
+  }
+  body {
+    font-size: 0.9375rem;
+    padding: var(--top-buf) var(--pr) calc(24px + var(--safe-b)) var(--pl);
+    min-height: 100dvh;
+    overflow-wrap: break-word;
+    touch-action: pan-y pinch-zoom;
+  }
+  button, input, select { font: inherit; color: inherit; }
+  button { cursor: pointer; border: none; background: none; }
+  button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid var(--ember); outline-offset: 2px; }
+
+  @keyframes fade-in { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: none; } }
+  @keyframes pop { 0% { transform: scale(1); } 40% { transform: scale(1.12); } 100% { transform: scale(1); } }
+  .fade { animation: fade-in .22s ease; }
+  /* --faint: its own tier for strokes (rest, deload). canvas.css --c-line-strong. Not for text. */
+  :root { --faint: #868a85; } /* mist 75% into panel, light */
+  @media (prefers-color-scheme: dark) { :root { --faint: #9ea09c; } }
+  .ring-fill { transition: stroke-dashoffset .24s ease; }
+  .pop { animation: pop .24s ease; }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+  }
+
+
+  /* ---- Header ---- */
+  .header { margin: 22px 0 4px; }
+  .header .phase, .kicker {
+    color: var(--ember-text);
+    font-family: var(--mono);
+    font-weight: 700;
+    font-size: 0.72rem;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+  }
+  .header h1 {
+    font-family: var(--disp);
+    font-size: 1.85rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin: 6px 0 8px;
+    line-height: 1.15;
+  }
+  .header .meta {
+    color: var(--mist);
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .header .meta .hi { color: var(--bone); }
+  @media __DUO__ { .header { margin-top: 0; margin-bottom: 14px; } }
+
+  /* ---- Today (outer screen hero) ---- */
+  section.today {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-left: 4px solid var(--ember);
+    border-radius: 16px;
+    margin-bottom: 14px;
+  }
+  section.today.is-done { border-left-color: var(--jade); }
+  .today-top {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px 0 12px;
+    min-height: 56px;
+  }
+  .today-top .tt-text { flex: 1; min-width: 0; }
+  .today-top .dayx {
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    color: var(--bone);
+    font-weight: 600;
+  }
+  .btn-skip {
+    min-height: 44px;
+    min-width: 64px;
+    padding: 0 14px;
+    border-radius: 12px;
+    border: 1px solid var(--line);
+    color: var(--mist);
+    font-size: 0.85rem;
+    font-weight: 600;
+    background: transparent;
+    flex-shrink: 0;
+  }
+  .btn-skip[aria-pressed="true"] { color: var(--bone); border-color: var(--mist); background: var(--panel2); }
+  .today-hero { padding: 8px 14px 4px; }
+  .today-hero h2 {
+    font-family: var(--disp);
+    font-size: 1.6rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+  }
+  .today-hero .sub { color: var(--mist); font-size: 0.85rem; margin-top: 2px; }
+  .set-rows { list-style: none; padding: 6px 8px 0; }
+  .set-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    min-height: 52px;
+    padding: 8px 8px;
+    border-radius: 12px;
+    background: var(--panel2);
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+  }
+  .set-row .ex-left { flex: 1 1 10rem; }
+  .set-row .ex-name { font-size: 1rem; font-weight: 600; }
+  .set-row .ex-sets { font-size: 0.85rem; color: var(--bone); }
+  .today .ex-hint { padding: 0 14px; margin-top: 2px; }
+  .today-actions {
+    position: sticky;
+    bottom: 0;
+    padding: 12px 12px calc(12px + var(--safe-b));
+    background: var(--panel);
+    border-radius: 0 0 16px 16px;
+    margin-top: 6px;
+  }
+  .btn-done {
+    width: 100%;
+    min-height: 56px;
+    border-radius: 14px;
+    background: var(--ember);
+    color: var(--on-accent);
+    font-weight: 700;
+    font-size: 1.05rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
+  .btn-done svg { width: 24px; height: 24px; flex-shrink: 0; }
+  .btn-done.is-done { background: var(--jade); }
+  .today-rest { padding: 6px 14px 16px; color: var(--mist); }
+  @media __WIDE__ {
+    .set-row { min-height: 46px; padding: 6px 10px; margin-bottom: 6px; }
+    .set-row .ex-name { font-size: 0.95rem; }
+  }
+
+  /* ---- Week strip (7 days) ---- */
+  .wstrip {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(2.35rem, 1fr));
+    gap: 2px;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 6px;
+    margin-bottom: 14px;
+  }
+  .wd {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 2px;
+    border-radius: 10px;
+    min-height: 44px;
+  }
+  .wd.is-today { background: var(--ember-dim); }
+  .wd .d { font-family: var(--mono); font-size: 0.68rem; color: var(--mist); text-transform: uppercase; }
+  .wd .s { font-size: 0.66rem; color: var(--mist); }
+  .wd.is-today .d, .wd.is-today .s { color: var(--bone); }
+  .dot {
+    width: 22px; height: 22px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    border: 2px solid var(--mist);
+    color: var(--on-accent);
+  }
+  .dot svg { width: 13px; height: 13px; }
+  .dot.done { background: var(--jade); border-color: var(--jade); }
+  .dot.skip { border-color: var(--mist); color: var(--mist); }
+  .dot.plan { border-style: solid; }
+  .dot.today { border-color: var(--ember); box-shadow: 0 0 0 2px var(--ember-dim); }
+  .dot.rest { border-style: dashed; border-color: var(--faint); }
+
+  /* ---- Big week ring ---- */
+  .wring {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 14px 16px;
+    margin-bottom: 14px;
+  }
+  .wring .wr-text { min-width: 0; }
+  .wring .big { font-family: var(--disp); font-size: 1.6rem; font-weight: 700; letter-spacing: -0.02em; }
+  .wring .sub { color: var(--mist); font-size: 0.8rem; }
+
+
+  /* ---- Week spine (12 weeks, one row per block) ---- */
+  .spine-wrap { margin: 4px 0 14px; }
+  .spine-groups { display: grid; gap: 8px; }
+  .spine-group { display: grid; grid-template-columns: 2.6rem minmax(0, 1fr); align-items: center; gap: 8px; }
+  .spine-bars { order: 2; display: grid; grid-template-columns: repeat(var(--cols-w, 4), minmax(0, 1fr)); gap: 8px; }
+  @media (max-width: 399px) { .spine-bars { grid-template-columns: repeat(var(--cols-n, 4), minmax(0, 1fr)); } }
+  .spine-pill {
+    min-height: 44px;
+    border-radius: 10px;
+    background: var(--line);
+    border: 1px solid transparent;
+    min-width: 0;
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    color: var(--mist);
+  }
+  .spine-pill.deload { background: transparent; border: 1px dashed var(--faint); }
+  .spine-pill.done { background: var(--jade-dim); border: 1px solid var(--jade); color: var(--bone); }
+  .spine-pill.selected { background: var(--ember-dim); border: 1px solid var(--ember); color: var(--bone); }
+  .spine-pill.selected.current { background: var(--ember); border: 1px solid var(--ember); color: var(--on-accent); }
+  .spine-pill.done.selected, .spine-pill.done.selected.current { background: var(--jade); border: 1px solid var(--jade); color: var(--on-accent); }
+  /* current week: a quiet ring, no looping animation */
+  .spine-pill.pulse { box-shadow: 0 0 0 2px var(--ember-dim); }
+  .spine-label {
+    order: 1;
+    color: var(--mist);
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.12em;
+  }
+  .spine-legend { display: flex; align-items: center; gap: 16px; margin-top: 10px; flex-wrap: wrap; }
+  .leg { display: flex; align-items: center; gap: 6px; }
+  .leg i { display: block; width: 12px; height: 12px; border-radius: 3px; }
+  .leg span { color: var(--mist); font-family: var(--mono); font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.06em; }
+  .leg .work { background: var(--line); }
+  .leg .dl { background: transparent; border: 1px dashed var(--faint); }
+  .leg .dn { background: var(--jade-dim); border: 1px solid var(--jade); }
+
+  /* ---- Tabs ---- */
+  .tabs {
+    display: flex;
+    gap: 8px;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 4px;
+    margin: 4px 0 0;
+  }
+  .tab {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    min-height: 44px;
+    padding: 8px;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--mist);
+    border: 1px solid transparent;
+  }
+  .tab.active { background: var(--panel2); color: var(--bone); border-color: var(--line); }
+  .tab svg { flex-shrink: 0; opacity: 0.9; }
+  .panel { display: none; padding-top: 18px; }
+  .panel.active { display: block; }
+
+  /* ---- Train summary ---- */
+  .week-sum { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; gap: 12px; flex-wrap: wrap; }
+  .week-sum-left { display: flex; align-items: center; gap: 12px; min-width: 0; }
+  .week-sum h2 { font-family: var(--disp); font-size: 1.05rem; font-weight: 700; }
+  .week-sum .sub { color: var(--mist); font-size: 0.78rem; margin-top: 2px; }
+  .pill-jump {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-height: 44px;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    color: var(--ember-text);
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    border-radius: 999px;
+    padding: 0 14px;
+    white-space: nowrap;
+  }
+
+  .banner {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-left: 4px solid var(--ember);
+    border-radius: 16px;
+    padding: 14px 16px;
+    margin-bottom: 12px;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+  .banner .moon { color: var(--ember-text); line-height: 1; margin-top: 1px; flex-shrink: 0; }
+  .banner .btitle { color: var(--ember-text); font-family: var(--mono); font-size: 0.7rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; }
+  .banner .bbody { color: var(--mist); font-size: 0.8rem; margin-top: 4px; line-height: 1.5; }
+
+  /* ---- Session cards ---- */
+  .day-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; align-items: start; }
+  /* inner portrait (v0.1.3.3: inside the Week and progress page): session and progress cards in two columns */
+  @media __INNERP__ {
+    .day-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: var(--gap); }
+    .prog-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: var(--gap); align-items: start; }
+    .prog-grid > .card:last-child:nth-child(odd) { grid-column: 1 / -1; }
+  }
+  .day { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; }
+  .day.today { border-color: var(--ember); }
+  .day.rest-day { opacity: 0.8; background: transparent; }
+  .day-head { display: flex; align-items: center; gap: 10px; padding: 10px; width: 100%; }
+  .day-badge {
+    width: 44px; height: 44px; border-radius: 12px;
+    background: var(--panel2); border: 1px solid var(--line);
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--mono); font-size: 0.68rem; text-transform: uppercase; color: var(--mist); letter-spacing: 0.04em; flex-shrink: 0;
+  }
+  .day-badge.today { background: var(--ember-dim); border-color: var(--ember); color: var(--bone); }
+  .day-toggle { flex: 1; text-align: left; min-width: 0; min-height: 44px; }
+  .day-toggle .title-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .day-toggle .name { font-family: var(--disp); font-weight: 700; font-size: 1rem; }
+  .day.done-day .name { color: var(--bone); }
+  .day.skip-day .name { color: var(--mist); }
+  .prio { background: var(--ember-dim); color: var(--ember-text); font-family: var(--mono); font-size: 0.62rem; padding: 2px 7px; border-radius: 5px; text-transform: uppercase; letter-spacing: 0.06em; }
+  .day-toggle .focus { color: var(--mist); font-size: 0.78rem; margin-top: 3px; display: flex; align-items: center; gap: 6px; }
+  .chev { display: inline-block; transition: transform .2s; font-size: 0.7rem; color: var(--mist); }
+  .day.open .chev { transform: rotate(180deg); color: var(--ember-text); }
+  .check-btn {
+    width: 48px; height: 48px; border-radius: 50%;
+    border: 2px solid var(--mist); background: transparent;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    color: var(--on-accent);
+  }
+  /* one done treatment everywhere: green check plus a word */
+  .check-btn.done { background: var(--jade); border-color: var(--jade); color: var(--on-done); }
+  .st-word { font-family: var(--mono); font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--mist); white-space: nowrap; }
+  @media (prefers-color-scheme: dark) { .st-word { font-weight: 700; color: var(--bone); } }
+  .st-word.done { color: var(--bone); }
+  .check-btn svg { display: none; }
+  .check-btn.skip { background: transparent; border-color: var(--mist); color: var(--mist); }
+  .check-btn.done svg.check-mark { display: block; }
+  .check-btn.skip svg.skip-mark { display: block; }
+  .day-body { display: none; border-top: 1px solid var(--line); padding: 8px 14px 14px; }
+  .day.open .day-body { display: block; }
+  .ex { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+  .ex:last-child { border-bottom: none; }
+  .ex-left { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; min-width: 0; }
+  .ex-name { font-size: 0.9rem; color: var(--bone); }
+  .ex-sets { font-family: var(--mono); color: var(--mist); font-size: 0.72rem; white-space: nowrap; flex-shrink: 0; }
+  .tag { font-family: var(--mono); font-size: 0.62rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; padding: 2px 7px; border-radius: 5px; flex-shrink: 0; }
+  .tag.anchor { background: var(--ember-dim); color: var(--ember-text); }
+  .tag.accessory { background: var(--violet-dim); color: var(--violet); }
+  .tag.optional { background: transparent; color: var(--mist); box-shadow: inset 0 0 0 1px var(--faint); }
+  .tag.priority { background: var(--ember-dim); color: var(--ember-text); }
+  .ex-hint { color: var(--mist); font-size: 0.75rem; margin-top: 8px; line-height: 1.5; }
+
+  .stat-bar { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 14px 16px; margin-top: 14px; display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+  .stat-bar .lbl { color: var(--mist); font-family: var(--mono); font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.08em; }
+  .stat-bar .val { font-family: var(--mono); font-size: 0.9rem; }
+  .stat-bar .val em { color: var(--ember-text); font-style: normal; font-weight: 700; }
+  .vol-card { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 14px 16px; margin-top: 10px; }
+  .vol-card .vt { color: var(--mist); font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 8px; }
+  .vol-row { display: flex; justify-content: space-between; gap: 12px; padding: 5px 0; font-size: 0.8rem; flex-wrap: wrap; }
+  .vol-row .k { color: var(--bone); }
+  .vol-row .v { color: var(--mist); font-family: var(--mono); font-size: 0.72rem; text-align: right; }
+  .vol-foot { color: var(--mist); font-size: 0.75rem; margin-top: 8px; line-height: 1.5; }
+
+  /* ---- Progress / forms ---- */
+  .nutrition { background: var(--ember-dim); border: 1px solid var(--line); border-left: 4px solid var(--ember); border-radius: 16px; padding: 14px 16px; margin-bottom: 14px; }
+  .nutrition .label { font-family: var(--mono); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ember-text); margin-bottom: 6px; }
+  .nutrition .vals { font-weight: 700; font-size: 1.05rem; }
+  .nutrition .hint { color: var(--bone); font-size: 0.8rem; margin-top: 6px; line-height: 1.45; }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 16px; margin-bottom: 12px; }
+  .section-title { font-family: var(--mono); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ember-text); margin: 0 0 12px; }
+  .section-title.muted { color: var(--mist); margin-top: 4px; }
+  .field { display: block; margin-bottom: 12px; }
+  .field:last-of-type { margin-bottom: 0; }
+  .field > span { display: block; color: var(--mist); font-size: 0.78rem; margin-bottom: 6px; }
+  .field-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
+  @media (min-width: 480px) { .field-grid.two { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  .field-grid .field { margin-bottom: 0; }
+  input, select {
+    width: 100%; min-height: 44px;
+    background: var(--ink); border: 1px solid var(--line); border-radius: 10px;
+    padding: 10px 14px; font-family: var(--mono); font-size: 1rem; color: var(--bone);
+    -webkit-appearance: none; appearance: none;
+  }
+  input:focus, select:focus { outline: none; border-color: var(--ember); }
+  input::placeholder { color: var(--mist); }
+  .btn {
+    background: var(--ember); color: var(--on-accent); font-weight: 700;
+    min-height: 48px; padding: 10px 16px; border-radius: 12px;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    width: 100%; margin-top: 14px; font-size: 0.95rem;
+  }
+  .btn:active { opacity: 0.88; }
+  .btn.ghost { background: var(--panel2); border: 1px solid var(--line); color: var(--bone); width: auto; flex: 1; min-width: 120px; margin-top: 0; }
+  .btn.danger { background: transparent; border: none; color: var(--mist); width: 44px; min-height: 44px; height: 44px; padding: 0; margin: 0; flex-shrink: 0; }
+  .btn-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+  .list-item { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--line); }
+  .list-item:last-child { border-bottom: none; }
+  .list-item .info { flex: 1; min-width: 0; }
+  .list-item .title { font-weight: 700; font-size: 0.92rem; }
+  .list-item .sub { color: var(--mist); font-family: var(--mono); font-size: 0.72rem; margin-top: 2px; }
+  .empty { color: var(--mist); font-size: 0.85rem; padding: 8px 0; text-align: center; }
+  .prog-subtabs { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
+  .prog-sub { min-height: 44px; background: var(--panel); border: 1px solid var(--line); color: var(--mist); border-radius: 12px; padding: 0 18px; font-size: 0.85rem; font-weight: 600; }
+  .prog-sub.active { background: var(--panel2); border-color: var(--ember); color: var(--bone); }
+
+  .footer { margin-top: 28px; padding-top: 18px; border-top: 1px solid var(--line); color: var(--mist); font-size: 0.75rem; text-align: left; line-height: 1.55; }
+  .footer strong { color: var(--bone); }
+  .io-row { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
+  #importFile { display: none; }
+  .more-btn span { color: var(--mist); margin-left: 4px; }
+  .more-row { margin-top: 12px; padding: 12px; border: 1px solid var(--line); border-radius: 12px; background: var(--panel); }
+  .more-row[hidden], .import-confirm[hidden] { display: none; }
+  .more-note { margin: 0 0 10px; color: var(--bone); font-size: 0.82rem; }
+  /* the confirm is pinned near the top on every screen, clear of the bottom toolbar zone and the thumb */
+  .import-confirm { position: fixed; z-index: 31; top: var(--top-buf); left: var(--pl); right: var(--pr); margin: 0; padding: 12px; border: 2px solid var(--warn); border-radius: 12px; background: var(--panel); color: var(--bone); box-shadow: var(--shadow-pop); }
+  .import-confirm .ic-undo { font-weight: 400; color: var(--mist); font-size: 0.82rem; }
+  .import-confirm p { margin: 0 0 6px; font-weight: 600; font-size: 0.88rem; overflow-wrap: anywhere; }
+  .ic-row { display: flex; gap: 10px; flex-wrap: wrap; }
+  .ic-row .btn { min-height: 44px; flex: 1 1 auto; }
+  .import-confirm .ic-row { margin-top: 10px; }
+  /* destructive but outlined: no accent fill */
+  .ic-replace { background: transparent; color: var(--bone); border: 2px solid var(--warn); font-weight: 700; }
+
+  /* the seam between the inner panes; centered on the fold. Change here only. */
+  :root { --fold-gap: 40px; }
+
+  /* ---- Undo toast (top of screen, away from Done) ---- */
+  .toast {
+    position: fixed;
+    top: var(--top-buf);
+    left: var(--pl);
+    right: var(--pr);
+    z-index: 10;
+    display: none;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    background: var(--bone);
+    color: var(--ink);
+    border-radius: 14px;
+    padding: 6px 6px 6px 16px;
+    font-weight: 600;
+  }
+  .toast.show { display: flex; }
+  .toast button { min-height: 44px; min-width: 72px; padding: 0 14px; border-radius: 10px; background: var(--ink); color: var(--bone); font-weight: 700; }
+  @media __DUO__ {
+    .toast { right: auto; width: calc(50vw - var(--pl) - var(--fold-gap) / 2); }
+  }
+
+  /* ---- Short height (outer landscape and below 440): compress headers ---- */
+  @media (max-height: 439px) {
+    body { padding-top: var(--top-buf); }
+    .header { margin-top: 14px; }
+    .header h1 { font-size: 1.25rem; margin: 2px 0 4px; }
+    .today-top { min-height: 48px; padding-top: 6px; }
+    .today-hero { padding-top: 2px; }
+    .today-hero h2 { font-size: 1.25rem; }
+    .today-actions { padding-top: 8px; padding-bottom: calc(8px + var(--safe-b)); }
+    .set-row { min-height: 46px; padding-top: 4px; padding-bottom: 4px; margin-bottom: 6px; }
+  }
+
+  /* ---- v0.3.1 nits ---- */
+  .check-btn.done.week-done, .dot.done, .btn-done.is-done, .spine-pill.done.selected { color: var(--on-done); }
+  /* kicker on one line, Day X of Y below */
+  .today-top .kicker { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .skip-bottom { display: none; }
+  .today-actions .act-row { display: flex; gap: 12px; }
+  .today-actions .btn-done { flex: 1 1 auto; }
+  html.lg-text .today-top .btn-skip { display: none; }
+  html.lg-text .skip-bottom { display: inline-flex; align-items: center; justify-content: center; min-height: 56px; }
+  html.lg-text .today-top .kicker { letter-spacing: 0.04em; }
+  /* deload = hatched fill, dashed is only for rest days */
+  .spine-pill.deload, .leg .dl {
+    border: 1px solid var(--line);
+    background: repeating-linear-gradient(135deg, var(--panel2) 0 5px, var(--line) 5px 7px);
+  }
+  .spine-pill.deload.done { background: var(--jade-dim); border-color: var(--jade); }
+  .nowrap { white-space: nowrap; }
+  .lbl-short { display: none; }
+  html.lg-text .lbl-long { display: none; }
+  html.lg-text .lbl-short { display: inline; }
+  html.lg-text .btn-done { white-space: nowrap; }
+  button.wd { width: 100%; min-width: 0; border: 1px solid transparent; background: transparent; color: inherit; }
+  button.wd:active { background: var(--panel2); }
+
+  /* ======== v0.4.0 layout ======== */
+  @media __DUO__ { .today-top > svg, .today-top .kicker { display: none !important; } }
+  .app { display: block; }
+  .pane { min-width: 0; }
+  .open-plan, .sheet-head, .scrim { display: none; }
+  .pane-plan { margin-top: 8px; }
+
+  /* Today card extras */
+  .back-today {
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    width: 100%; min-height: 44px; padding: 0 12px;
+    background: var(--panel2); border-bottom: 1px solid var(--line);
+    border-radius: 12px 12px 0 0; color: var(--mist); font-size: 0.82rem; font-weight: 600; text-align: left;
+  }
+  .back-today b { color: var(--ember-text); font-weight: 700; white-space: nowrap; flex-shrink: 0; }
+  #backSlot .back-today { margin-top: 10px; border: 1px solid var(--line); border-radius: 14px; flex-wrap: wrap; row-gap: 0; }
+  .back-inline { display: none; }
+  .dx-day { display: none; }
+  @media __DUO__ { .dx-lbl { display: none; } .dx-day { display: inline; } }
+  @media __DUO__ {
+    .today-top .back-inline { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; min-width: 44px; padding: 0 10px; flex-shrink: 0;
+      background: transparent; border: 1px solid transparent; border-radius: 12px; color: var(--ember-text); font-weight: 700; font-size: 0.85rem; text-decoration: underline; text-underline-offset: 3px; white-space: nowrap; }
+    html.lg-text .today-top { flex-wrap: wrap; row-gap: 4px; }
+  }
+  .back-today .bt-label { min-width: 0; white-space: normal; overflow-wrap: anywhere; padding: 6px 0; }
+  .wd.is-view { border-color: var(--ember); }
+  .btn-done { transition: background-color .18s ease, color .18s ease; }
+  .btn-done.is-done { background: var(--jade); color: var(--on-done); }
+  /* the sticky Done bar stops above Safari's floating toolbar */
+  /* Done bar sits in normal flow: nothing can ever hide under it */
+  .today-actions { position: static; }
+  .btn-done.is-armed { background: var(--panel2); color: var(--bone); border: 2px solid var(--warn); }
+
+  /* ---- Cover pattern (phones, cover screen portrait and landscape, inner portrait): today only, the plan is one tap away in a page or sheet ---- */
+  @media __COVER__ {
+    #header { display: none; }
+    /* Safari's bottom toolbar zone plus the home indicator; the nav ends above it at scroll end */
+    body { padding-bottom: calc(50px + var(--safe-b) + 12px); }
+    /* fit strip and nav at scroll 0 on a 4-exercise day: tighter rows and gaps */
+    section.today { margin-bottom: 6px; }
+    .wstrip { margin-bottom: 0; }
+    #paneToday .set-row { min-height: 44px; margin-bottom: 4px; }
+    #paneToday .today-actions { padding-top: 8px; padding-bottom: 8px; margin-top: 4px; }
+    #paneToday .wd { padding-top: 4px; padding-bottom: 4px; gap: 3px; }
+    #paneToday .wstrip { padding-top: 4px; padding-bottom: 4px; }
+    #paneToday .today-top { padding-top: 8px; min-height: 48px; }
+    #paneToday .today-hero { padding-top: 6px; padding-bottom: 2px; }
+    #paneToday .today-hero h2 { font-size: 1.5rem; line-height: 1.12; }
+    #paneToday .today-hero .sub { line-height: 1.3; }
+    #paneToday .set-rows { padding-top: 4px; }
+    #paneToday .set-row { margin-bottom: 2px; }
+    #paneToday .today-actions { padding-top: 6px; padding-bottom: 6px; }
+    #paneToday .btn-done { min-height: 48px; }
+    #paneToday .wstrip { padding-top: 3px; padding-bottom: 3px; }
+    #paneToday .wd { padding-top: 3px; padding-bottom: 3px; }
+    #paneToday .wd .d, #paneToday .wd .s { line-height: 1.15; }
+    body { padding-top: var(--top-buf); }
+    /* one row under the strip: Back to today (left), Week and progress (right); wraps to two rows only at large text */
+    .outer-nav { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+    #backSlot { display: flex; flex: 1 0 auto; min-width: 0; }
+    #backSlot:empty { display: none; }
+    #backSlot .back-today { margin-top: 0; width: 100%; justify-content: center; padding: 0 14px; background: var(--panel); }
+    #backSlot .back-today .bt-label { display: none; }
+    .outer-nav .open-plan { flex: 1 1 12rem; min-width: 0; }
+    /* v0.1.3.2: the strip and the paired row follow the card in the flow and never pin over it (see LEARNINGS) */
+    body { padding-bottom: calc(50px + var(--safe-b) + 16px); }
+    section.today { margin-bottom: 0; }
+    .nav-group { padding-top: 6px; }
+    /* kicker: the trailing Deload is dropped on outer (each row already says deload); segments wrap whole, never clipped */
+    .today-top .kicker { white-space: normal; overflow: visible; text-overflow: clip; }
+    .today-top .kicker .k-seg { white-space: nowrap; }
+    .today-top .kicker .k-tail { display: none; }
+    /* under 360 wide the Block part goes too, so the kicker stays one line and the card does not grow */
+    @media (max-width: 359px) { .today-top .kicker .k-blk { display: none; } }
+    .open-plan {
+      display: flex; width: 100%; min-height: 44px; margin: 0;
+      align-items: center; justify-content: space-between; gap: 12px;
+      padding: 0 16px; border-radius: 14px; border: 1px solid var(--line); background: var(--panel);
+      color: var(--bone); font-weight: 600; font-size: 0.9rem;
+    }
+    .open-plan .chev { color: var(--mist); }
+    .scrim {
+      display: block; position: fixed; inset: 0; z-index: 20;
+      background: var(--scrim); opacity: 0; pointer-events: none;
+      transition: opacity .2s ease;
+    }
+    .app.sheet-open .scrim { opacity: 1; pointer-events: auto; }
+    .pane-plan {
+      position: fixed; left: 0; right: 0; bottom: 0; top: var(--top-buf);
+      z-index: 21; margin: 0;
+      background: var(--ink); border: 1px solid var(--line); border-bottom: none;
+      border-radius: 20px 20px 0 0;
+      overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch;
+      padding: 0 var(--pr) calc(24px + 50px + var(--safe-b)) var(--pl);
+      transform: translateY(100%); visibility: hidden;
+      transition: transform .24s ease, visibility 0s linear .24s;
+    }
+    .app.sheet-open .pane-plan { transform: none; visibility: visible; transition: transform .24s ease; }
+    .sheet-head {
+      display: flex; position: sticky; top: 0; z-index: 2; background: var(--ink);
+      align-items: center; justify-content: space-between; gap: 12px;
+      padding: 10px 0; margin-bottom: 12px; border-bottom: 1px solid var(--line);
+    }
+    .sheet-title { font-family: var(--disp); font-weight: 700; font-size: 1.1rem; }
+    .sheet-sub { color: var(--mist); font-family: var(--mono); font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.06em; }
+    .sheet-close {
+      min-height: 44px; min-width: 76px; padding: 0 16px; border-radius: 12px; flex-shrink: 0;
+      background: var(--panel2); border: 1px solid var(--line); color: var(--bone); font-weight: 700;
+    }
+    html.sheet-lock, html.sheet-lock body { overflow: hidden; }
+    /* the today card owns the ring; the sheet keeps one status line */
+    #planPane .week-sum-left > svg, #planPane .week-sum h2 { display: none !important; }
+    /* the top of the outer screen holds Skip; Undo sits low, above Safari's toolbar */
+    .toast { top: auto; bottom: calc(50px + 10px + var(--safe-b)); z-index: 30; }
+    .set-row { min-height: 48px; padding-top: 6px; padding-bottom: 6px; margin-bottom: 6px; }
+  }
+
+  /* three blocks in one row only when each week pill still gets 44px (split screen can be 617 wide) */
+  @media __INNERP__ { @media (min-width: 700px) {
+    .spine-groups.compact { grid-template-columns: repeat(var(--nb, 3), minmax(0, 1fr)); gap: 14px; }
+    .spine-groups.compact .spine-group { grid-template-columns: minmax(0, 1fr); gap: 6px; }
+    .spine-groups.compact .spine-bars { gap: 6px; }
+    .spine-groups.compact .spine-label { order: 3; text-align: center; }
+  } }
+
+  /* ---- Inner landscape: two panes that scroll on their own; the gap sits on the fold ---- */
+  @media __DUO__ {
+    html, body { height: 100%; overflow: hidden; }
+    body { padding: 0; min-height: 0; }
+    .app {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      column-gap: var(--fold-gap);
+      height: 100vh;
+      height: 100dvh;
+    }
+    .pane {
+      min-height: 0; height: 100%;
+      overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch;
+      padding-top: var(--top-buf);
+      padding-bottom: calc(24px + 50px + var(--safe-b));
+    }
+    .pane-today { padding-left: var(--pl); }
+    .pane-plan { padding-right: var(--pr); margin-top: 0; }
+    .header { margin: 0 0 14px; }
+    .tabs { margin-top: 0; }
+    .toast { right: auto; width: calc(50% - var(--fold-gap) / 2 - var(--pl)); }
+    /* one-off confirms sit over the left pane, never under the right hand */
+    .import-confirm { right: auto; width: calc(50% - var(--fold-gap) / 2 - var(--pl)); }
+  }

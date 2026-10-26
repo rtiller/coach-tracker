@@ -1,0 +1,264 @@
+{
+  "version": "v0.1.2-preview",
+  "engine": "webkit",
+  "url": "local",
+  "clock": "2026-10-23T12:00:00-05:00",
+  "scheme": "Designer set in dark and light; retakes light",
+  "shots": [
+    {
+      "file": "screens/v0.1.2/prompt-slab-390x844.png",
+      "viewport": "390x844",
+      "bytes": 155895,
+      "what": "start date prompt, new Home Screen line"
+    },
+    {
+      "file": "screens/v0.1.2/prompt-duo-outer-382x644.png",
+      "viewport": "382x644",
+      "bytes": 136645,
+      "what": "start date prompt, new Home Screen line"
+    },
+    {
+      "file": "screens/v0.1.2/c-duo-outer-382x644.png",
+      "viewport": "382x644",
+      "bytes": 110203,
+      "what": "sample c at rest (leftover line with Stay and X on one row)"
+    },
+    {
+      "file": "screens/v0.1.2/leftover-slab-390x844.png",
+      "viewport": "390x844",
+      "bytes": 126538,
+      "what": "leftover line: text, Stay and a 44px X on one row"
+    },
+    {
+      "file": "screens/v0.1.2/toast-duo-outer-382x644.png",
+      "viewport": "382x644",
+      "bytes": 112152,
+      "what": "Undo toast after Skip, a row above the strip"
+    },
+    {
+      "file": "screens/v0.1.2/toast-duo-inner-landscape-951x669-dark.png",
+      "viewport": "951x669",
+      "bytes": 241943,
+      "what": "Undo toast: a row directly above the strip in the left pane's group"
+    },
+    {
+      "file": "screens/v0.1.2/toast-duo-inner-portrait-669x835-dark.png",
+      "viewport": "669x835",
+      "bytes": 149167,
+      "what": "Undo toast: a row directly above the strip in the left pane's group"
+    },
+    {
+      "file": "screens/v0.1.2/update-duo-inner-landscape-951x669-dark.png",
+      "viewport": "951x669",
+      "bytes": 224876,
+      "what": "Update plan opened from the right pane, in the right pane"
+    },
+    {
+      "file": "screens/v0.1.2/update-focused-duo-inner-landscape-951x339-dark.png",
+      "viewport": "951x339",
+      "bytes": 107430,
+      "what": "Update plan box focused, viewport reduced by 330px for the keyboard"
+    },
+    {
+      "file": "screens/v0.1.2/update-duo-inner-portrait-669x835-dark.png",
+      "viewport": "669x835",
+      "bytes": 213394,
+      "what": "Update plan opened from the right half of More, in the right pane"
+    },
+    {
+      "file": "screens/v0.1.2/update-focused-duo-inner-portrait-669x475-dark.png",
+      "viewport": "669x475",
+      "bytes": 113891,
+      "what": "Update plan box focused, viewport reduced by 360px for the keyboard"
+    },
+    {
+      "file": "screens/v0.1.2/frame-duo-outer-382x644-000ms-dark.png",
+      "viewport": "382x644",
+      "bytes": 96349,
+      "what": "Update plan opening, animation held at 0ms (first frame)"
+    },
+    {
+      "file": "screens/v0.1.2/frame-duo-outer-382x644-050ms-dark.png",
+      "viewport": "382x644",
+      "bytes": 141630,
+      "what": "Update plan opening, animation held at 50ms"
+    },
+    {
+      "file": "screens/v0.1.2/frame-duo-outer-382x644-100ms-dark.png",
+      "viewport": "382x644",
+      "bytes": 139637,
+      "what": "Update plan opening, animation held at 100ms"
+    },
+    {
+      "file": "screens/v0.1.2/frame-duo-outer-382x644-200ms-dark.png",
+      "viewport": "382x644",
+      "bytes": 109997,
+      "what": "Update plan opening, animation held at 200ms (settled)"
+    },
+    {
+      "file": "screens/v0.1.2/frame-duo-inner-portrait-669x835-000ms-dark.png",
+      "viewport": "669x835",
+      "bytes": 171284,
+      "what": "Update plan opening, animation held at 0ms (first frame)"
+    },
+    {
+      "file": "screens/v0.1.2/frame-duo-inner-portrait-669x835-050ms-dark.png",
+      "viewport": "669x835",
+      "bytes": 224131,
+      "what": "Update plan opening, animation held at 50ms"
+    },
+    {
+      "file": "screens/v0.1.2/frame-duo-inner-portrait-669x835-100ms-dark.png",
+      "viewport": "669x835",
+      "bytes": 218305,
+      "what": "Update plan opening, animation held at 100ms"
+    },
+    {
+      "file": "screens/v0.1.2/frame-duo-inner-portrait-669x835-200ms-dark.png",
+      "viewport": "669x835",
+      "bytes": 178008,
+      "what": "Update plan opening, animation held at 200ms (settled)"
+    },
+    {
+      "file": "screens/v0.1.2/frame-duo-inner-landscape-951x669-000ms-dark.png",
+      "viewport": "951x669",
+      "bytes": 221804,
+      "what": "Update plan opening, animation held at 0ms (first frame)"
+    },
+    {
+      "file": "screens/v0.1.2/frame-duo-inner-landscape-951x669-050ms-dark.png",
+      "viewport": "951x669",
+      "bytes": 271394,
+      "what": "Update plan opening, animation held at 50ms"
+    },
+    {
+      "file": "screens/v0.1.2/frame-duo-inner-landscape-951x669-100ms-dark.png",
+      "viewport": "951x669",
+      "bytes": 263995,
+      "what": "Update plan opening, animation held at 100ms"
+    },
+    {
+      "file": "screens/v0.1.2/frame-duo-inner-landscape-951x669-200ms-dark.png",
+      "viewport": "951x669",
+      "bytes": 224876,
+      "what": "Update plan opening, animation held at 200ms (settled)"
+    },
+    {
+      "file": "screens/v0.1.2/toast-duo-inner-landscape-951x669-light.png",
+      "viewport": "951x669",
+      "bytes": 240840,
+      "what": "Undo toast: a row directly above the strip in the left pane's group"
+    },
+    {
+      "file": "screens/v0.1.2/toast-duo-inner-portrait-669x835-light.png",
+      "viewport": "669x835",
+      "bytes": 149337,
+      "what": "Undo toast: a row directly above the strip in the left pane's group"
+    },
+    {
+      "file": "screens/v0.1.2/update-duo-inner-landscape-951x669-light.png",
+      "viewport": "951x669",
+      "bytes": 231288,
+      "what": "Update plan opened from the right pane, in the right pane"
+    },
+    {
+      "file": "screens/v0.1.2/update-focused-duo-inner-landscape-951x339-light.png",
+      "viewport": "951x339",
+      "bytes": 112837,
+      "what": "Update plan box focused, viewport reduced by 330px for the keyboard"
+    },
+    {
+      "file": "screens/v0.1.2/update-duo-inner-portrait-669x835-light.png",
+      "viewport": "669x835",
+      "bytes": 219159,
+      "what": "Update plan opened from the right half of More, in the right pane"
+    },
+    {
+      "file": "screens/v0.1.2/update-focused-duo-inner-portrait-669x475-light.png",
+      "viewport": "669x475",
+      "bytes": 119025,
+      "what": "Update plan box focused, viewport reduced by 360px for the keyboard"
+    },
+    {
+      "file": "screens/v0.1.2/frame-duo-outer-382x644-000ms-light.png",
+      "viewport": "382x644",
+      "bytes": 96653,
+      "what": "Update plan opening, animation held at 0ms (first frame)"
+    },
+    {
+      "file": "screens/v0.1.2/frame-duo-outer-382x644-050ms-light.png",
+      "viewport": "382x644",
+      "bytes": 144517,
+      "what": "Update plan opening, animation held at 50ms"
+    },
+    {
+      "file": "screens/v0.1.2/frame-duo-outer-382x644-100ms-light.png",
+      "viewport": "382x644",
+      "bytes": 146498,
+      "what": "Update plan opening, animation held at 100ms"
+    },
+    {
+      "file": "screens/v0.1.2/frame-duo-outer-382x644-200ms-light.png",
+      "viewport": "382x644",
+      "bytes": 114355,
+      "what": "Update plan opening, animation held at 200ms (settled)"
+    },
+    {
+      "file": "screens/v0.1.2/frame-duo-inner-portrait-669x835-000ms-light.png",
+      "viewport": "669x835",
+      "bytes": 169391,
+      "what": "Update plan opening, animation held at 0ms (first frame)"
+    },
+    {
+      "file": "screens/v0.1.2/frame-duo-inner-portrait-669x835-050ms-light.png",
+      "viewport": "669x835",
+      "bytes": 224621,
+      "what": "Update plan opening, animation held at 50ms"
+    },
+    {
+      "file": "screens/v0.1.2/frame-duo-inner-portrait-669x835-100ms-light.png",
+      "viewport": "669x835",
+      "bytes": 222087,
+      "what": "Update plan opening, animation held at 100ms"
+    },
+    {
+      "file": "screens/v0.1.2/frame-duo-inner-portrait-669x835-200ms-light.png",
+      "viewport": "669x835",
+      "bytes": 183480,
+      "what": "Update plan opening, animation held at 200ms (settled)"
+    },
+    {
+      "file": "screens/v0.1.2/frame-duo-inner-landscape-951x669-000ms-light.png",
+      "viewport": "951x669",
+      "bytes": 221322,
+      "what": "Update plan opening, animation held at 0ms (first frame)"
+    },
+    {
+      "file": "screens/v0.1.2/frame-duo-inner-landscape-951x669-050ms-light.png",
+      "viewport": "951x669",
+      "bytes": 271491,
+      "what": "Update plan opening, animation held at 50ms"
+    },
+    {
+      "file": "screens/v0.1.2/frame-duo-inner-landscape-951x669-100ms-light.png",
+      "viewport": "951x669",
+      "bytes": 267584,
+      "what": "Update plan opening, animation held at 100ms"
+    },
+    {
+      "file": "screens/v0.1.2/frame-duo-inner-landscape-951x669-200ms-light.png",
+      "viewport": "951x669",
+      "bytes": 231288,
+      "what": "Update plan opening, animation held at 200ms (settled)"
+    }
+  ],
+  "strips": [
+    "screens/v0.1.2/frames-duo-outer-382x644-dark.png",
+    "screens/v0.1.2/frames-duo-inner-portrait-669x835-dark.png",
+    "screens/v0.1.2/frames-duo-inner-landscape-951x669-dark.png",
+    "screens/v0.1.2/frames-duo-outer-382x644-light.png",
+    "screens/v0.1.2/frames-duo-inner-portrait-669x835-light.png",
+    "screens/v0.1.2/frames-duo-inner-landscape-951x669-light.png"
+  ],
+  "errors": []
+}

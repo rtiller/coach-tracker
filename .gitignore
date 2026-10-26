@@ -1,0 +1,6 @@
+*.log
+.herenow/
+/publish/
+node_modules
+reviews/
+test/node_modules

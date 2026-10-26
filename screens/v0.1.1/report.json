@@ -1,0 +1,100 @@
+{
+  "version": "v0.1.1-preview",
+  "engine": "webkit",
+  "url": "local",
+  "clock": "2026-10-23T12:00:00-05:00",
+  "scheme": "light (one dark check)",
+  "shots": [
+    {
+      "file": "screens/v0.1.1/prompt-slab-390x844.png",
+      "viewport": "390x844",
+      "bytes": 160314,
+      "what": "start date prompt, This week selected"
+    },
+    {
+      "file": "screens/v0.1.1/prompt-duo-outer-382x644.png",
+      "viewport": "382x644",
+      "bytes": 140603,
+      "what": "start date prompt, This week selected"
+    },
+    {
+      "file": "screens/v0.1.1/error-slab-390x844-collapsed.png",
+      "viewport": "390x844",
+      "bytes": 145976,
+      "what": "bad link error, details closed"
+    },
+    {
+      "file": "screens/v0.1.1/error-slab-390x844-expanded.png",
+      "viewport": "390x844",
+      "bytes": 152861,
+      "what": "bad link error, details open"
+    },
+    {
+      "file": "screens/v0.1.1/c-duo-outer-382x644.png",
+      "viewport": "382x644",
+      "bytes": 110867,
+      "what": "sample c at rest, pinned group with fade"
+    },
+    {
+      "file": "screens/v0.1.1/leftover-slab-390x844.png",
+      "viewport": "390x844",
+      "bytes": 126024,
+      "what": "week 5 with 2 sessions left in week 4"
+    },
+    {
+      "file": "screens/v0.1.1/leftover-duo-inner-landscape-951x669.png",
+      "viewport": "951x669",
+      "bytes": 231512,
+      "what": "week 5 with 2 sessions left in week 4"
+    },
+    {
+      "file": "screens/v0.1.1/toast-duo-outer-382x644.png",
+      "viewport": "382x644",
+      "bytes": 111581,
+      "what": "Undo toast after Skip, a row above the strip"
+    },
+    {
+      "file": "screens/v0.1.1/week-progress-duo-outer-382x644.png",
+      "viewport": "382x644",
+      "bytes": 113387,
+      "what": "Week and progress, full-screen page"
+    },
+    {
+      "file": "screens/v0.1.1/week-progress-duo-outer-382x644-dark.png",
+      "viewport": "382x644",
+      "bytes": 113218,
+      "what": "Week and progress, full-screen page (dark check)"
+    },
+    {
+      "file": "screens/v0.1.1/week-progress-slab-390x844.png",
+      "viewport": "390x844",
+      "bytes": 144517,
+      "what": "Week and progress, rounded sheet edge to edge, no border"
+    },
+    {
+      "file": "screens/v0.1.1/update-duo-inner-portrait-669x835.png",
+      "viewport": "669x835",
+      "bytes": 167258,
+      "what": "Update plan opened, Paste code first"
+    },
+    {
+      "file": "screens/v0.1.1/update-focused-duo-inner-portrait-669x475.png",
+      "viewport": "669x475",
+      "bytes": 87579,
+      "what": "Update plan box focused, viewport reduced by 360px for the keyboard"
+    },
+    {
+      "file": "screens/v0.1.1/update-duo-inner-landscape-951x669.png",
+      "viewport": "951x669",
+      "bytes": 220845,
+      "what": "Update plan opened, Paste code first"
+    },
+    {
+      "file": "screens/v0.1.1/update-focused-duo-inner-landscape-951x339.png",
+      "viewport": "951x339",
+      "bytes": 102629,
+      "what": "Update plan box focused, viewport reduced by 330px for the keyboard"
+    }
+  ],
+  "errors": []
+}

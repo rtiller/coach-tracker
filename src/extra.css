@@ -1,0 +1,435 @@
+
+  /* ======== Generic tracker additions (v0.1.0) ======== */
+  /* No plan yet: the empty state replaces the app */
+  .empty-state[hidden], .app[hidden], .dlg[hidden], .upd-box[hidden] { display: none; }
+  .empty-state { max-width: 560px; margin: 0 auto; padding-bottom: 8px; }
+  .empty-state .es-kicker { font-family: var(--mono); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ember-text); margin: 6px 0 6px; }
+  .empty-state h1 { font-family: var(--disp); font-size: 1.6rem; line-height: 1.15; margin: 0 0 10px; }
+  .empty-state p { color: var(--bone); font-size: 0.92rem; margin: 0 0 10px; line-height: 1.5; }
+  .empty-state p.es-muted { color: var(--mist); font-size: 0.82rem; }
+  .empty-state ol { margin: 0 0 4px 1.2rem; padding: 0; color: var(--bone); font-size: 0.9rem; line-height: 1.5; }
+  .empty-state li { margin-bottom: 6px; }
+  textarea.code-in {
+    display: block; width: 100%; min-height: 96px; max-height: 40vh; resize: vertical;
+    background: var(--ink); border: 1px solid var(--line); border-radius: 10px;
+    padding: 10px 14px; font-family: var(--mono); font-size: 0.85rem; color: var(--bone);
+    word-break: break-all; -webkit-appearance: none; appearance: none;
+  }
+  textarea.code-in:focus { outline: none; border-color: var(--ember); }
+  textarea.code-in::placeholder { color: var(--mist); }
+  .form-err { margin-top: 10px; padding: 10px 12px; border: 2px solid var(--warn); border-radius: 10px; background: var(--panel); color: var(--bone); font-size: 0.85rem; }
+  .form-err[hidden] { display: none; }
+  .form-err b { display: block; margin-bottom: 2px; }
+  .form-err ul { margin: 6px 0 0 1.1rem; padding: 0; color: var(--mist); font-size: 0.8rem; }
+  .form-ok { margin-top: 10px; color: var(--mist); font-size: 0.85rem; }
+  .form-ok[hidden] { display: none; }
+  .more-row .btn.ghost { width: 100%; flex: 1 1 auto; margin-top: 8px; }
+  .more-row .more-note { margin-top: 12px; }
+  .more-row .more-note:first-child { margin-top: 0; }
+  .upd-box { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--line); }
+  .upd-box label > span { display: block; color: var(--mist); font-size: 0.78rem; margin-bottom: 6px; }
+  .upd-box .ic-row { margin-top: 10px; }
+  .notes-card { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 14px 16px; margin-top: 10px; }
+  .notes-card .vt { color: var(--mist); font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 6px; }
+  .notes-card p { font-size: 0.85rem; color: var(--bone); line-height: 1.5; white-space: pre-line; }
+  .arch { font-family: var(--mono); font-size: 0.6rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--mist); border: 1px solid var(--faint); border-radius: 5px; padding: 1px 6px; margin-left: 6px; vertical-align: 1px; }
+  .banner .btn.ghost { margin-top: 10px; width: 100%; }
+  /* One dialog for every one-off question (start date, replace plan, import, errors).
+     Pinned near the top on every screen, clear of the bottom toolbar zone; scrolls inside itself at large text. */
+  .dlg { position: fixed; z-index: 31; top: var(--top-buf); left: var(--pl); right: var(--pr); margin: 0; padding: 14px;
+    border: 2px solid var(--line); border-radius: 12px; background: var(--panel); color: var(--bone); box-shadow: var(--shadow-pop);
+    max-height: calc(100vh - var(--top-buf) - 50px - var(--safe-b) - 16px);
+    max-height: calc(100dvh - var(--top-buf) - 50px - var(--safe-b) - 16px); overflow-y: auto; overscroll-behavior: contain; }
+  .dlg.warn { border-color: var(--warn); }
+  .dlg .dlg-title { margin: 0 0 6px; font-weight: 700; font-size: 0.98rem; overflow-wrap: anywhere; }
+  .dlg .dlg-body { margin: 0 0 6px; font-size: 0.88rem; color: var(--bone); overflow-wrap: anywhere; }
+  .dlg .dlg-note { margin: 0 0 6px; font-size: 0.82rem; color: var(--mist); }
+  .dlg ul { margin: 4px 0 6px 1.1rem; padding: 0; font-size: 0.8rem; color: var(--mist); }
+  .dlg .field { margin: 8px 0 4px; }
+  .dlg .ic-row { margin-top: 12px; }
+  .dlg-scrim { position: fixed; inset: 0; z-index: 30; background: var(--scrim); }
+  .dlg-scrim[hidden] { display: none; }
+  @media __DUO__ { .dlg { right: auto; width: min(520px, calc(100% - var(--pl) - var(--pr))); } }
+  @media __DUO__ { .dlg { width: calc(50% - var(--fold-gap) / 2 - var(--pl)); } }
+  /* the empty state is one column that scrolls with the page, also at 820px and up where the app panes lock the page */
+  .empty-state { padding-bottom: 50px; }
+  @media __DUO__ {
+    html.no-plan, html.no-plan body { height: auto; overflow: auto; }
+    /* two columns, one per screen half, so nothing crosses the fold */
+    .empty-state { max-width: none; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: var(--fold-gap); align-items: start;
+      padding: var(--top-buf) var(--pr) calc(24px + 50px + var(--safe-b)) var(--pl); }
+  }
+
+/* Update plan opens fully in view: clear of the sticky head and of the bottom toolbar zone */
+#updBox { scroll-margin: 80px 0 calc(62px + var(--safe-b)); }
+
+/* v0.1.1 */
+/* Tabular figures only where numbers line up. On body they also widened hyphens in WebKit ("Chest - supported"). */
+.wring, .ring-num, .spine-pill, .pill-jump, .week-sum, .sub, .meta, .kicker, .stat-bar, .vol-card, .list-item .sub, .sets, .ex-sets, input, .toast, .sheet-sub, .st-word { font-variant-numeric: tabular-nums; }
+/* start date: quick picks show which one is chosen; Save is the one filled button, Not now is quiet */
+.qp-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin: 10px 0 4px; }
+.qp { min-height: 48px; padding: 8px 10px; border-radius: 12px; border: 1px solid var(--line); background: var(--panel2); color: var(--bone);
+  font-weight: 600; font-size: 0.88rem; line-height: 1.25; display: flex; align-items: center; justify-content: center; gap: 6px; text-align: center; }
+.qp .qp-check { display: none; flex-shrink: 0; color: var(--ember-text); }
+.qp[aria-pressed="true"] { border: 2px solid var(--ember); background: var(--ember-dim); padding: 7px 9px; }
+.qp[aria-pressed="true"] .qp-check { display: block; }
+.btn.text { background: transparent; border: none; color: var(--bone); font-weight: 600; text-decoration: underline; text-underline-offset: 3px;
+  width: auto; flex: 0 1 auto; min-width: 0; min-height: 44px; margin-top: 0; padding: 10px 14px; }
+.dlg .ic-row .btn.primary { flex: 1 1 10rem; margin-top: 0; min-height: 48px; }
+.dlg .ic-row { align-items: center; }
+/* error details: closed by default, Copy inside */
+.err-more { margin: 6px 0 4px; }
+.err-more summary { min-height: 44px; display: flex; align-items: center; gap: 6px; cursor: pointer; font-weight: 600; font-size: 0.86rem; color: var(--bone); list-style: none; }
+.err-more summary::-webkit-details-marker { display: none; }
+.err-more summary::before { content: ""; width: 0; height: 0; border-left: 5px solid currentColor; border-top: 4px solid transparent; border-bottom: 4px solid transparent; }
+.err-more[open] summary::before { transform: rotate(90deg); }
+.err-text { margin: 2px 0 6px; padding: 8px 10px; max-height: 9.5rem; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere;
+  font-family: var(--mono); font-size: 0.74rem; line-height: 1.45; color: var(--bone); background: var(--ink); border: 1px solid var(--line); border-radius: 8px;
+  -webkit-user-select: text; user-select: text; }
+.err-copy-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.err-copy-row .btn.err-copy { flex: 0 0 auto; min-width: 0; min-height: 44px; padding: 8px 14px; }
+.err-copied { font-size: 0.8rem; color: var(--mist); }
+/* the week line under the header */
+#weekNote[hidden] { display: none; }
+.wk-note { margin: 0 0 10px; padding: 4px 4px 0 12px; border: 1px solid var(--line); border-radius: 12px; background: var(--panel); font-size: 0.86rem; }
+.wk-note > p { margin: 0; padding: 8px 8px 10px 0; }
+.wk-note .wk-row { display: flex; flex-wrap: wrap; align-items: center; gap: 0 8px; }
+.wk-note .wk-row p { margin: 0; flex: 1 1 10rem; padding: 6px 0; }
+.wk-note .wk-row .btn.ghost { flex: 0 0 auto; min-width: 0; min-height: 44px; padding: 8px 14px; }
+.wk-note .btn.wk-push { padding: 0 8px 0 0; font-size: 0.82rem; color: var(--mist); }
+
+/* ---- v0.1.1: Undo toast in reserved space ---- */
+.toast .toast-x { min-width: 44px; width: 44px; padding: 0; background: transparent; color: var(--ink); display: inline-flex; align-items: center; justify-content: center; }
+.toast #toastMsg { flex: 1 1 auto; min-width: 0; }
+.toast #toastUndo[hidden] { display: none; }
+.toast { gap: 4px; padding-right: 4px; }
+/* with the sheet open: a row in the sheet head */
+.toast.in-head {
+  position: static; display: flex; left: auto; right: auto; top: auto; bottom: auto; width: auto; z-index: auto;
+  max-height: 0; opacity: 0; margin: 0; padding-top: 0; padding-bottom: 0; overflow: hidden; visibility: hidden;
+  transition: max-height .2s ease, opacity .2s ease, margin .2s ease, padding .2s ease, visibility 0s linear .2s;
+}
+.toast.in-head.show {
+  max-height: 12rem; opacity: 1; padding-top: 6px; padding-bottom: 6px; visibility: visible;
+  transition: max-height .2s ease, opacity .2s ease, margin .2s ease, padding .2s ease;
+}
+.toast.in-head { flex-basis: 100%; order: 3; }
+.toast.in-head.show { margin: 6px 0 0; }
+#planPane .sheet-head { flex-wrap: wrap; }
+
+/* ---- v0.1.1: Week and progress ---- */
+@media __COVER__ {
+  /* no hairline anywhere: separation is the surface color (and the backdrop while it rises) */
+  .pane-plan { border: none; }
+}
+/* outer (cover) screen and other short phones: a full-screen page, every edge filled, behind the clock column too */
+/* nested: the cover layout, and only when the screen is not very tall and narrow */
+@media __COVER__ { @media (min-aspect-ratio: 9/17) {
+  .pane-plan { top: 0; border-radius: 0; background: var(--panel); padding-top: 0; }
+  .pane-plan .sheet-head { background: var(--panel); padding-top: var(--top-buf); }
+} }
+@media __COVER__ { @media (prefers-reduced-motion: reduce) {
+  .pane-plan { transform: none !important; opacity: 0; transition: opacity .2s ease, visibility 0s linear .2s !important; }
+  .app.sheet-open .pane-plan { opacity: 1; transition: opacity .2s ease !important; }
+} }
+
+/* ---- v0.1.1: Update plan, a panel pinned near the top ---- */
+.upd-scrim { position: fixed; inset: 0; z-index: 32; background: var(--scrim); }
+.upd-scrim[hidden] { display: none; }
+.upd-box { position: fixed; z-index: 33; left: var(--pl); right: var(--pr); top: calc(var(--vv-top, 0px) + var(--top-buf)); margin: 0;
+  max-height: calc(var(--vv-h, 100vh) - var(--top-buf) - 12px); overflow-y: auto; overscroll-behavior: contain;
+  padding: 14px; border: 2px solid var(--line); border-radius: 12px; background: var(--panel); color: var(--bone); box-shadow: var(--shadow-pop); }
+.upd-box[hidden] { display: none; }
+.upd-box .upd-title { font-family: var(--disp); font-weight: 700; font-size: 1.05rem; margin: 0 0 4px; }
+.upd-box .upd-note { color: var(--mist); font-size: 0.86rem; margin: 0 0 10px; }
+.upd-box .btn.primary { width: 100%; margin-top: 0; }
+.upd-box .upd-or { color: var(--mist); font-size: 0.82rem; margin: 12px 0 4px; }
+.upd-box .code-in { min-height: 4.6rem; }
+.upd-box .ic-row { margin-top: 10px; }
+/* typing: the field and Use this plan come first, so both sit above the keyboard */
+.upd-box.typing .upd-note, .upd-box.typing #updPaste, .upd-box.typing .upd-or { display: none; }
+.upd-box.typing .code-in { min-height: 3.6rem; }
+@media __DUO__ { .upd-box { right: auto; width: min(520px, calc(100% - var(--pl) - var(--pr))); } }
+@media __DUO__ { .upd-box { width: calc(50% - var(--fold-gap) / 2 - var(--pl)); } }
+
+/* ---- v0.1.1: safety net ---- */
+.fatal { position: fixed; z-index: 60; top: var(--top-buf); left: var(--pl); right: var(--pr); padding: 14px; border: 2px solid var(--warn); border-radius: 12px; background: var(--panel); color: var(--bone); box-shadow: var(--shadow-pop); }
+.fatal .ic-row { margin-top: 10px; }
+.fatal .fatal-err { margin: 10px 0 0; font-family: var(--mono); font-size: 0.72rem; color: var(--mist); overflow-wrap: anywhere; }
+@media __DUO__ { .fatal { right: auto; width: min(520px, calc(100% - var(--pl) - var(--pr))); } }
+.upd-box .ic-row { display: flex; flex-wrap: nowrap; gap: 8px; align-items: center; }
+.upd-box .ic-row .btn { margin-top: 0; }
+.upd-box #updUse { flex: 1 1 auto; width: auto; }
+.upd-box #updCancel { flex: 0 0 auto; width: auto; padding: 0 12px; }
+.err-nochange { margin-top: 6px; color: var(--mist); }
+
+/* ---- v0.1.2: overlays stay in the left pane on inner screens, off the hinge (portrait and landscape) ---- */
+@media __DUO__ {
+  .toast, .dlg, .upd-box, .fatal, .import-confirm { right: auto; width: calc(50% - var(--fold-gap) / 2 - var(--pl)); }
+}
+/* ---- v0.1.2: leftover line close button ---- */
+.wk-note .wk-row .wk-x { flex: 0 0 44px; width: 44px; height: 44px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center; margin-left: -4px; border-radius: 10px; color: var(--mist); background: transparent; }
+.wk-note .wk-row .wk-x:focus-visible { outline: 2px solid var(--ember); outline-offset: 2px; }
+.wk-note .wk-row p { flex: 1 1 6rem; }
+.wk-note .wk-row .btn.ghost { padding: 8px 12px; }
+
+/* ---- v0.1.2: dialogs are laid out at full size before they show. Only opacity and an 8px rise animate (200ms),
+   never height, max-height, clip or overflow; the dim fades on the same frame. Reduced motion: instant (global rule). ---- */
+@keyframes dlg-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@keyframes dim-in { from { opacity: 0; } to { opacity: 1; } }
+.dlg:not([hidden]), .upd-box:not([hidden]), .fatal { animation: dlg-in .2s ease both; }
+.dlg-scrim:not([hidden]), .upd-scrim:not([hidden]) { animation: dim-in .2s ease both; }
+/* ---- v0.1.2: inner screens: a dialog opened from the right pane sits in the right pane ---- */
+@media __DUO__ {
+  .dlg.pane-r, .upd-box.pane-r { left: calc(50% + var(--fold-gap) / 2); right: auto; width: calc(50% - var(--fold-gap) / 2 - var(--pr)); }
+}
+/* ---- v0.1.2: rest days in light mode: full opacity so their text meets AA ---- */
+@media (prefers-color-scheme: light) { .day.rest-day { opacity: 1; } }
+/* ---- v0.1.3: pinned parts never cover what the reader needs ---- */
+/* a toast floating over the page reserves its height at the end of the page (JS sets --pin-pad) */
+body::after { content: ""; display: block; height: var(--pin-pad, 0px); pointer-events: none; }
+@media __DUO__ {
+  /* the strip with the Undo slot directly below it */
+  #navGroup .wstrip { margin-bottom: 8px; }
+  /* children margins stay inside the group, so its box is its place in the flow */
+  #navGroup { display: flow-root; }
+  #paneToday > .outer-nav { margin-top: 6px; margin-bottom: 14px; }
+}
+@media __DUO__ {
+  /* root cause of v0.1.2's split card: a sticky box pins inside the scroll container's padding, so the pane's
+     74px toolbar clearance held the group about 82px above the screen edge with the card visible below it.
+     The clearance is now a spacer after the group (#navEnd) and the pane has no bottom padding. */
+  .pane-today { padding-bottom: 0; }
+  /* a control scrolled into view (focus, find, scrollIntoView) lands clear of the pane's edges */
+  .pane-today { scroll-padding-top: 12px; scroll-padding-bottom: calc(16px + var(--safe-b)); }
+  #paneToday > #navEnd { display: block; height: calc(24px + 50px + var(--safe-b) + var(--pin-pad, 0px)); }
+}
+
+/* ---- v0.1.3.1: the Undo slot ---- */
+/* The toast has its own slot at the end of the nav group: below the Back to today and Week and progress row on phones
+   and the cover screen, directly below the strip on inner screens. The slot is always there at the toast's full height
+   (two lines of message at most), so showing or hiding Undo moves nothing; only opacity fades (200ms, instant under
+   reduced motion). Normal flow: no absolute or fixed positioning, no transform, no negative margins. */
+.toast-slot { display: block; height: max(56px, calc(2.5em + 12px)); margin: 8px 0 0; }
+@media __DUO__ { .toast-slot { margin: 0 0 8px; } }
+.toast.in-slot {
+  position: static; display: flex; left: auto; right: auto; top: auto; bottom: auto; width: auto; height: 100%; max-height: none; z-index: auto;
+  margin: 0; padding: 0 4px 0 16px; overflow: hidden; transform: none; box-shadow: none;
+  opacity: 0; visibility: hidden; transition: opacity .2s ease, visibility 0s linear .2s;
+}
+/* phones and the cover screen: the row under the strip is one full-width line (wraps only at large text) */
+@media __COVER__ { #outerNav > .nav-row { display: flex; flex: 1 1 100%; flex-wrap: wrap; gap: 8px; min-width: 0; } }
+.toast.in-slot.show { opacity: 1; visibility: visible; transition: opacity .2s ease; }
+/* the message wraps to two lines at most (200% text included), so the toast never outgrows its slot */
+.toast.in-slot #toastMsg { line-height: 1.25; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; overflow-wrap: anywhere; }
+/* the buttons never wrap or shrink (at 200% text "Undo" once broke into two lines); the message gives way */
+.toast.in-slot button { flex-shrink: 0; white-space: nowrap; }
+/* inner screens: one way back, in the card header ("Back to today"); the duplicate Showing bar under the strip is gone */
+@media __DUO__ {
+  #paneToday .outer-nav { display: none; }
+  .today-top .back-inline { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; min-width: 44px; padding: 0 10px; flex-shrink: 0;
+    background: transparent; border: 1px solid transparent; border-radius: 12px; color: var(--ember-text); font-weight: 700; font-size: 0.85rem; text-decoration: underline; text-underline-offset: 3px; white-space: nowrap; }
+  html.lg-text .today-top { flex-wrap: wrap; row-gap: 4px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .toast.in-slot, .toast.in-slot.show { transition: none; }
+}
+
+
+/* ---- v0.1.3.3: popovers attach to their control (JS placePop, cover pattern only) ---- */
+/* measures the top clear zone, max(safe-area top, 50px) + 12px, and the side and bottom safe areas for placePop */
+#clearProbe { position: fixed; top: var(--top-buf); left: var(--safe-l); right: var(--safe-r); bottom: var(--safe-b); padding-top: var(--safe-t); box-sizing: border-box; visibility: hidden; pointer-events: none; z-index: -1; }
+/* the safety net never runs past the bottom toolbar zone; it scrolls inside at large text */
+.fatal { max-height: calc(100vh - var(--top-buf) - 50px - var(--safe-b) - 16px); max-height: calc(100dvh - var(--top-buf) - 50px - var(--safe-b) - 16px); overflow-y: auto; overscroll-behavior: contain; }
+
+/* ---- v0.1.3.3 Counter: the cover screen in landscape (html.counter, set by syncCounter) ---- */
+/* One surface, two matching panels (design review 2026-10-25): Today (56%) and Week (44%), the same card surface and 16px
+   radius, both filling the usable height (12px inside the safe area at the top and bottom, max(safe area, 12px) at the
+   sides), tops and bottoms aligned. The panel surfaces are #paneToday::before and ::after (grid items behind the content),
+   so the Today panel can hold its card AND the reserved Undo slot. Rows: --hh (both header rows, the same height), the
+   body, and the Undo slot (Today only; the week list runs to the bottom). --hh is 44px, or less when 44px would leave a
+   week row under 44px (644x382 with a 21px bottom inset: 39px; the header buttons keep a 44px hit area that reaches up into
+   the top padding). #navGroup is display: contents so its parts are cells of this grid. */
+.wd .ss { display: none; }
+.bt-ph { display: none; }
+html.counter, html.counter body { height: 100%; overflow: hidden; }
+html.counter body { padding: 0 !important; }
+html.counter #paneToday {
+  --cpad: 12px; --cpad-b: 12px;
+  --cav: calc(100dvh - var(--safe-t) - var(--safe-b) - var(--cpad) - var(--cpad-b));
+  --hh: clamp(32px, calc(var(--cav) - 308px), 44px);
+  /* one type scale for both panels; --rh is one week row (the list over 7) */
+  --rh: calc((var(--cav) - var(--hh)) / 7);
+  --c-name: clamp(1.0625rem, calc(var(--rh) * 0.40), 1.375rem);
+  --c-mono: clamp(0.8125rem, calc(var(--rh) * 0.30), 1rem);
+  --c-kick: 0.8125rem;
+  --slot-h: max(56px, calc(2.5rem + 12px));
+  /* Skip and Mark day done; 44px at 200% text (below; v0.1.3.4: the 3rem rule gave 70px and squeezed the exercise list) */
+  --btn-h: max(44px, calc(3rem * var(--cs, 1)));
+  --act-h: calc(var(--slot-h) + 10px + var(--btn-h));
+  position: fixed; inset: 0; display: grid; grid-template-columns: minmax(0, 56fr) minmax(0, 44fr); grid-template-rows: var(--hh) minmax(0, 1fr) auto;
+  column-gap: 12px; padding: calc(var(--safe-t) + var(--cpad)) max(var(--safe-r), 12px) calc(var(--safe-b) + var(--cpad-b)) max(var(--safe-l), 12px);
+}
+html.counter #paneToday::before, html.counter #paneToday::after { content: ""; grid-row: 1 / 4; z-index: -1; background: var(--panel); border: 1px solid var(--line); border-radius: 16px; }
+html.counter #paneToday::before { grid-column: 1; }
+html.counter #paneToday::after { grid-column: 2; }
+/* rows would fall under 44px (644x382 with a 21px bottom inset gives 42.9): the bottom padding goes (the panels end at
+   the safe area's edge, never inside it) */
+html.counter.counter-tight #paneToday { --cpad-b: 0px; }
+html.counter.lg-text #paneToday { grid-template-columns: minmax(0, 52fr) minmax(0, 48fr); }
+/* the header, week note and start nudge live in portrait and in the page; a start date is asked for by its own prompt */
+html.counter #header, html.counter #startNudge, html.counter #weekNote, html.counter #navMark, html.counter #navEnd { display: none !important; }
+html.counter #paneToday section.today { grid-column: 1; grid-row: 1 / 4; margin: 0; min-height: 0; display: flex; flex-direction: column; overflow-y: auto; overscroll-behavior: contain; scroll-padding-bottom: var(--act-h);
+  background: transparent; border: 0; border-radius: 16px 16px 0 0; box-shadow: none; padding: 0; }
+/* Today header: the 32px ring and the kicker ("W1 of 12 · Block 1") on one line, never truncated (it may wrap to two
+   lines at 200% text). Back to today lives in the Week header. Nothing overlays the header (gate-v0133 section 7). */
+html.counter #paneToday .today-top { flex: 0 0 auto; padding: 0 16px; min-height: var(--hh); align-items: center; gap: 8px; flex-wrap: nowrap; }
+html.counter #paneToday .today-top > svg { width: 32px; height: 32px; flex: 0 0 32px; }
+html.counter #paneToday .today-top .tt-text { flex: 1 1 auto; min-width: 0; }
+html.counter #paneToday .today-top .dayx { display: none; }
+html.counter #paneToday .today-top .kicker { white-space: nowrap; overflow: visible; text-transform: none; font-family: inherit; font-weight: 700; letter-spacing: 0.01em; color: var(--mist); font-size: var(--c-kick); line-height: 1.3; }
+html.counter.lg-text #paneToday .today-top .kicker { white-space: normal; }
+html.counter #paneToday .today-top .kicker .k-seg { white-space: nowrap; }
+html.counter #paneToday .today-top .kicker .k-c { font-size: 0; }
+html.counter #paneToday .today-top .kicker .k-c::after { content: "\00a0\00b7\00a0"; font-size: var(--c-kick); }
+/* a deload week says so once, in the kicker ("W5 of 10 · Block 1, Deload"), instead of on every set line */
+html.counter #paneToday .today-top .kicker .k-tail { display: inline; white-space: nowrap; }
+html.counter #paneToday .set-row .ex-dl { display: none; }
+html.counter #paneToday .today-top .back-inline, html.counter #paneToday .today-top .btn-skip { display: none; }
+
+html.counter #paneToday .today-hero { flex: 0 0 auto; padding: calc(2px * var(--cs, 1)) 16px 2px; }
+html.counter #paneToday .today-hero h2 { font-size: max(1.125rem, calc(1.6rem * var(--cs, 1))); line-height: 1.1; }
+html.counter #paneToday .today-hero .sub { font-size: max(0.8125rem, calc(0.92rem * var(--cs, 1))); line-height: 1.3; }
+/* v0.1.3.4: the exercise list is the Today panel's one scroll area, between the title block and the pinned actions.
+   Its natural height when every row fits (nothing changes at normal text); it shrinks and scrolls when they do not.
+   Before, the whole card scrolled under the opaque sticky actions bar, whose top is the reserved Undo slot (92px at
+   200% text), so the rows sat behind a blank band with no sign that they were there. */
+html.counter #paneToday .set-rows { flex: 0 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 2px 16px 0; }
+/* "N more": solid, on the list's bottom edge (right side, so the start of the row above stays readable), at least 44px;
+   it sits above the actions bar, so it never covers Skip, Mark day done or the Undo slot. No mask, fade or gradient. */
+.more-pill { display: none; }
+html.counter #paneToday .more-pill:not([hidden]) { display: inline-flex; align-items: center; gap: 4px; flex: 0 0 auto; align-self: flex-end; position: relative; z-index: 2;
+  min-height: 44px; min-width: 44px; margin: calc(-44px - 6px) 16px 6px 0; padding: 0 12px 0 14px; box-sizing: border-box; border-radius: 22px;
+  background: var(--bone); color: var(--ink); border: 1px solid var(--line); box-shadow: none; font: inherit; font-size: var(--c-mono); font-weight: 700; line-height: 1.1; white-space: nowrap; }
+html.counter #paneToday .more-pill svg { width: 1.1em; height: 1.1em; flex: 0 0 auto; }
+/* 200% text: the list keeps room for the 44px pill (46px) when it scrolls. To fund it the buttons drop to 44px, the 4px gap
+   above them goes and so do the gaps around the list, so a two-line day title still leaves that room at 644x382 */
+html.counter.lg-text #paneToday { --btn-h: 44px; --act-h: calc(var(--slot-h) + 6px + var(--btn-h)); }
+html.counter.lg-text #paneToday .today-actions { padding-top: var(--slot-h); }
+html.counter.lg-text #paneToday .toast-slot { margin-bottom: calc(var(--btn-h) + 7px); } /* the bar's 6px bottom padding and 1px margin: the slot ends where the buttons start */
+html.counter.lg-text #paneToday .set-rows { min-height: 46px; box-sizing: border-box; padding-top: 0; padding-bottom: 2px; } /* 2px: WebKit scrolls in whole pixels, so a list at a fractional top could not bring the last row's final pixel into view */
+html.counter.lg-text #paneToday .today-hero { padding-bottom: 0; }
+html.counter.lg-text #paneToday .more-pill:not([hidden]) { margin: -45px 16px 1px 0; }
+/* v0.1.3.4b, 200% text, a list that overflows (.more-on, set by layoutMore): the pill has its own 44px strip under the list
+   (right side), so it never covers a row; the focus line goes to pay for it. The list snaps: each row's top (.snap-top, a
+   1px marker, since a row taller than the window must not be a snap area) and the start of each line inside a row, so a
+   scroll always settles with a whole line at the top. Rows start flush (no top padding), so a row's top is its first line. */
+.set-row .snap-top { display: none; }
+html.counter.lg-text #paneToday .today.more-on .today-hero .sub { display: none; }
+html.counter.lg-text #paneToday .today.more-on .today-hero h2 { line-height: 1; } /* 7px back from a two-line title */
+html.counter.lg-text #paneToday .today.more-on .set-rows { min-height: 43px; padding-bottom: 0; scroll-snap-type: y mandatory; }
+html.counter.lg-text #paneToday .today.more-on .set-row { position: relative; padding-top: 0; scroll-snap-align: start; }
+html.counter.lg-text #paneToday .today.more-on .set-row.tall { scroll-snap-align: none; }
+html.counter.lg-text #paneToday .today.more-on .set-row .snap-top { display: block; position: absolute; top: 0; left: 0; width: 1px; height: 1px; scroll-snap-align: start; }
+html.counter.lg-text #paneToday .today.more-on .set-row .w,
+html.counter.lg-text #paneToday .today.more-on .set-row .ex-dl { display: inline-block; }
+html.counter.lg-text #paneToday .today.more-on .set-row .sn { scroll-snap-align: start; } /* the first word, tag or note of each line (layoutMore) */
+html.counter.lg-text #paneToday .today.more-on .set-row .ex-name { line-height: 1.25; } /* at least the font's content height (1.21em), so a line's glyph box ends where the next line's snap point starts */
+html.counter.lg-text #paneToday .today.more-on .more-pill:not([hidden]) { margin: 0 16px 0 0; }
+html.counter.lg-text #paneToday .today.more-on .more-pill.at-end { visibility: hidden; }
+html.counter #paneToday .set-row { min-height: calc(2.4rem * var(--cs, 1)); margin: 0; padding: calc(0.2rem * var(--cs, 1)) 0; gap: 2px 12px; flex-wrap: nowrap;
+  background: transparent; border-radius: 0; border-bottom: 1px solid var(--line); }
+html.counter #paneToday .set-row:last-child { border-bottom: 0; }
+html.counter #paneToday .set-row .ex-left { flex: 1 1 auto; min-width: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 2px 8px; }
+html.counter #paneToday .set-row .ex-name { font-size: var(--c-name); font-weight: 600; line-height: 1.2; overflow-wrap: anywhere; }
+html.counter #paneToday .set-row .tag { font-size: max(0.625rem, calc(0.66rem * var(--cs, 1))); }
+html.counter #paneToday .set-row .ex-sets { font-family: var(--mono); font-size: var(--c-mono); white-space: nowrap; flex-shrink: 0; }
+html.counter #paneToday .today .ex-hint { flex: 0 0 auto; }
+html.counter #paneToday .today-rest { flex: 0 0 auto; }
+/* Skip and Mark day done sit at the panel's bottom; spare space stays inside the panel, above them. The bar's top
+   --slot-h is the reserved Undo slot, which #toastSlot covers (below), so Undo shows just above the buttons and nothing moves. */
+html.counter #paneToday .today-actions { flex: 0 0 auto; margin-top: auto; padding: calc(var(--slot-h) + 4px) 16px 6px; position: sticky; bottom: 0; z-index: 1; background: var(--panel); margin: auto 1px 1px; border-radius: 0 0 15px 15px; }
+html.counter #paneToday .btn-done { min-height: var(--btn-h); font-size: max(0.9375rem, calc(1.05rem * var(--cs, 1))); }
+html.counter #paneToday #navGroup { display: contents; }
+/* Week header: the same height as the Today header. "Week and progress" + chevron is a plain label on the left and the
+   whole row is its button; Back to today sits on the right, its space always kept (hidden while today is selected) */
+html.counter #paneToday #outerNav { grid-column: 2; grid-row: 1; margin: 0; min-height: 0; height: var(--hh); display: block; overflow: visible; }
+html.counter #paneToday #outerNav .nav-row { display: flex; flex-wrap: nowrap; margin: 0; padding: 0; min-height: 0; height: var(--hh); align-items: flex-start; gap: 0; overflow: visible; }
+html.counter #paneToday .outer-nav .open-plan { order: 1; flex: 1 1 0; min-width: 0; width: auto; height: 44px; min-height: 44px; margin: calc(var(--hh) - 44px) 0 0; padding: 0 0 0 16px; border: 0; border-radius: 16px 0 0 0;
+  background: transparent; box-shadow: none; color: var(--mist); font-family: inherit; font-size: var(--c-kick); font-weight: 700; letter-spacing: 0; line-height: 1.3; text-decoration: none;
+  display: flex; align-items: center; justify-content: flex-start; gap: 3px; text-align: left; white-space: nowrap; }
+html.counter #paneToday .outer-nav .open-plan > span:first-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+html.counter #paneToday .open-plan .chev { display: inline; color: var(--mist); }
+html.counter #paneToday #backSlot { order: 2; flex: 0 0 auto; display: flex; margin-top: calc(var(--hh) - 44px); }
+html.counter #paneToday #backSlot .back-today { margin: 0; width: auto; height: 44px; min-height: 44px; min-width: 44px; padding: 0 8px 0 4px; border: 0; border-radius: 12px; background: transparent;
+  display: inline-flex; align-items: center; justify-content: center; font-size: var(--c-kick); white-space: nowrap; }
+html.counter #paneToday #backSlot .back-today .bt-label { display: none; }
+html.counter #paneToday #backSlot .bt-ph { visibility: hidden; }
+html.counter #paneToday #weekStrip { grid-column: 2; grid-row: 2 / 4; margin-top: 0; min-height: 0; overflow: hidden; container-type: size; background: transparent; border: 0; border-radius: 0 0 16px 16px; }
+/* seven equal rows; the type follows the row (--rh): name clamp(17px, 0.40 x row, 22px),
+   day label clamp(13px, 0.30 x row, 16px) (in rem, so 200% text doubles the floors); both stay on one line with an
+   ellipsis (the sizes are the panel's --c-name and --c-mono, shared with the Today panel). Status glyph 24px centered in a 44x44 box. */
+html.counter #paneToday .wstrip { display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: repeat(7, minmax(0, 1fr)); grid-auto-flow: row; height: 100%; box-sizing: border-box; padding: 0; margin: 0; gap: 0; border: 0; border-radius: 0; background: transparent; overflow: hidden; }
+html.counter #paneToday .wd { min-height: 0; height: auto; flex-direction: row; align-items: center; justify-content: flex-start; gap: 8px; padding: 0 0 0 16px; text-align: left; overflow: hidden; }
+html.counter #paneToday .wd .d { flex: 0 0 3.1em; font-family: var(--mono); font-weight: 700; letter-spacing: 0.06em; font-size: var(--c-mono); line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+html.counter #paneToday .wd .ss { display: block; flex: 1 1 auto; min-width: 0; font-weight: 600; font-size: var(--c-name); line-height: 1.2; color: var(--bone); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+html.counter #paneToday .wd .s { display: none; }
+html.counter #paneToday .wd .dot { flex: 0 0 24px; width: 24px; height: 24px; box-sizing: border-box; margin: 0 10px; }
+html.counter #paneToday .wd .dot svg { width: 14px; height: 14px; }
+/* the Undo slot: over the reserved top of the actions bar, right above Skip and Mark day done */
+html.counter #paneToday .toast-slot { grid-column: 1; grid-row: 1 / 4; align-self: end; position: relative; z-index: 2; height: var(--slot-h); box-sizing: border-box; padding: 0 16px;
+  margin: 0 1px calc(var(--btn-h) + 10px) 1px; } /* inset 1px like the actions bar, so the slot stays inside it */
+html.counter #paneToday .toast-slot { pointer-events: none; } /* an empty slot never takes a tap or covers a rest day */
+html.counter #paneToday .toast-slot > * { pointer-events: auto; }
+/* 200% text: day rows keep one line with an ellipsis and the right column grows to 48% */
+html.counter.lg-text #paneToday .wd .d { flex-basis: 2.6em; letter-spacing: 0; }
+/* 200% text: a set line that does not fit beside the name goes under it (whole words, never over the tag) */
+html.counter.lg-text #paneToday .set-row { flex-wrap: wrap; }
+html.counter.lg-text #paneToday .set-row .ex-left { flex: 1 1 12em; }
+html.counter.lg-text #paneToday .set-row .ex-name { overflow-wrap: normal; word-break: normal; }
+html.counter.lg-text #paneToday .set-row .ex-sets { white-space: normal; flex-shrink: 1; }
+html.counter #paneToday .skip-bottom { display: inline-flex; align-items: center; justify-content: center; min-height: var(--btn-h); }
+/* Counter: Update plan fits whole between the top clear zone and the bottom safe area (678x396 and 644x382): a two-line
+   field, tighter gaps, and the "Plan code" label kept for screen readers only (the field's placeholder says the same) */
+html.counter .upd-box .code-in { height: 2.9rem; min-height: 2.9rem; }
+html.counter .upd-box .upd-note { margin-bottom: 6px; }
+html.counter .upd-box .upd-or { margin: 6px 0 4px; }
+html.counter .upd-box .ic-row { margin-top: 6px; }
+html.counter .upd-box label > span { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+
+/* About and your data (v0.1.3.3): a plain scrolling page over the app, in every layout (the Counter too) */
+.about-page { position: fixed; inset: 0; z-index: 36; overflow-y: auto; overscroll-behavior: contain; background: var(--ink); color: var(--bone);
+  padding: calc(var(--safe-t) + 12px) max(var(--safe-r), 16px) calc(var(--safe-b) + 24px) max(var(--safe-l), 16px); }
+.about-page[hidden] { display: none; }
+.about-inner { max-width: 600px; margin: 0 auto; }
+.about-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--line); margin-bottom: 14px; }
+.about-kicker { margin: 0; color: var(--mist); font-family: var(--mono); font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; }
+.about-close { min-height: 44px; min-width: 76px; padding: 0 16px; border-radius: 12px; flex-shrink: 0; font: inherit; font-weight: 700;
+  background: var(--panel2); border: 1px solid var(--line); color: var(--bone); }
+.about-hero { font-family: var(--disp); font-weight: 700; font-size: 1.5rem; line-height: 1.2; margin: 0 0 10px; }
+.about-sub { margin: 0 0 8px; font-size: 0.9375rem; line-height: 1.45; }
+.about-card { margin: 16px 0; padding: 16px; background: var(--panel); border: 1px solid var(--line); border-radius: 16px; }
+.about-card-title { font-family: var(--disp); font-size: 1.05rem; font-weight: 700; margin: 0 0 10px; }
+.about-card .btn.primary { display: block; width: 100%; min-height: 44px; margin: 0 0 10px; }
+.about-note { margin: 0 0 6px; color: var(--mist); font-size: 0.875rem; line-height: 1.45; }
+.about-link { margin: 0 0 18px; }
+.about-link a { display: inline-flex; align-items: center; min-height: 44px; color: var(--ember-text); font-weight: 700; text-underline-offset: 3px; }
+.about-foot { margin: 0 0 4px; color: var(--mist); font-size: 0.75rem; }
+html.about-open, html.about-open body { overflow: hidden; }
+
+/* ---- v0.1.3.3 slab phones: reading text is at least 15px wherever the cover pattern runs (every phone, the Duo cover
+   screen, inner portrait). Small print stays small: field labels, the page footer, the About footer, the version line.
+   Two panes keep their v0.1.3.2 sizes. ---- */
+.week-sum .tap-hint { font-size: 0.72rem; }
+@media __COVER__ {
+  .wk-note p, .today-hero .sub, .more-note, .upd-box .upd-note, .upd-box .upd-or, .dlg .dlg-body, .dlg .dlg-note, .about-note, .week-sum .tap-hint { font-size: 0.9375rem; }
+}
+/* the Counter keeps its fitted scale for training days; a rest day's line is reading text */
+html.counter #paneToday .today:has(.today-rest) .today-hero .sub { font-size: max(0.9375rem, calc(0.92rem * var(--cs, 1))); }
+/* the Counter on a short phone (Android in landscape under its status bar): when even the tight list cannot give seven
+   44px rows, the rows stay 44px and the list scrolls inside its panel, the picked day (or today) kept in view */
+html.counter.counter-short #paneToday #weekStrip { overflow-y: auto; }
+html.counter.counter-short #paneToday .wstrip { height: auto; grid-template-rows: repeat(7, 44px); }
+/* the Counter with the keyboard up at 200% text leaves ~130px: the field drops to one line (it scrolls) so the field and
+   Use this plan both stay above the keyboard */
+html.counter .upd-box.typing .code-in { height: min(2.9rem, 56px); min-height: min(2.9rem, 56px); }

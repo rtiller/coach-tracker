@@ -1,0 +1,1042 @@
+{
+ "note": "Each PNG is the full CSS viewport at DPR 2 (not full page). Safe areas applied as CSS custom properties.",
+ "shots": [
+  {
+   "file": "screens/v0.1.3.3/slab/iphone-se-portrait-today-dark.png",
+   "device": "iphone-se",
+   "size": "375x667",
+   "orient": "portrait",
+   "insets": {
+    "t": 20,
+    "b": 0,
+    "l": 0,
+    "r": 0
+   },
+   "text": "default",
+   "scheme": "dark",
+   "what": "today",
+   "mode": "cover",
+   "errors": []
+  },
+  {
+   "file": "screens/v0.1.3.3/slab/iphone-se-portrait-more-dark.png",
+   "device": "iphone-se",
+   "size": "375x667",
+   "orient": "portrait",
+   "insets": {
+    "t": 20,
+    "b": 0,
+    "l": 0,
+    "r": 0
+   },
+   "text": "default",
+   "scheme": "dark",
+   "what": "More open on the Week and progress page",
+   "mode": "cover",
+   "errors": []
+  },
+  {
+   "file": "screens/v0.1.3.3/slab/iphone-se-portrait-update-dark.png",
+   "device": "iphone-se",
+   "size": "375x667",
+   "orient": "portrait",
+   "insets": {
+    "t": 20,
+    "b": 0,
+    "l": 0,
+    "r": 0
+   },
+   "text": "default",
+   "scheme": "dark",
+   "what": "Update plan opened from More",
+   "mode": "cover",
+   "errors": []
+  },
+  {
+   "file": "screens/v0.1.3.3/slab/iphone-se-portrait-update-keyboard-dark.png",
+   "device": "iphone-se",
+   "size": "375x667",
+   "orient": "portrait",
+   "insets": {
+    "t": 20,
+    "b": 0,
+    "l": 0,
+    "r": 0
+   },
+   "text": "default",
+   "scheme": "dark",
+   "what": "Update plan with the keyboard up (viewport 375x407: a 260px keyboard)",
+   "mode": "cover",
+   "errors": []
+  },
+  {
+   "file": "screens/v0.1.3.3/slab/iphone-se-portrait-about-dark.png",
+   "device": "iphone-se",
+   "size": "375x667",
+   "orient": "portrait",
+   "insets": {
+    "t": 20,
+    "b": 0,
+    "l": 0,
+    "r": 0
+   },
+   "text": "default",
+   "scheme": "dark",
+   "what": "About",
+   "mode": "cover",
+   "errors": []
+  },
+  {
+   "file": "screens/v0.1.3.3/slab/iphone-se-landscape-today-dark.png",
+   "device": "iphone-se",
+   "size": "667x375",
+   "orient": "landscape",
+   "insets": {
+    "t": 0,
+    "b": 0,
+    "l": 0,
+    "r": 0
+   },
+   "text": "default",
+   "scheme": "dark",
+   "what": "today",
+   "mode": "counter",
+   "errors": []
+  },
+  {
+   "file": "screens/v0.1.3.3/slab/iphone-se-landscape-more-dark.png",
+   "device": "iphone-se",
+   "size": "667x375",
+   "orient": "landscape",
+   "insets": {
+    "t": 0,
+    "b": 0,
+    "l": 0,
+    "r": 0
+   },
+   "text": "default",
+   "scheme": "dark",
+   "what": "More open on the Week and progress page",
+   "mode": "counter",
+   "errors": []
+  },
+  {
+   "file": "screens/v0.1.3.3/slab/iphone-se-landscape-update-dark.png",
+   "device": "iphone-se",
+   "size": "667x375",
+   "orient": "landscape",
+   "insets": {
+    "t": 0,
+    "b": 0,
+    "l": 0,
+    "r": 0
+   },
+   "text": "default",
+   "scheme": "dark",
+   "what": "Update plan opened from More",
+   "mode": "counter",
+   "errors": []
+  },
+  {
+   "file": "screens/v0.1.3.3/slab/iphone-se-landscape-about-dark.png",
+   "device": "iphone-se",
+   "size": "667x375",
+   "orient": "landscape",
+   "insets": {
+    "t": 0,
+    "b": 0,
+    "l": 0,
+    "r": 0
+   },
+   "text": "default",
+   "scheme": "dark",
+   "what": "About",
+   "mode": "counter",
+   "errors": []
+  },
+  {
+   "file": "screens/v0.1.3.3/slab/iphone-se-portrait-today-200-dark.png",
+   "device": "iphone-se",
+   "size": "375x667",
+   "orient": "portrait",
+   "insets": {
+    "t": 20,
+    "b": 0,
+    "l": 0,
+    "r": 0
+   },
+   "text": "200%",
+   "scheme": "dark",
+   "what": "today",
+   "mode": "cover",
+   "errors": []
+  },
+  {
+   "file": "screens/v0.1.3.3/slab/iphone-se-portrait-more-200-dark.png",
+   "device": "iphone-se",
+   "size": "375x667",
+   "orient": "portrait",
+   "insets": {
+    "t": 20,
+    "b": 0,
+    "l": 0,
+    "r": 0
+   },
+   "text": "200%",
+   "scheme": "dark",
+   "what": "More open on the Week and progress page",
+   "mode": "cover",
+   "errors": []
+  },
+  {
+   "file": "screens/v0.1.3.3/slab/iphone-se-portrait-update-200-dark.png",
+   "device": "iphone-se",
+   "size": "375x667",
+   "orient": "portrait",
+   "insets": {
+    "t": 20,
+    "b": 0,
+    "l": 0,
+    "r": 0
+   },
+   "text": "200%",
+   "scheme": "dark",
+   "what": "Update plan opened from More",
+   "mode": "cover",
+   "errors": []
+  },
+  {
+   "file": "screens/v0.1.3.3/slab/iphone-se-portrait-about-200-dark.png",
+   "device": "iphone-se",
+   "size": "375x667",
+   "orient": "portrait",
+   "insets": {
+    "t": 20,
+    "b": 0,
+    "l": 0,
+    "r": 0
+   },
+   "text": "200%",
+   "scheme": "dark",
+   "what": "About",
+   "mode": "cover",
+   "errors": []
+  },
+  {
+   "file": "screens/v0.1.3.3/slab/iphone-13-mini-portrait-today-dark.png",
+   "device": "iphone-13-mini",
+   "size": "375x812",
+   "orient": "portrait",
+   "insets": {
+    "t": 50,
+    "b": 34,
+    "l": 0,
+    "r": 0
+   },
+   "text": "default",
+   "scheme": "dark",
+   "what": "today",
+   "mode": "cover",
+   "errors": []
+  },
+  {
+   "file": "screens/v0.1.3.3/slab/iphone-13-mini-portrait-more-dark.png",
+   "device": "iphone-13-mini",
+   "size": "375x812",
+   "orient": "portrait",
+   "insets": {
+    "t": 50,
+    "b": 34,
+    "l": 0,
+    "r": 0
+   },
+   "text": "default",
+   "scheme": "dark",
+   "what": "More open on the Week and progress page",
+   "mode": "cover",
+   "errors": []
+  },
+  {
+   "file": "screens/v0.1.3.3/slab/iphone-13-mini-portrait-update-dark.png",
+   "device": "iphone-13-mini",
+   "size": "375x812",
+   "orient": "portrait",
+   "insets": {
+    "t": 50,
+    "b": 34,
+    "l": 0,
+    "r": 0
+   },
+   "text": "default",
+   "scheme": "dark",
+   "what": "Update plan opened from More",
+   "mode": "cover",
+   "errors": []
+  },
+  {
+   "file": "screens/v0.1.3.3/slab/iphone-13-mini-portrait-about-dark.png",
+   "device": "iphone-13-mini",
+   "size": "375x812",
+   "orient": "portrait",
+   "insets": {
+    "t": 50,
+    "b": 34,
+    "l": 0,
+    "r": 0
+   },
+   "text": "default",
+   "scheme": "dark",
+   "what": "About",
+   "mode": "cover",
+   "errors": []
+  },
+  {
+   "file": "screens/v0.1.3.3/slab/iphone-16-portrait-today-dark.png",
+   "device": "iphone-16",
+   "size": "393x852",
+   "orient": "portrait",
+   "insets": {
+    "t": 59,
+    "b": 34,
+    "l": 0,
+    "r": 0
+   },
+   "text": "default",
+   "scheme": "dark",
+   "what": "today",
+   "mode": "cover",
+   "errors": []
+  },
+  {
+   "file": "screens/v0.1.3.3/slab/iphone-16-portrait-more-dark.png",
+   "device": "iphone-16",
+   "size": "393x852",
+   "orient": "portrait",
+   "insets": {
+    "t": 59,
+    "b": 34,
+    "l": 0,
+    "r": 0
+   },
+   "text": "default",
+   "scheme": "dark",
+   "what": "More open on the Week and progress page",
+   "mode": "cover",
+   "errors": []
+  },
+  {
+   "file": "screens/v0.1.3.3/slab/iphone-16-portrait-update-dark.png",
+   "device": "iphone-16",
+   "size": "393x852",
+   "orient": "portrait",
+   "insets": {
+    "t": 59,
+    "b": 34,
+    "l": 0,
+    "r": 0
+   },
+   "text": "default",
+   "scheme": "dark",
+   "what": "Update plan opened from More",
+   "mode": "cover",
+   "errors": []
+  },
+  {
+   "file": "screens/v0.1.3.3/slab/iphone-16-portrait-about-dark.png",
+   "device": "iphone-16",
+   "size": "393x852",
+   "orient": "portrait",
+   "insets": {
+    "t": 59,
+    "b": 34,
+    "l": 0,
+    "r": 0
+   },
+   "text": "default",
+   "scheme": "dark",
+   "what": "About",
+   "mode": "cover",
+   "errors": []
+  },
+  {
+   "file": "screens/v0.1.3.3/slab/iphone-16-landscape-today-dark.png",
+   "device": "iphone-16",
+   "size": "852x393",
+   "orient": "landscape",
+   "insets": {
+    "t": 0,
+    "b": 21,
+    "l": 59,
+    "r": 0
+   },
+   "text": "default",
+   "scheme": "dark",
+   "what": "today",
+   "mode": "counter",
+   "errors": []
+  },
+  {
+   "file": "screens/v0.1.3.3/slab/iphone-16-landscape-more-dark.png",
+   "device": "iphone-16",
+   "size": "852x393",
+   "orient": "landscape",
+   "insets": {
+    "t": 0,
+    "b": 21,
+    "l": 59,
+    "r": 0
+   },
+   "text": "default",
+   "scheme": "dark",
+   "what": "More open on the Week and progress page",
+   "mode": "counter",
+   "errors": []
+  },
+  {
+   "file": "screens/v0.1.3.3/slab/iphone-16-landscape-update-dark.png",
+   "device": "iphone-16",
+   "size": "852x393",
+   "orient": "landscape",
+   "insets": {
+    "t": 0,
+    "b": 21,
+    "l": 59,
+    "r": 0
+   },
+   "text": "default",
+   "scheme": "dark",
+   "what": "Update plan opened from More",
+   "mode": "counter",
+   "errors": []
+  },
+  {
+   "file": "screens/v0.1.3.3/slab/iphone-16-landscape-about-dark.png",
+   "device": "iphone-16",
+   "size": "852x393",
+   "orient": "landscape",
+   "insets": {
+    "t": 0,
+    "b": 21,
+    "l": 59,
+    "r": 0
+   },
+   "text": "default",
+   "scheme": "dark",
+   "what": "About",
+   "mode": "counter",
+   "errors": []
+  },
+  {
+   "file": "screens/v0.1.3.3/slab/iphone-16-portrait-today-light.png",
+   "device": "iphone-16",
+   "size": "393x852",
+   "orient": "portrait",
+   "insets": {
+    "t": 59,
+    "b": 34,
+    "l": 0,
+    "r": 0
+   },
+   "text": "default",
+   "scheme": "light",
+   "what": "today",
+   "mode": "cover",
+   "errors": []
+  },
+  {
+   "file": "screens/v0.1.3.3/slab/iphone-16-portrait-more-light.png",
+   "device": "iphone-16",
+   "size": "393x852",
+   "orient": "portrait",
+   "insets": {
+    "t": 59,
+    "b": 34,
+    "l": 0,
+    "r": 0
+   },
+   "text": "default",
+   "scheme": "light",
+   "what": "More open on the Week and progress page",
+   "mode": "cover",
+   "errors": []
+  },
+  {
+   "file": "screens/v0.1.3.3/slab/iphone-16-portrait-update-light.png",
+   "device": "iphone-16",
+   "size": "393x852",
+   "orient": "portrait",
+   "insets": {
+    "t": 59,
+    "b": 34,
+    "l": 0,
+    "r": 0
+   },
+   "text": "default",
+   "scheme": "light",
+   "what": "Update plan opened from More",
+   "mode": "cover",
+   "errors": []
+  },
+  {
+   "file": "screens/v0.1.3.3/slab/iphone-16-portrait-about-light.png",
+   "device": "iphone-16",
+   "size": "393x852",
+   "orient": "portrait",
+   "insets": {
+    "t": 59,
+    "b": 34,
+    "l": 0,
+    "r": 0
+   },
+   "text": "default",
+   "scheme": "light",
+   "what": "About",
+   "mode": "cover",
+   "errors": []
+  },
+  {
+   "file": "screens/v0.1.3.3/slab/iphone-16-pro-portrait-today-dark.png",
+   "device": "iphone-16-pro",
+   "size": "402x874",
+   "orient": "portrait",
+   "insets": {
+    "t": 62,
+    "b": 34,
+    "l": 0,
+    "r": 0
+   },
+   "text": "default",
+   "scheme": "dark",
+   "what": "today",
+   "mode": "cover",
+   "errors": []
+  },
+  {
+   "file": "screens/v0.1.3.3/slab/iphone-16-pro-portrait-more-dark.png",
+   "device": "iphone-16-pro",
+   "size": "402x874",
+   "orient": "portrait",
+   "insets": {
+    "t": 62,
+    "b": 34,
+    "l": 0,
+    "r": 0
+   },
+   "text": "default",
+   "scheme": "dark",
+   "what": "More open on the Week and progress page",
+   "mode": "cover",
+   "errors": []
+  },
+  {
+   "file": "screens/v0.1.3.3/slab/iphone-16-pro-portrait-update-dark.png",
+   "device": "iphone-16-pro",
+   "size": "402x874",
+   "orient": "portrait",
+   "insets": {
+    "t": 62,
+    "b": 34,
+    "l": 0,
+    "r": 0
+   },
+   "text": "default",
+   "scheme": "dark",
+   "what": "Update plan opened from More",
+   "mode": "cover",
+   "errors": []
+  },
+  {
+   "file": "screens/v0.1.3.3/slab/iphone-16-pro-portrait-about-dark.png",
+   "device": "iphone-16-pro",
+   "size": "402x874",
+   "orient": "portrait",
+   "insets": {
+    "t": 62,
+    "b": 34,
+    "l": 0,
+    "r": 0
+   },
+   "text": "default",
+   "scheme": "dark",
+   "what": "About",
+   "mode": "cover",
+   "errors": []
+  },
+  {
+   "file": "screens/v0.1.3.3/slab/iphone-air-portrait-today-dark.png",
+   "device": "iphone-air",
+   "size": "420x912",
+   "orient": "portrait",
+   "insets": {
+    "t": 59,
+    "b": 34,
+    "l": 0,
+    "r": 0
+   },
+   "text": "default",
+   "scheme": "dark",
+   "what": "today",
+   "mode": "cover",
+   "errors": []
+  },
+  {
+   "file": "screens/v0.1.3.3/slab/iphone-air-portrait-more-dark.png",
+   "device": "iphone-air",
+   "size": "420x912",
+   "orient": "portrait",
+   "insets": {
+    "t": 59,
+    "b": 34,
+    "l": 0,
+    "r": 0
+   },
+   "text": "default",
+   "scheme": "dark",
+   "what": "More open on the Week and progress page",
+   "mode": "cover",
+   "errors": []
+  },
+  {
+   "file": "screens/v0.1.3.3/slab/iphone-air-portrait-update-dark.png",
+   "device": "iphone-air",
+   "size": "420x912",
+   "orient": "portrait",
+   "insets": {
+    "t": 59,
+    "b": 34,
+    "l": 0,
+    "r": 0
+   },
+   "text": "default",
+   "scheme": "dark",
+   "what": "Update plan opened from More",
+   "mode": "cover",
+   "errors": []
+  },
+  {
+   "file": "screens/v0.1.3.3/slab/iphone-air-portrait-about-dark.png",
+   "device": "iphone-air",
+   "size": "420x912",
+   "orient": "portrait",
+   "insets": {
+    "t": 59,
+    "b": 34,
+    "l": 0,
+    "r": 0
+   },
+   "text": "default",
+   "scheme": "dark",
+   "what": "About",
+   "mode": "cover",
+   "errors": []
+  },
+  {
+   "file": "screens/v0.1.3.3/slab/iphone-16-pro-max-portrait-today-dark.png",
+   "device": "iphone-16-pro-max",
+   "size": "440x956",
+   "orient": "portrait",
+   "insets": {
+    "t": 62,
+    "b": 34,
+    "l": 0,
+    "r": 0
+   },
+   "text": "default",
+   "scheme": "dark",
+   "what": "today",
+   "mode": "cover",
+   "errors": []
+  },
+  {
+   "file": "screens/v0.1.3.3/slab/iphone-16-pro-max-portrait-more-dark.png",
+   "device": "iphone-16-pro-max",
+   "size": "440x956",
+   "orient": "portrait",
+   "insets": {
+    "t": 62,
+    "b": 34,
+    "l": 0,
+    "r": 0
+   },
+   "text": "default",
+   "scheme": "dark",
+   "what": "More open on the Week and progress page",
+   "mode": "cover",
+   "errors": []
+  },
+  {
+   "file": "screens/v0.1.3.3/slab/iphone-16-pro-max-portrait-update-dark.png",
+   "device": "iphone-16-pro-max",
+   "size": "440x956",
+   "orient": "portrait",
+   "insets": {
+    "t": 62,
+    "b": 34,
+    "l": 0,
+    "r": 0
+   },
+   "text": "default",
+   "scheme": "dark",
+   "what": "Update plan opened from More",
+   "mode": "cover",
+   "errors": []
+  },
+  {
+   "file": "screens/v0.1.3.3/slab/iphone-16-pro-max-portrait-about-dark.png",
+   "device": "iphone-16-pro-max",
+   "size": "440x956",
+   "orient": "portrait",
+   "insets": {
+    "t": 62,
+    "b": 34,
+    "l": 0,
+    "r": 0
+   },
+   "text": "default",
+   "scheme": "dark",
+   "what": "About",
+   "mode": "cover",
+   "errors": []
+  },
+  {
+   "file": "screens/v0.1.3.3/slab/iphone-16-pro-max-landscape-today-dark.png",
+   "device": "iphone-16-pro-max",
+   "size": "956x440",
+   "orient": "landscape",
+   "insets": {
+    "t": 0,
+    "b": 21,
+    "l": 62,
+    "r": 0
+   },
+   "text": "default",
+   "scheme": "dark",
+   "what": "today",
+   "mode": "counter",
+   "errors": []
+  },
+  {
+   "file": "screens/v0.1.3.3/slab/iphone-16-pro-max-landscape-more-dark.png",
+   "device": "iphone-16-pro-max",
+   "size": "956x440",
+   "orient": "landscape",
+   "insets": {
+    "t": 0,
+    "b": 21,
+    "l": 62,
+    "r": 0
+   },
+   "text": "default",
+   "scheme": "dark",
+   "what": "More open on the Week and progress page",
+   "mode": "counter",
+   "errors": []
+  },
+  {
+   "file": "screens/v0.1.3.3/slab/iphone-16-pro-max-landscape-update-dark.png",
+   "device": "iphone-16-pro-max",
+   "size": "956x440",
+   "orient": "landscape",
+   "insets": {
+    "t": 0,
+    "b": 21,
+    "l": 62,
+    "r": 0
+   },
+   "text": "default",
+   "scheme": "dark",
+   "what": "Update plan opened from More",
+   "mode": "counter",
+   "errors": []
+  },
+  {
+   "file": "screens/v0.1.3.3/slab/iphone-16-pro-max-landscape-about-dark.png",
+   "device": "iphone-16-pro-max",
+   "size": "956x440",
+   "orient": "landscape",
+   "insets": {
+    "t": 0,
+    "b": 21,
+    "l": 62,
+    "r": 0
+   },
+   "text": "default",
+   "scheme": "dark",
+   "what": "About",
+   "mode": "counter",
+   "errors": []
+  },
+  {
+   "file": "screens/v0.1.3.3/slab/pixel-portrait-today-dark.png",
+   "device": "pixel",
+   "size": "412x915",
+   "orient": "portrait",
+   "insets": {
+    "t": 24,
+    "b": 0,
+    "l": 0,
+    "r": 0
+   },
+   "text": "default",
+   "scheme": "dark",
+   "what": "today",
+   "mode": "cover",
+   "errors": []
+  },
+  {
+   "file": "screens/v0.1.3.3/slab/pixel-portrait-more-dark.png",
+   "device": "pixel",
+   "size": "412x915",
+   "orient": "portrait",
+   "insets": {
+    "t": 24,
+    "b": 0,
+    "l": 0,
+    "r": 0
+   },
+   "text": "default",
+   "scheme": "dark",
+   "what": "More open on the Week and progress page",
+   "mode": "cover",
+   "errors": []
+  },
+  {
+   "file": "screens/v0.1.3.3/slab/pixel-portrait-update-dark.png",
+   "device": "pixel",
+   "size": "412x915",
+   "orient": "portrait",
+   "insets": {
+    "t": 24,
+    "b": 0,
+    "l": 0,
+    "r": 0
+   },
+   "text": "default",
+   "scheme": "dark",
+   "what": "Update plan opened from More",
+   "mode": "cover",
+   "errors": []
+  },
+  {
+   "file": "screens/v0.1.3.3/slab/pixel-portrait-about-dark.png",
+   "device": "pixel",
+   "size": "412x915",
+   "orient": "portrait",
+   "insets": {
+    "t": 24,
+    "b": 0,
+    "l": 0,
+    "r": 0
+   },
+   "text": "default",
+   "scheme": "dark",
+   "what": "About",
+   "mode": "cover",
+   "errors": []
+  },
+  {
+   "file": "screens/v0.1.3.3/slab/galaxy-portrait-today-dark.png",
+   "device": "galaxy",
+   "size": "360x780",
+   "orient": "portrait",
+   "insets": {
+    "t": 24,
+    "b": 0,
+    "l": 0,
+    "r": 0
+   },
+   "text": "default",
+   "scheme": "dark",
+   "what": "today",
+   "mode": "cover",
+   "errors": []
+  },
+  {
+   "file": "screens/v0.1.3.3/slab/galaxy-portrait-more-dark.png",
+   "device": "galaxy",
+   "size": "360x780",
+   "orient": "portrait",
+   "insets": {
+    "t": 24,
+    "b": 0,
+    "l": 0,
+    "r": 0
+   },
+   "text": "default",
+   "scheme": "dark",
+   "what": "More open on the Week and progress page",
+   "mode": "cover",
+   "errors": []
+  },
+  {
+   "file": "screens/v0.1.3.3/slab/galaxy-portrait-update-dark.png",
+   "device": "galaxy",
+   "size": "360x780",
+   "orient": "portrait",
+   "insets": {
+    "t": 24,
+    "b": 0,
+    "l": 0,
+    "r": 0
+   },
+   "text": "default",
+   "scheme": "dark",
+   "what": "Update plan opened from More",
+   "mode": "cover",
+   "errors": []
+  },
+  {
+   "file": "screens/v0.1.3.3/slab/galaxy-portrait-about-dark.png",
+   "device": "galaxy",
+   "size": "360x780",
+   "orient": "portrait",
+   "insets": {
+    "t": 24,
+    "b": 0,
+    "l": 0,
+    "r": 0
+   },
+   "text": "default",
+   "scheme": "dark",
+   "what": "About",
+   "mode": "cover",
+   "errors": []
+  },
+  {
+   "file": "screens/v0.1.3.3/slab/galaxy-landscape-today-dark.png",
+   "device": "galaxy",
+   "size": "780x360",
+   "orient": "landscape",
+   "insets": {
+    "t": 24,
+    "b": 0,
+    "l": 0,
+    "r": 0
+   },
+   "text": "default",
+   "scheme": "dark",
+   "what": "today",
+   "mode": "counter",
+   "errors": []
+  },
+  {
+   "file": "screens/v0.1.3.3/slab/galaxy-landscape-more-dark.png",
+   "device": "galaxy",
+   "size": "780x360",
+   "orient": "landscape",
+   "insets": {
+    "t": 24,
+    "b": 0,
+    "l": 0,
+    "r": 0
+   },
+   "text": "default",
+   "scheme": "dark",
+   "what": "More open on the Week and progress page",
+   "mode": "counter",
+   "errors": []
+  },
+  {
+   "file": "screens/v0.1.3.3/slab/galaxy-landscape-update-dark.png",
+   "device": "galaxy",
+   "size": "780x360",
+   "orient": "landscape",
+   "insets": {
+    "t": 24,
+    "b": 0,
+    "l": 0,
+    "r": 0
+   },
+   "text": "default",
+   "scheme": "dark",
+   "what": "Update plan opened from More",
+   "mode": "counter",
+   "errors": []
+  },
+  {
+   "file": "screens/v0.1.3.3/slab/galaxy-landscape-about-dark.png",
+   "device": "galaxy",
+   "size": "780x360",
+   "orient": "landscape",
+   "insets": {
+    "t": 24,
+    "b": 0,
+    "l": 0,
+    "r": 0
+   },
+   "text": "default",
+   "scheme": "dark",
+   "what": "About",
+   "mode": "counter",
+   "errors": []
+  },
+  {
+   "file": "screens/v0.1.3.3/slab/galaxy-portrait-today-200-dark.png",
+   "device": "galaxy",
+   "size": "360x780",
+   "orient": "portrait",
+   "insets": {
+    "t": 24,
+    "b": 0,
+    "l": 0,
+    "r": 0
+   },
+   "text": "200%",
+   "scheme": "dark",
+   "what": "today",
+   "mode": "cover",
+   "errors": []
+  },
+  {
+   "file": "screens/v0.1.3.3/slab/galaxy-portrait-more-200-dark.png",
+   "device": "galaxy",
+   "size": "360x780",
+   "orient": "portrait",
+   "insets": {
+    "t": 24,
+    "b": 0,
+    "l": 0,
+    "r": 0
+   },
+   "text": "200%",
+   "scheme": "dark",
+   "what": "More open on the Week and progress page",
+   "mode": "cover",
+   "errors": []
+  },
+  {
+   "file": "screens/v0.1.3.3/slab/galaxy-portrait-update-200-dark.png",
+   "device": "galaxy",
+   "size": "360x780",
+   "orient": "portrait",
+   "insets": {
+    "t": 24,
+    "b": 0,
+    "l": 0,
+    "r": 0
+   },
+   "text": "200%",
+   "scheme": "dark",
+   "what": "Update plan opened from More",
+   "mode": "cover",
+   "errors": []
+  },
+  {
+   "file": "screens/v0.1.3.3/slab/galaxy-portrait-about-200-dark.png",
+   "device": "galaxy",
+   "size": "360x780",
+   "orient": "portrait",
+   "insets": {
+    "t": 24,
+    "b": 0,
+    "l": 0,
+    "r": 0
+   },
+   "text": "200%",
+   "scheme": "dark",
+   "what": "About",
+   "mode": "cover",
+   "errors": []
+  }
+ ]
+}

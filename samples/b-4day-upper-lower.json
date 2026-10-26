@@ -1,0 +1,410 @@
+{
+  "meta": {
+    "name": "Upper lower, 12 weeks",
+    "weeks": 12,
+    "blockWeeks": 4,
+    "deload": "last",
+    "units": "lb",
+    "deloadNote": "Use the same weights with about half the sets. Leave three reps in the tank."
+  },
+  "days": [
+    {
+      "key": "upperA",
+      "label": "Upper A",
+      "short": "Mon",
+      "focus": "Press focus",
+      "priority": true,
+      "rest": false,
+      "note": ""
+    },
+    {
+      "key": "lowerA",
+      "label": "Lower A",
+      "short": "Tue",
+      "focus": "Squat focus",
+      "priority": true,
+      "rest": false,
+      "note": ""
+    },
+    {
+      "key": "rest",
+      "label": "Rest",
+      "short": "Wed",
+      "focus": "",
+      "priority": false,
+      "rest": true,
+      "note": "Easy walk"
+    },
+    {
+      "key": "upperB",
+      "label": "Upper B",
+      "short": "Thu",
+      "focus": "Pull focus",
+      "priority": false,
+      "rest": false,
+      "note": ""
+    },
+    {
+      "key": "lowerB",
+      "label": "Lower B",
+      "short": "Fri",
+      "focus": "Hinge focus",
+      "priority": false,
+      "rest": false,
+      "note": ""
+    },
+    {
+      "key": "rest",
+      "label": "Rest",
+      "short": "Sat",
+      "focus": "",
+      "priority": false,
+      "rest": true,
+      "note": ""
+    },
+    {
+      "key": "rest",
+      "label": "Rest",
+      "short": "Sun",
+      "focus": "",
+      "priority": false,
+      "rest": true,
+      "note": "Weigh-in"
+    }
+  ],
+  "blocks": {
+    "1": {
+      "upperA": [
+        {
+          "name": "Bench press",
+          "sets": "4 x 5-7",
+          "tags": [
+            "anchor"
+          ]
+        },
+        {
+          "name": "One-arm dumbbell row",
+          "sets": "3 x 8-10",
+          "tags": []
+        },
+        {
+          "name": "Seated dumbbell press",
+          "sets": "3 x 8-10",
+          "tags": []
+        },
+        {
+          "name": "Lateral raise",
+          "sets": "2 x 12-15",
+          "tags": [
+            "accessory"
+          ]
+        }
+      ],
+      "lowerA": [
+        {
+          "name": "Back squat",
+          "sets": "4 x 5-7",
+          "tags": [
+            "anchor"
+          ]
+        },
+        {
+          "name": "Leg press",
+          "sets": "3 x 10-12",
+          "tags": []
+        },
+        {
+          "name": "Leg curl",
+          "sets": "3 x 10-12",
+          "tags": []
+        },
+        {
+          "name": "Standing calf raise",
+          "sets": "3 x 12-15",
+          "tags": [
+            "accessory"
+          ]
+        }
+      ],
+      "upperB": [
+        {
+          "name": "Barbell row",
+          "sets": "4 x 6-8",
+          "tags": [
+            "anchor"
+          ]
+        },
+        {
+          "name": "Incline dumbbell press",
+          "sets": "3 x 8-10",
+          "tags": []
+        },
+        {
+          "name": "Lat pulldown",
+          "sets": "3 x 10-12",
+          "tags": []
+        },
+        {
+          "name": "Biceps curl",
+          "sets": "2 x 10-12",
+          "tags": [
+            "optional"
+          ]
+        }
+      ],
+      "lowerB": [
+        {
+          "name": "Romanian deadlift",
+          "sets": "3 x 5",
+          "tags": [
+            "anchor"
+          ]
+        },
+        {
+          "name": "Walking lunge",
+          "sets": "3 x 10/leg",
+          "tags": []
+        },
+        {
+          "name": "Back extension",
+          "sets": "3 x 12",
+          "tags": []
+        },
+        {
+          "name": "Hanging knee raise",
+          "sets": "2 x 10-15",
+          "tags": [
+            "optional"
+          ]
+        }
+      ]
+    },
+    "2": {
+      "upperA": [
+        {
+          "name": "Incline bench press",
+          "sets": "4 x 5-7",
+          "tags": [
+            "anchor"
+          ]
+        },
+        {
+          "name": "One-arm dumbbell row",
+          "sets": "3 x 8-10",
+          "tags": []
+        },
+        {
+          "name": "Seated dumbbell press",
+          "sets": "3 x 8-10",
+          "tags": []
+        },
+        {
+          "name": "Lateral raise",
+          "sets": "2 x 12-15",
+          "tags": [
+            "accessory"
+          ]
+        }
+      ],
+      "lowerA": [
+        {
+          "name": "Front squat",
+          "sets": "4 x 5-7",
+          "tags": [
+            "anchor"
+          ]
+        },
+        {
+          "name": "Leg press",
+          "sets": "3 x 10-12",
+          "tags": []
+        },
+        {
+          "name": "Leg curl",
+          "sets": "3 x 10-12",
+          "tags": []
+        },
+        {
+          "name": "Standing calf raise",
+          "sets": "3 x 12-15",
+          "tags": [
+            "accessory"
+          ]
+        }
+      ],
+      "upperB": [
+        {
+          "name": "Chest-supported row",
+          "sets": "4 x 6-8",
+          "tags": [
+            "anchor"
+          ]
+        },
+        {
+          "name": "Incline dumbbell press",
+          "sets": "3 x 8-10",
+          "tags": []
+        },
+        {
+          "name": "Lat pulldown",
+          "sets": "3 x 10-12",
+          "tags": []
+        },
+        {
+          "name": "Biceps curl",
+          "sets": "2 x 10-12",
+          "tags": [
+            "optional"
+          ]
+        }
+      ],
+      "lowerB": [
+        {
+          "name": "Deadlift",
+          "sets": "3 x 5",
+          "tags": [
+            "anchor"
+          ]
+        },
+        {
+          "name": "Walking lunge",
+          "sets": "3 x 10/leg",
+          "tags": []
+        },
+        {
+          "name": "Back extension",
+          "sets": "3 x 12",
+          "tags": []
+        },
+        {
+          "name": "Hanging knee raise",
+          "sets": "2 x 10-15",
+          "tags": [
+            "optional"
+          ]
+        }
+      ]
+    },
+    "3": {
+      "upperA": [
+        {
+          "name": "Bench press",
+          "sets": "4 x 5-7",
+          "tags": [
+            "anchor"
+          ]
+        },
+        {
+          "name": "One-arm dumbbell row",
+          "sets": "3 x 8-10",
+          "tags": []
+        },
+        {
+          "name": "Seated dumbbell press",
+          "sets": "3 x 8-10",
+          "tags": []
+        },
+        {
+          "name": "Lateral raise",
+          "sets": "2 x 12-15",
+          "tags": [
+            "accessory"
+          ]
+        }
+      ],
+      "lowerA": [
+        {
+          "name": "Back squat",
+          "sets": "4 x 5-7",
+          "tags": [
+            "anchor"
+          ]
+        },
+        {
+          "name": "Leg press",
+          "sets": "3 x 10-12",
+          "tags": []
+        },
+        {
+          "name": "Leg curl",
+          "sets": "3 x 10-12",
+          "tags": []
+        },
+        {
+          "name": "Standing calf raise",
+          "sets": "3 x 12-15",
+          "tags": [
+            "accessory"
+          ]
+        }
+      ],
+      "upperB": [
+        {
+          "name": "Barbell row",
+          "sets": "4 x 6-8",
+          "tags": [
+            "anchor"
+          ]
+        },
+        {
+          "name": "Incline dumbbell press",
+          "sets": "3 x 8-10",
+          "tags": []
+        },
+        {
+          "name": "Lat pulldown",
+          "sets": "3 x 10-12",
+          "tags": []
+        },
+        {
+          "name": "Biceps curl",
+          "sets": "2 x 10-12",
+          "tags": [
+            "optional"
+          ]
+        }
+      ],
+      "lowerB": [
+        {
+          "name": "Deadlift",
+          "sets": "3 x 5",
+          "tags": [
+            "anchor"
+          ]
+        },
+        {
+          "name": "Walking lunge",
+          "sets": "3 x 10/leg",
+          "tags": []
+        },
+        {
+          "name": "Back extension",
+          "sets": "3 x 12",
+          "tags": []
+        },
+        {
+          "name": "Hanging knee raise",
+          "sets": "2 x 10-15",
+          "tags": [
+            "optional"
+          ]
+        }
+      ]
+    }
+  },
+  "lifts": [
+    "Back squat",
+    "Front squat",
+    "Bench press",
+    "Deadlift",
+    "Barbell row"
+  ],
+  "labels": {
+    "anchor": "Main lift",
+    "priority": "Focus",
+    "optional": "If time",
+    "hints": {
+      "lowerA": "Warm up the squat with two lighter sets."
+    }
+  }
+}

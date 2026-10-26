@@ -1,0 +1,253 @@
+{
+  "meta": {
+    "name": "Full body basics",
+    "weeks": 8,
+    "blockWeeks": 4,
+    "deload": "none",
+    "units": "lb",
+    "notes": "Start light. Add a little weight when every set feels smooth with two reps left in the tank."
+  },
+  "days": [
+    {
+      "key": "fullA",
+      "label": "Full body A",
+      "short": "Mon",
+      "focus": "Squat and press",
+      "priority": true,
+      "rest": false,
+      "note": ""
+    },
+    {
+      "key": "rest",
+      "label": "Rest",
+      "short": "Tue",
+      "focus": "",
+      "priority": false,
+      "rest": true,
+      "note": "Walk 20 minutes"
+    },
+    {
+      "key": "fullB",
+      "label": "Full body B",
+      "short": "Wed",
+      "focus": "Hinge and pull",
+      "priority": false,
+      "rest": false,
+      "note": ""
+    },
+    {
+      "key": "rest",
+      "label": "Rest",
+      "short": "Thu",
+      "focus": "",
+      "priority": false,
+      "rest": true,
+      "note": ""
+    },
+    {
+      "key": "fullC",
+      "label": "Full body C",
+      "short": "Fri",
+      "focus": "Lunge and push",
+      "priority": true,
+      "rest": false,
+      "note": ""
+    },
+    {
+      "key": "rest",
+      "label": "Rest",
+      "short": "Sat",
+      "focus": "",
+      "priority": false,
+      "rest": true,
+      "note": ""
+    },
+    {
+      "key": "rest",
+      "label": "Rest",
+      "short": "Sun",
+      "focus": "",
+      "priority": false,
+      "rest": true,
+      "note": ""
+    }
+  ],
+  "blocks": {
+    "1": {
+      "fullA": [
+        {
+          "name": "Goblet squat",
+          "sets": "3 x 8-10",
+          "tags": [
+            "anchor"
+          ]
+        },
+        {
+          "name": "Dumbbell bench press",
+          "sets": "3 x 8-10",
+          "tags": []
+        },
+        {
+          "name": "Seated cable row",
+          "sets": "3 x 10-12",
+          "tags": []
+        },
+        {
+          "name": "Plank",
+          "sets": "3 x 30s",
+          "tags": [
+            "optional"
+          ]
+        }
+      ],
+      "fullB": [
+        {
+          "name": "Romanian deadlift",
+          "sets": "3 x 8-10",
+          "tags": [
+            "anchor"
+          ]
+        },
+        {
+          "name": "Lat pulldown",
+          "sets": "3 x 10-12",
+          "tags": []
+        },
+        {
+          "name": "Incline push-up",
+          "sets": "3 x 8-12",
+          "tags": []
+        },
+        {
+          "name": "Dead bug",
+          "sets": "2 x 10/side",
+          "tags": [
+            "accessory"
+          ]
+        }
+      ],
+      "fullC": [
+        {
+          "name": "Split squat",
+          "sets": "3 x 8/leg",
+          "tags": [
+            "anchor"
+          ]
+        },
+        {
+          "name": "Overhead dumbbell press",
+          "sets": "3 x 8-10",
+          "tags": []
+        },
+        {
+          "name": "Chest-supported row",
+          "sets": "3 x 10-12",
+          "tags": []
+        },
+        {
+          "name": "Farmer carry",
+          "sets": "3 x 30s",
+          "tags": [
+            "optional"
+          ]
+        }
+      ]
+    },
+    "2": {
+      "fullA": [
+        {
+          "name": "Back squat",
+          "sets": "3 x 6-8",
+          "tags": [
+            "anchor"
+          ]
+        },
+        {
+          "name": "Dumbbell bench press",
+          "sets": "3 x 8-10",
+          "tags": []
+        },
+        {
+          "name": "Seated cable row",
+          "sets": "3 x 10-12",
+          "tags": []
+        },
+        {
+          "name": "Plank",
+          "sets": "3 x 40s",
+          "tags": [
+            "optional"
+          ]
+        }
+      ],
+      "fullB": [
+        {
+          "name": "Trap bar deadlift",
+          "sets": "3 x 5-6",
+          "tags": [
+            "anchor"
+          ]
+        },
+        {
+          "name": "Lat pulldown",
+          "sets": "3 x 8-10",
+          "tags": []
+        },
+        {
+          "name": "Push-up",
+          "sets": "3 x 8-12",
+          "tags": []
+        },
+        {
+          "name": "Dead bug",
+          "sets": "2 x 12/side",
+          "tags": [
+            "accessory"
+          ]
+        }
+      ],
+      "fullC": [
+        {
+          "name": "Reverse lunge",
+          "sets": "3 x 8/leg",
+          "tags": [
+            "anchor"
+          ]
+        },
+        {
+          "name": "Overhead dumbbell press",
+          "sets": "3 x 8-10",
+          "tags": []
+        },
+        {
+          "name": "Chest-supported row",
+          "sets": "3 x 8-10",
+          "tags": []
+        },
+        {
+          "name": "Farmer carry",
+          "sets": "3 x 40s",
+          "tags": [
+            "optional"
+          ]
+        }
+      ]
+    }
+  },
+  "lifts": [
+    "Goblet squat",
+    "Back squat",
+    "Romanian deadlift",
+    "Trap bar deadlift",
+    "Dumbbell bench press"
+  ],
+  "labels": {
+    "anchor": "Main lift",
+    "priority": "Focus",
+    "optional": "If time",
+    "hints": {
+      "fullA": "Main lift first while you are fresh.",
+      "fullB": "Keep your back flat on every hinge."
+    }
+  }
+}
