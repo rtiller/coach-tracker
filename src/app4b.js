@@ -59,6 +59,65 @@
   }
 
   /* ---- Train ---- */
+  /* v0.1.4 (a): a day that opens grows to its full height in 200ms (ease-out, no bounce; at once under Reduce Motion). When
+     closing the day above it moved its top out of view (under the page head or off screen), the page scrolls so the
+     card's top sits just under the head. */
+  function revealDay(idx, opening) {
+    const card = document.querySelector('#panel-train .day[data-day="' + idx + '"]');
+    if (!card) return;
+    let sc = card.parentElement;
+    while (sc && sc !== document.body && !(/(auto|scroll)/.test(getComputedStyle(sc).overflowY) && sc.scrollHeight > sc.clientHeight)) sc = sc.parentElement;
+    if (!sc || sc === document.body) sc = document.scrollingElement;
+    const doc = sc === document.scrollingElement;
+    let head = doc ? 0 : sc.getBoundingClientRect().top;
+    const sh = sc.querySelector(".sheet-head");
+    if (sh && sh.getClientRects().length && /sticky|fixed/.test(getComputedStyle(sh).position)) head = Math.max(head, sh.getBoundingClientRect().bottom);
+    const bottom = doc ? window.innerHeight : sc.getBoundingClientRect().bottom;
+    const top = card.getBoundingClientRect().top;
+    /* opening the page at that day (Up next): also when the day's end is below the screen */
+    const cb = card.getBoundingClientRect().bottom;
+    if (top < head - 0.5 || top > bottom - 44 || (opening && cb > bottom)) sc.scrollTop += top - head - 8;
+    const body = card.querySelector(".day-body");
+    let reduce = false;
+    try { reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches; } catch (e) {}
+    if (!body || reduce || opening || typeof body.animate !== "function") return;
+    const h = body.getBoundingClientRect().height;
+    if (h > 0) body.animate([{ height: "0px", opacity: 0, overflow: "hidden" }, { height: h + "px", opacity: 1, overflow: "hidden" }], { duration: 200, easing: "cubic-bezier(0.2, 0, 0, 1)" });
+  }
+
+  /* v0.1.4 (a), Designer addendum (owner-approved): two columns only when the layout viewport is wider than tall AND the week
+     list itself is at least 820px wide; one column everywhere else (every portrait view). Landscape follows the layout
+     classes (the 520 rule, frozen while a text field has focus); outside inner it is the layout viewport's own shape. A
+     ResizeObserver on the Train panel and resize / orientationchange re-check. */
+  function landscapeLayout() {
+    const r = document.documentElement;
+    if (r.classList.contains("L-innerp")) return false;
+    if (r.classList.contains("L-duo")) return true;
+    return r.clientWidth > r.clientHeight;
+  }
+  function syncDayCols() {
+    const w = document.querySelector("#panel-train .day-wrap");
+    if (w) w.classList.toggle("cols2", landscapeLayout() && w.getBoundingClientRect().width >= 820);
+  }
+  /* v0.1.4: the sticky page head's height is the pane's scroll padding, so a control brought into view (keyboard focus,
+     scrollIntoView) never ends up under the head (closing the day above can leave the next card's status there) */
+  (function watchSheetHead() {
+    const pane = document.getElementById("planPane"), head = pane && pane.querySelector(".sheet-head");
+    if (!head || typeof ResizeObserver !== "function") return;
+    let raf = 0; /* next frame, like watchDayCols: no work inside the observer callback */
+    new ResizeObserver(function () { cancelAnimationFrame(raf); raf = requestAnimationFrame(function () { pane.style.setProperty("--head-h", head.offsetHeight + "px"); }); }).observe(head);
+  })();
+  (function watchDayCols() {
+    const p = document.getElementById("panel-train");
+    /* in the next frame: toggling .cols2 inside the observer changes the panel's own height, which WebKit reports as a
+       "ResizeObserver loop completed with undelivered notifications" error */
+    let raf = 0;
+    if (p && typeof ResizeObserver === "function") new ResizeObserver(function () { cancelAnimationFrame(raf); raf = requestAnimationFrame(syncDayCols); }).observe(p);
+    else window.addEventListener("resize", syncDayCols);
+    window.addEventListener("orientationchange", function () { requestAnimationFrame(syncDayCols); });
+    if (typeof ResizeObserver === "function") window.addEventListener("resize", function () { requestAnimationFrame(syncDayCols); });
+  })();
+
   function renderTrain() {
     const panel = document.getElementById("panel-train");
     const m = weekMeta(state.week);
@@ -98,7 +157,8 @@
         "</div>";
     }
 
-    html += '<div class="day-grid">';
+    /* v0.1.4 (a): the week list is its own size container; one column under 820px (two above it, the open day full width) */
+    html += '<div class="day-wrap"><div class="day-grid">';
     DAYS.forEach(function (day, idx) {
       const today = isTodaySession(state.week, idx);
       if (day.rest) {
@@ -147,7 +207,7 @@
       if (HINTS[day.key]) html += '<div class="ex-hint">' + escapeHtml(HINTS[day.key]) + "</div>";
       html += "</div></div>";
     });
-    html += "</div>";
+    html += "</div></div>";
     html +=
       '<div class="stat-bar" data-anchor>' +
         '<span class="lbl">Total across ' + TOTAL_WEEKS + "\u00a0weeks</span>" +
@@ -158,17 +218,26 @@
     }
     html += "</div>";
     panel.innerHTML = html;
+    syncDayCols();
 
     const jump = document.getElementById("jumpThisWeek");
     if (jump) jump.addEventListener("click", function () { clearWeekPick(); state.week = autoWeek(state.week); setView(null); persist(); renderAll(); });
     panel.querySelectorAll("[data-toggle]").forEach(function (btn) {
       btn.addEventListener("click", function () {
-        const key = dayKey(state.week, parseInt(btn.dataset.toggle, 10));
+        const idx = parseInt(btn.dataset.toggle, 10), key = dayKey(state.week, idx);
         const wasOpen = btn.getAttribute("aria-expanded") === "true";
+        /* v0.1.4 (a): one day open at a time; opening one closes the other (every card stays in its place in the week) */
+        if (!wasOpen) DAYS.forEach(function (d, i) { if (!d.rest && i !== idx) state.openDays[dayKey(state.week, i)] = false; });
         state.openDays[key] = !wasOpen;
         persist();
+        /* the re-render must not move the page: keep the scroll so the cards above stay put (revealDay then fixes a top
+           that left the view) */
+        const pane = document.getElementById("planPane"), keepPane = pane ? pane.scrollTop : 0, keepWin = window.scrollY;
         renderTrain();
         renderDuo();
+        if (pane && pane.scrollTop !== keepPane) pane.scrollTop = keepPane;
+        if (window.scrollY !== keepWin) window.scrollTo(window.scrollX, keepWin);
+        if (!wasOpen) revealDay(idx);
       });
     });
     panel.querySelectorAll("[data-check]").forEach(function (btn) {

@@ -45,7 +45,8 @@ const SIZES = [[390, 844], [430, 932], [382, 644], [669, 835], [951, 669], [475,
       await p.fill("#dlgStart", "2026-11-09"); await p.waitForTimeout(80); g = await look();
       rec(size, "prompt: another date in the field leaves no quick pick selected", g.qp.every(q => q.pressed === "false"));
       rec(size, "prompt: every control >= 44px; the prompt ends above the bottom zone", g.small.length === 0 && g.dlgBottom <= g.ih - 50, JSON.stringify([g.small, g.dlgBottom, g.ih]));
-      rec(size, "prompt: Home Screen line for a link reads exactly: Adding this page to your Home Screen later starts fresh. Add it first, then set your date there.", g.note.trim() === "Adding this page to your Home Screen later starts fresh. Add it first, then set your date there.", g.note);
+      if (engine === "webkit") rec(size, "prompt: Home Screen line for a link reads exactly: Adding this page to your Home Screen later starts fresh. Add it first, then set your date there.", g.note.trim() === "Adding this page to your Home Screen later starts fresh. Add it first, then set your date there.", g.note);
+      else rec(size, "prompt (Android, v0.1.4): no Home Screen line (the shortcut shares this storage)", g.note === "", g.note);
       await safeTap(p, "#dlgThisWk"); await safeTap(p, "#dlgSaveStart");
       rec(size, "prompt: Save start date stores the date and closes", (await L.ls(p, "startDate")) === "2026-10-19" && (await dlgKind(p)) === null);
     }
@@ -55,7 +56,8 @@ const SIZES = [[390, 844], [430, 932], [382, 644], [669, 835], [951, 669], [475,
     rec("prompt", "Home Screen app: no Home Screen line", (await dlgKind(p)) === "start" && !(await vis(p, "#dlgHsNote")));
     await ctx.close(); }
   { const { ctx, p, W } = await page(); await p.goto(url); await p.waitForTimeout(300); await p.fill("#esCode", code(A)); await safeTap(p, "#esUse"); await p.waitForTimeout(200);
-    rec("prompt", "pasted plan (no link): the line says the Home Screen app starts with no plan", /starts fresh, with no plan/.test(await txt(p, "#dlgHsNote")), await txt(p, "#dlgHsNote"));
+    if (engine === "webkit") rec("prompt", "pasted plan (no link): the line says the Home Screen app starts with no plan", /starts fresh, with no plan/.test(await txt(p, "#dlgHsNote")), await txt(p, "#dlgHsNote"));
+    else rec("prompt", "pasted plan (Android, v0.1.4): no Home Screen line", !(await vis(p, "#dlgHsNote")));
     await ctx.close(); }
 
   // ---- 2. Bad link: plain headline, details closed with Copy ----
@@ -422,6 +424,15 @@ const SIZES = [[390, 844], [430, 932], [382, 644], [669, 835], [951, 669], [475,
     await ctx.close();
   }
 
+  /* v0.1.4.3 (check change 48): a floating toast while the window resizes (a keyboard rising and falling) must not set --pin-pad
+     inside the ResizeObserver delivery (#navEnd's height uses it): WebKit logged "ResizeObserver loop completed with undelivered
+     notifications" (r7 669x835 update). frozen7 fails this in WebKit in 5 of 6 loads; the fix defers reserveSpace a frame */
+  for (const [w, h] of [[669, 835], [390, 844]]) {
+    const { ctx, p, W } = await page({ seed: L.seedFor(B) }, w, h); await p.goto(url); await p.waitForTimeout(400); let n = 0;
+    for (let i = 0; i < 3; i++) { await p.evaluate(() => { const t = document.getElementById("toast"); t.classList.remove("in-slot", "in-head"); t.classList.add("show"); t.hidden = false; t.style.display = "block"; t.textContent = "x"; });
+      for (const hh of [h - 360, h, h - 235, h, h - 335, h]) { await p.setViewportSize({ width: w, height: hh }); await p.waitForTimeout(60); } await p.waitForTimeout(250); n++; }
+    rec(`${w}x${h}`, `floating toast during ${n * 6} window resizes: no ResizeObserver loop error (check change 48)`, W.errs.length === 0, W.errs.join(" | ")); await ctx.close();
+  }
   } catch (e) { rec("section " + 9, "crashed: an element this section needs is missing", false, String(e.message).split("\n")[0]); }
   // ---- 10. Old browsers: no color-mix, dark tokens are plain values; CSP present and quiet ----
   try {

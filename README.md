@@ -16,7 +16,7 @@ It holds no plan and no personal data. A coach (or you) sends a link with the pl
    ```sh
    node tools/encode-plan.js --verify my-plan.json --url https://YOU.github.io/tracker/
    ```
-3. Open the link on the phone. On an iPhone, use Safari, then **Share**, **Add to Home Screen**, **Add**. Open the new icon and use it from then on. On Android, use Chrome, then the menu, **Add to Home screen** or **Install app**.
+3. Open the link on the phone. On an iPhone, use Safari, then **Share**, **Add to Home Screen**, **Add**. Open the new icon and use it from then on. Android tip (optional; the link works fine in the browser): in Chrome, tap ⋮, then **Add to Home screen**, then **Create shortcut** (or **Install** if offered). Samsung Internet: **Add page to** > **Home screen**. Edge: **Add to phone**.
 4. The tracker asks for the start date on first open. Week 1 starts on the Monday of that week.
 
 The tracker always opens on the current calendar week. If last week still has open sessions, one line says how many, with **Stay on week N** (kept for this visit only) and **Push my plan back a week** (moves the start date 7 days later after a confirm; every log stays). Before the start it previews Week 1, and after the last week it says the plan is complete.

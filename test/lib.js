@@ -32,6 +32,9 @@ async function context(b, engine, w, h, opts = {}) {
   await ctx.clock.setFixedTime(new Date(opts.now || NOW));
   if (opts.seed) await ctx.addInitScript(s => { if (!sessionStorage.getItem("gate-seeded")) { sessionStorage.setItem("gate-seeded", "1"); localStorage.clear(); for (const k in s) localStorage.setItem("ct1-" + k, JSON.stringify(s[k])); } }, opts.seed);
   if (opts.standalone) await ctx.addInitScript(() => { Object.defineProperty(Navigator.prototype, "standalone", { get: () => true, configurable: true }); });
+  /* v0.1.4: WebKit stands for iOS Safari, which has navigator.standalone (false in a tab); Playwright's WebKit has none.
+     Chromium stands for Android and has none. The app's iOS-only paths test "standalone" in navigator. */
+  else if (engine === "webkit" && !opts.noIOS) await ctx.addInitScript(() => { Object.defineProperty(Navigator.prototype, "standalone", { get: () => false, configurable: true }); });
   if (opts.noStream) await ctx.addInitScript(() => { window.__ctNoStream = true; });
   return ctx;
 }

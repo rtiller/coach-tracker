@@ -266,7 +266,8 @@ html.counter #paneToday {
   --slot-h: max(56px, calc(2.5rem + 12px));
   /* Skip and Mark day done; 44px at 200% text (below; v0.1.3.4: the 3rem rule gave 70px and squeezed the exercise list) */
   --btn-h: max(44px, calc(3rem * var(--cs, 1)));
-  --act-h: calc(var(--slot-h) + 10px + var(--btn-h));
+  /* v0.1.4 (c): the list runs to the buttons; the Undo slot overlays the list's bottom, so the bar reserves no slot */
+  --act-h: calc(6px + var(--btn-h));
   position: fixed; inset: 0; display: grid; grid-template-columns: minmax(0, 56fr) minmax(0, 44fr); grid-template-rows: var(--hh) minmax(0, 1fr) auto;
   column-gap: 12px; padding: calc(var(--safe-t) + var(--cpad)) max(var(--safe-r), 12px) calc(var(--safe-b) + var(--cpad-b)) max(var(--safe-l), 12px);
 }
@@ -276,7 +277,11 @@ html.counter #paneToday::after { grid-column: 2; }
 /* rows would fall under 44px (644x382 with a 21px bottom inset gives 42.9): the bottom padding goes (the panels end at
    the safe area's edge, never inside it) */
 html.counter.counter-tight #paneToday { --cpad-b: 0px; }
-html.counter.lg-text #paneToday { grid-template-columns: minmax(0, 52fr) minmax(0, 48fr); }
+/* large text (Designer, v0.1.4.3): the header line is taller than a 32px row, so the header row keeps its full 44px and
+   the pane's padding is 6px top and bottom, inside the safe area (never in place of it), for both cards alike; the tight
+   rule above does not apply here */
+html.counter.lg-text #paneToday, html.counter.lg-text.counter-tight #paneToday { --hh: 44px; --cpad: 6px; --cpad-b: 6px; }
+/* v0.1.4.3 (Designer A+): 200% text keeps the 56/44 columns; day names wrap now, and a week column under 12ch of names gives the single column */
 /* the header, week note and start nudge live in portrait and in the page; a start date is asked for by its own prompt */
 html.counter #header, html.counter #startNudge, html.counter #weekNote, html.counter #navMark, html.counter #navEnd { display: none !important; }
 html.counter #paneToday section.today { grid-column: 1; grid-row: 1 / 4; margin: 0; min-height: 0; display: flex; flex-direction: column; overflow-y: auto; overscroll-behavior: contain; scroll-padding-bottom: var(--act-h);
@@ -304,90 +309,105 @@ html.counter #paneToday .today-hero .sub { font-size: max(0.8125rem, calc(0.92re
    Its natural height when every row fits (nothing changes at normal text); it shrinks and scrolls when they do not.
    Before, the whole card scrolled under the opaque sticky actions bar, whose top is the reserved Undo slot (92px at
    200% text), so the rows sat behind a blank band with no sign that they were there. */
-html.counter #paneToday .set-rows { flex: 0 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 2px 16px 0; }
+html.counter #paneToday .set-rows { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 0 16px; display: flex; flex-direction: column; }
+/* v0.1.4.1: with the scale capped at v0.1.3.4's, a day that fits leaves room under its rows; the list takes it and its rows share it, so the list still runs to the buttons (no free room when it overflows) */
+html.counter #paneToday .set-rows > .set-row { flex: 1 0 auto; }
 /* "N more": solid, on the list's bottom edge (right side, so the start of the row above stays readable), at least 44px;
    it sits above the actions bar, so it never covers Skip, Mark day done or the Undo slot. No mask, fade or gradient. */
 .more-pill { display: none; }
 html.counter #paneToday .more-pill:not([hidden]) { display: inline-flex; align-items: center; gap: 4px; flex: 0 0 auto; align-self: flex-end; position: relative; z-index: 2;
-  min-height: 44px; min-width: 44px; margin: calc(-44px - 6px) 16px 6px 0; padding: 0 12px 0 14px; box-sizing: border-box; border-radius: 22px;
-  background: var(--bone); color: var(--ink); border: 1px solid var(--line); box-shadow: none; font: inherit; font-size: var(--c-mono); font-weight: 700; line-height: 1.1; white-space: nowrap; }
-html.counter #paneToday .more-pill svg { width: 1.1em; height: 1.1em; flex: 0 0 auto; }
+  min-height: 44px; min-width: 44px; margin: calc(-44px - 6px) 16px 6px 0; padding: 0 2px; box-sizing: border-box; justify-content: center;
+  background: transparent; color: var(--ink); border: 0; box-shadow: none; font: inherit; font-size: var(--c-mono); font-weight: 700; line-height: 1; white-space: nowrap; }
+/* v0.1.4.1: the 44px button is the tap target only (transparent); what shows is a small chip, at most 22px tall at any
+   text size (its type stops at 16px; the button's aria-label carries the full count) */
+html.counter #paneToday .more-pill .mp-chip { display: inline-flex; align-items: center; gap: 3px; height: 22px; box-sizing: border-box; padding: 0 7px 0 9px;
+  border-radius: 11px; background: var(--bone); border: 1px solid var(--line); font-size: min(var(--c-mono), 16px); line-height: 1; overflow: hidden; }
+html.counter #paneToday .more-pill svg { width: 1em; height: 1em; flex: 0 0 auto; }
 /* 200% text: the list keeps room for the 44px pill (46px) when it scrolls. To fund it the buttons drop to 44px, the 4px gap
    above them goes and so do the gaps around the list, so a two-line day title still leaves that room at 644x382 */
-html.counter.lg-text #paneToday { --btn-h: 44px; --act-h: calc(var(--slot-h) + 6px + var(--btn-h)); }
-html.counter.lg-text #paneToday .today-actions { padding-top: var(--slot-h); }
+html.counter.lg-text #paneToday { --btn-h: 44px; --act-h: calc(6px + var(--btn-h)); }
+html.counter.lg-text #paneToday .today-actions { padding-top: 0; }
 html.counter.lg-text #paneToday .toast-slot { margin-bottom: calc(var(--btn-h) + 7px); } /* the bar's 6px bottom padding and 1px margin: the slot ends where the buttons start */
 html.counter.lg-text #paneToday .set-rows { min-height: 46px; box-sizing: border-box; padding-top: 0; padding-bottom: 2px; } /* 2px: WebKit scrolls in whole pixels, so a list at a fractional top could not bring the last row's final pixel into view */
 html.counter.lg-text #paneToday .today-hero { padding-bottom: 0; }
 html.counter.lg-text #paneToday .more-pill:not([hidden]) { margin: -45px 16px 1px 0; }
-/* v0.1.3.4b, 200% text, a list that overflows (.more-on, set by layoutMore): the pill has its own 44px strip under the list
-   (right side), so it never covers a row; the focus line goes to pay for it. The list snaps: each row's top (.snap-top, a
+/* v0.1.3.4b, and since v0.1.4 (c) at every text size: a list that overflows (.more-on, set by layoutMore) gives the pill its
+   own 44px strip under the list (right side), so it never covers a row or a tag; no overflow, no strip. At 200% text the
+   focus line goes to pay for it (it stays at normal text). The list snaps: each row's top (.snap-top, a
    1px marker, since a row taller than the window must not be a snap area) and the start of each line inside a row, so a
    scroll always settles with a whole line at the top. Rows start flush (no top padding), so a row's top is its first line. */
 .set-row .snap-top { display: none; }
 html.counter.lg-text #paneToday .today.more-on .today-hero .sub { display: none; }
 html.counter.lg-text #paneToday .today.more-on .today-hero h2 { line-height: 1; } /* 7px back from a two-line title */
-html.counter.lg-text #paneToday .today.more-on .set-rows { min-height: 43px; padding-bottom: 0; scroll-snap-type: y mandatory; }
-html.counter.lg-text #paneToday .today.more-on .set-row { position: relative; padding-top: 0; scroll-snap-align: start; }
-html.counter.lg-text #paneToday .today.more-on .set-row.tall { scroll-snap-align: none; }
-html.counter.lg-text #paneToday .today.more-on .set-row .snap-top { display: block; position: absolute; top: 0; left: 0; width: 1px; height: 1px; scroll-snap-align: start; }
-html.counter.lg-text #paneToday .today.more-on .set-row .w,
-html.counter.lg-text #paneToday .today.more-on .set-row .ex-dl { display: inline-block; }
-html.counter.lg-text #paneToday .today.more-on .set-row .sn { scroll-snap-align: start; } /* the first word, tag or note of each line (layoutMore) */
-html.counter.lg-text #paneToday .today.more-on .set-row .ex-name { line-height: 1.25; } /* at least the font's content height (1.21em), so a line's glyph box ends where the next line's snap point starts */
-html.counter.lg-text #paneToday .today.more-on .more-pill:not([hidden]) { margin: 0 16px 0 0; }
-html.counter.lg-text #paneToday .today.more-on .more-pill.at-end { visibility: hidden; }
-html.counter #paneToday .set-row { min-height: calc(2.4rem * var(--cs, 1)); margin: 0; padding: calc(0.2rem * var(--cs, 1)) 0; gap: 2px 12px; flex-wrap: nowrap;
+html.counter #paneToday .today.more-on .set-rows { min-height: 43px; padding-bottom: 0; scroll-snap-type: y mandatory; }
+html.counter #paneToday .today.more-on .set-row { position: relative; padding-top: 0; scroll-snap-align: start; }
+html.counter #paneToday .today.more-on .set-row.tall { scroll-snap-align: none; }
+html.counter #paneToday .today.more-on .set-row .snap-top { display: block; position: absolute; top: 0; left: 0; width: 1px; height: 1px; scroll-snap-align: start; }
+html.counter #paneToday .today.more-on .set-row .w,
+html.counter #paneToday .today.more-on .set-row .ex-dl { display: inline-block; white-space: pre; } /* v0.1.4.3: pre keeps the leading space an inline-block drops ("6-8 · deload", as at 100%) */
+html.counter #paneToday .today.more-on .set-row .sn { scroll-snap-align: start; } /* the first word, tag or note of each line (layoutMore) */
+html.counter #paneToday .today.more-on .set-row .ex-name { line-height: normal; } /* v0.1.4: the font's own line height, never less than its glyph box (1.25 was under it: 1.35em on the Android test font), so a line's glyphs end where the next line's snap point starts and a sliver of the next line at the list's edge never touches them */
+html.counter #paneToday .today.more-on .more-pill:not([hidden]) { margin: 0 16px 0 0; }
+html.counter #paneToday .today.more-on .more-pill.at-end, html.counter #paneToday .today.more-on .more-pill.under-undo { visibility: hidden; } /* v0.1.4: hidden (its strip stays) at the list end and while Undo shows */
+html.counter #paneToday .set-row { min-height: calc(2.4rem * var(--cs, 1)); margin: 0; padding: calc(0.1rem * var(--cs, 1)) 0; gap: 2px 12px; flex-wrap: nowrap;
   background: transparent; border-radius: 0; border-bottom: 1px solid var(--line); }
 html.counter #paneToday .set-row:last-child { border-bottom: 0; }
-html.counter #paneToday .set-row .ex-left { flex: 1 1 auto; min-width: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 2px 8px; }
+html.counter #paneToday .set-row .ex-left { flex: 1 1 8ch; min-width: 0; display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 8px; }
 html.counter #paneToday .set-row .ex-name { font-size: var(--c-name); font-weight: 600; line-height: 1.2; overflow-wrap: anywhere; }
-html.counter #paneToday .set-row .tag { font-size: max(0.625rem, calc(0.66rem * var(--cs, 1))); }
+html.counter #paneToday .set-row .tag { font-size: max(0.625rem, calc(0.66rem * var(--cs, 1))); padding: 1px 6px; line-height: 1.2; } /* v0.1.4.1: rows 0.1rem*cs top and bottom (was 0.2rem) and 14px tag boxes (were 19px), so the longest day fits at 100% text; the Week view keeps its tags as they were */
 html.counter #paneToday .set-row .ex-sets { font-family: var(--mono); font-size: var(--c-mono); white-space: nowrap; flex-shrink: 0; }
 html.counter #paneToday .today .ex-hint { flex: 0 0 auto; }
 html.counter #paneToday .today-rest { flex: 0 0 auto; }
-/* Skip and Mark day done sit at the panel's bottom; spare space stays inside the panel, above them. The bar's top
-   --slot-h is the reserved Undo slot, which #toastSlot covers (below), so Undo shows just above the buttons and nothing moves. */
-html.counter #paneToday .today-actions { flex: 0 0 auto; margin-top: auto; padding: calc(var(--slot-h) + 4px) 16px 6px; position: sticky; bottom: 0; z-index: 1; background: var(--panel); margin: auto 1px 1px; border-radius: 0 0 15px 15px; }
+/* Skip and Mark day done sit at the panel's bottom; spare space stays inside the panel, above them. v0.1.4 (c): the bar no
+   longer reserves the Undo slot; the list runs to the buttons and #toastSlot (below) overlays the list's bottom, opacity only. */
+html.counter #paneToday .today-actions { flex: 0 0 auto; margin-top: auto; padding: 2px 16px 4px; position: sticky; bottom: 0; z-index: 1; background: var(--panel); margin: auto 1px 1px; border-radius: 0 0 15px 15px; }
 html.counter #paneToday .btn-done { min-height: var(--btn-h); font-size: max(0.9375rem, calc(1.05rem * var(--cs, 1))); }
 html.counter #paneToday #navGroup { display: contents; }
-/* Week header: the same height as the Today header. "Week and progress" + chevron is a plain label on the left and the
-   whole row is its button; Back to today sits on the right, its space always kept (hidden while today is selected) */
+/* Week header: the same height as the Today header. "This week" + chevron is a plain label on the left, its button sized
+   to its own content; Back to today sits on the right (margin-left: auto), shown only off today (Designer A+).
+   v0.1.4.3: the button no longer grows (was flex: 1 1 0), so its width does not change when Back to today comes and goes;
+   8px of its own padding after the chevron keep the A+ 8px spare */
 html.counter #paneToday #outerNav { grid-column: 2; grid-row: 1; margin: 0; min-height: 0; height: var(--hh); display: block; overflow: visible; }
-html.counter #paneToday #outerNav .nav-row { display: flex; flex-wrap: nowrap; margin: 0; padding: 0; min-height: 0; height: var(--hh); align-items: flex-start; gap: 0; overflow: visible; }
-html.counter #paneToday .outer-nav .open-plan { order: 1; flex: 1 1 0; min-width: 0; width: auto; height: 44px; min-height: 44px; margin: calc(var(--hh) - 44px) 0 0; padding: 0 0 0 16px; border: 0; border-radius: 16px 0 0 0;
+html.counter #paneToday #outerNav .nav-row { display: flex; flex-wrap: nowrap; margin: 0; padding: 0; min-height: 0; height: var(--hh); align-items: flex-start; gap: 12px; overflow: visible; } /* v0.1.4.3: 12px, the header fit rule's gap (syncCounter headRoom); Back to today keeps the right (margin-left: auto) */
+html.counter #paneToday .outer-nav .open-plan { order: 1; flex: 0 0 auto; min-width: 0; width: auto; height: 44px; min-height: 44px; margin: calc(var(--hh) - 44px) 0 0; padding: 0 8px 0 16px; border: 0; border-radius: 16px 0 0 0;
   background: transparent; box-shadow: none; color: var(--mist); font-family: inherit; font-size: var(--c-kick); font-weight: 700; letter-spacing: 0; line-height: 1.3; text-decoration: none;
-  display: flex; align-items: center; justify-content: flex-start; gap: 3px; text-align: left; white-space: nowrap; }
-html.counter #paneToday .outer-nav .open-plan > span:first-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+  display: flex; align-items: center; justify-content: flex-start; gap: 0.1875rem; text-align: left; white-space: nowrap; }
+/* v0.1.4.3 (Designer A+): "This week" (set by syncCounter), never an ellipsis; Back to today only off today, nowrap, its
+   label's right edge on the status circles' edge (10px in, the rows' circle margin); var(--gap) between them */
+html.counter #paneToday .outer-nav .open-plan > span:first-child { min-width: 0; overflow: visible; text-overflow: clip; }
 html.counter #paneToday .open-plan .chev { display: inline; color: var(--mist); }
-html.counter #paneToday #backSlot { order: 2; flex: 0 0 auto; display: flex; margin-top: calc(var(--hh) - 44px); }
+html.counter #paneToday #backSlot { order: 2; flex: 0 0 auto; display: flex; margin-top: calc(var(--hh) - 44px); margin-left: auto; }
 html.counter #paneToday #backSlot .back-today { margin: 0; width: auto; height: 44px; min-height: 44px; min-width: 44px; padding: 0 8px 0 4px; border: 0; border-radius: 12px; background: transparent;
   display: inline-flex; align-items: center; justify-content: center; font-size: var(--c-kick); white-space: nowrap; }
 html.counter #paneToday #backSlot .back-today .bt-label { display: none; }
-html.counter #paneToday #backSlot .bt-ph { visibility: hidden; }
+html.counter #paneToday #backSlot .bt-ph { display: none; }
+html.counter #paneToday #backSlot .back-today { padding-right: 10px; }
 html.counter #paneToday #weekStrip { grid-column: 2; grid-row: 2 / 4; margin-top: 0; min-height: 0; overflow: hidden; container-type: size; background: transparent; border: 0; border-radius: 0 0 16px 16px; }
 /* seven equal rows; the type follows the row (--rh): name clamp(17px, 0.40 x row, 22px),
    day label clamp(13px, 0.30 x row, 16px) (in rem, so 200% text doubles the floors); both stay on one line with an
-   ellipsis (the sizes are the panel's --c-name and --c-mono, shared with the Today panel). Status glyph 24px centered in a 44x44 box. */
+   (v0.1.4.3: names wrap to two lines, no ellipsis) (the sizes are the panel's --c-name and --c-mono, shared with the Today panel). Status glyph 24px centered in a 44x44 box. */
 html.counter #paneToday .wstrip { display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: repeat(7, minmax(0, 1fr)); grid-auto-flow: row; height: 100%; box-sizing: border-box; padding: 0; margin: 0; gap: 0; border: 0; border-radius: 0; background: transparent; overflow: hidden; }
-html.counter #paneToday .wd { min-height: 0; height: auto; flex-direction: row; align-items: center; justify-content: flex-start; gap: 8px; padding: 0 0 0 16px; text-align: left; overflow: hidden; }
-html.counter #paneToday .wd .d { flex: 0 0 3.1em; font-family: var(--mono); font-weight: 700; letter-spacing: 0.06em; font-size: var(--c-mono); line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-html.counter #paneToday .wd .ss { display: block; flex: 1 1 auto; min-width: 0; font-weight: 600; font-size: var(--c-name); line-height: 1.2; color: var(--bone); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* v0.1.4.3 (Designer A+): a day name wraps to two lines and never truncates; the line is centered in the row and the day
+   label and circle sit on the name's first line */
+html.counter #paneToday .wd { min-height: 0; height: auto; flex-direction: row; flex-wrap: wrap; align-content: center; align-items: flex-start; justify-content: flex-start; gap: 0 8px; padding: 0 0 0 16px; text-align: left; overflow: hidden; }
+html.counter #paneToday .wd .d { flex: 0 0 3.1em; font-family: var(--mono); font-weight: 700; letter-spacing: 0.06em; font-size: var(--c-mono); line-height: 1.2; white-space: nowrap; overflow: hidden;
+  margin-top: calc((var(--c-name) - var(--c-mono)) * 0.6); }
+html.counter #paneToday .wd .ss { display: block; flex: 1 1 0; min-width: 0; font-weight: 600; font-size: var(--c-name); line-height: 1.2; color: var(--bone); white-space: normal; overflow-wrap: anywhere; overflow: visible; text-overflow: clip; }
 html.counter #paneToday .wd .s { display: none; }
-html.counter #paneToday .wd .dot { flex: 0 0 24px; width: 24px; height: 24px; box-sizing: border-box; margin: 0 10px; }
+html.counter #paneToday .wd .dot { flex: 0 0 24px; width: 24px; height: 24px; box-sizing: border-box; margin: calc(var(--c-name) * 0.6 - 12px) 10px 0; }
 html.counter #paneToday .wd .dot svg { width: 14px; height: 14px; }
 /* the Undo slot: over the reserved top of the actions bar, right above Skip and Mark day done */
 html.counter #paneToday .toast-slot { grid-column: 1; grid-row: 1 / 4; align-self: end; position: relative; z-index: 2; height: var(--slot-h); box-sizing: border-box; padding: 0 16px;
-  margin: 0 1px calc(var(--btn-h) + 10px) 1px; } /* inset 1px like the actions bar, so the slot stays inside it */
+  margin: 0 1px calc(var(--btn-h) + 5px) 1px; } /* v0.1.4: ends where the buttons start (the bar's 4px bottom padding and 1px margin) */ /* inset 1px like the actions bar, so the slot stays inside it */
 html.counter #paneToday .toast-slot { pointer-events: none; } /* an empty slot never takes a tap or covers a rest day */
 html.counter #paneToday .toast-slot > * { pointer-events: auto; }
-/* 200% text: day rows keep one line with an ellipsis and the right column grows to 48% */
+/* 200% text: a narrower day label (v0.1.4.3: the 48% column is gone; names wrap) */
 html.counter.lg-text #paneToday .wd .d { flex-basis: 2.6em; letter-spacing: 0; }
 /* 200% text: a set line that does not fit beside the name goes under it (whole words, never over the tag) */
 html.counter.lg-text #paneToday .set-row { flex-wrap: wrap; }
-html.counter.lg-text #paneToday .set-row .ex-left { flex: 1 1 12em; }
+html.counter.lg-text #paneToday .set-row .ex-left { flex: 1 1 8ch; min-width: min-content; } /* v0.1.4 addendum: the sets go under the name only when the name column would be under 8ch, still right aligned. v0.1.4.3: never narrower than its longest word (names break only between words at 200%), so a word longer than 8ch sends the sets under the name instead of running into them (780x360 200%: "Overhead" over "4") */
 html.counter.lg-text #paneToday .set-row .ex-name { overflow-wrap: normal; word-break: normal; }
-html.counter.lg-text #paneToday .set-row .ex-sets { white-space: normal; flex-shrink: 1; }
+html.counter.lg-text #paneToday .set-row .ex-sets { white-space: nowrap; flex-shrink: 0; } /* v0.1.4 addendum: sets never wrap */
 html.counter #paneToday .skip-bottom { display: inline-flex; align-items: center; justify-content: center; min-height: var(--btn-h); }
 /* Counter: Update plan fits whole between the top clear zone and the bottom safe area (678x396 and 644x382): a two-line
    field, tighter gaps, and the "Plan code" label kept for screen readers only (the field's placeholder says the same) */
@@ -433,3 +453,58 @@ html.counter.counter-short #paneToday .wstrip { height: auto; grid-template-rows
 /* the Counter with the keyboard up at 200% text leaves ~130px: the field drops to one line (it scrolls) so the field and
    Use this plan both stay above the keyboard */
 html.counter .upd-box.typing .code-in { height: min(2.9rem, 56px); min-height: min(2.9rem, 56px); }
+/* v0.1.4.3: the single column in a short landscape window (200% text under 700 wide, Designer option 3) has the same
+   keyboard room as the Counter, so the field drops to one line there too (667x375 at 200%: Use this plan was under the keyboard) */
+@media (orientation: landscape) and (max-height: 499.98px) { .upd-box.typing .code-in { height: min(2.9rem, 56px); min-height: min(2.9rem, 56px); } }
+
+/* ---- v0.1.4 (d): inner portrait home, a full-width Week and progress row ----
+   Today card, strip, Week and progress. (v0.1.4.3: the Up next card from (d) is gone on the owner's request; inner
+   portrait was the only layout that showed it.) */
+@media __INNERP__ {
+  /* Week and progress: one row from card edge to card edge (the hidden Back to today placeholder no longer takes the left
+     part), at least 44px tall, the chevron centred in its own 44x44 area at the right end */
+  #backSlot:has(> .bt-ph) { display: none; }
+  .outer-nav .open-plan { flex: 1 1 100%; padding-right: 0; }
+  .open-plan .chev-box { display: inline-flex; flex: 0 0 44px; width: 44px; height: 44px; align-items: center; justify-content: center; margin: -1px 0; }
+  /* (the -1px margins lay the 44x44 area over the button's 1px borders, so the button stays 44px tall as in v0.1.3.4) */
+}
+
+/* v0.1.4 Designer addendum 2 (owner-approved): every exercise row (Week view, Today card, Up next, the Counter). The name block
+   takes the room (grows from an 8ch basis, min-width 0) and the sets sit at its right: never wrapped, tabular, right
+   aligned and on the name's first line (baseline). Name and tag wrap inside the name block, so a long name pushes the
+   tag under it, never the sets onto a left-aligned line. Flex rather than a two-track grid: the same columns, and the
+   8ch rule (sets on their own line, still right aligned, when the name column would be narrower) needs no container
+   query (a size container broke WebKit's scroll anchoring, see syncDayCols). */
+.ex, .set-row { align-items: baseline; }
+.ex > .ex-left, .set-row > .ex-left { flex: 1 1 8ch; min-width: 0; align-items: baseline; }
+.ex > .ex-sets, .set-row > .ex-sets { margin-left: auto; text-align: right; white-space: nowrap; flex-shrink: 0; font-variant-numeric: tabular-nums; }
+.ex-left > .ex-name { min-width: 0; overflow-wrap: break-word; }
+/* v0.1.4: in the Counter's snapping list (200% text) the sets sit at the top of the name's first line, not on its
+   baseline: the sets' mono glyph box is deeper than the name's, so on the baseline it reached 3px into the name's second
+   line, and a snap to that line left the sets cut at the list's top. At the top it ends inside the first line. */
+html.counter #paneToday .today.more-on .set-row > .ex-sets { align-self: flex-start; }
+/* v0.1.4: in the Counter a tag beside the name is centred on the name's line, as in v0.1.3.4, not on its baseline: on the
+   baseline its taller line box hung 3px under the name's, and five such rows put the measured 06 size (678x466 app, the
+   longest day) 2px over at the smallest type step, so the list scrolled behind the pill's strip. The sets keep the baseline. */
+.ex > .ex-left > .tag, .set-row > .ex-left > .tag { align-self: center; } /* everywhere: the same row heights as v0.1.3.4 */
+/* and everywhere the sets' line box is no taller than their glyphs (the monospace face's normal line height is deeper than
+   the name's), so on the baseline it does not hang under the name's line and make the row taller than in v0.1.3.4 */
+.ex > .ex-sets, .set-row > .ex-sets { line-height: 1.15; }
+
+/* v0.1.4: Undo never covers list text (app5 undoRoom). While it shows in the Counter, the actions bar takes back the
+   slot's height (as in v0.1.3.4) and the pill's strip goes (the pill is hidden under Undo anyway), so the list ends just
+   above the toast. The slot's scroll margins are the safe areas, so scrolling the slot into view stops clear of them. */
+html.counter #paneToday.undo-on .today-actions { padding-top: calc(var(--slot-h) + 2px); }
+html.counter #paneToday.undo-on .more-pill:not([hidden]) { display: none; } /* with or without its strip: a list that Undo shortened must not get a pill over its rows */
+.toast-slot { scroll-margin-top: var(--safe-t, 0px); scroll-margin-bottom: var(--safe-b, 0px); }
+/* v0.1.4: the list's end room (app5 layoutMore, --end-pad) is a spacer after its rows, so the list can still shrink (a flex
+   item never shrinks below its own padding) */
+html.counter #paneToday .set-rows::after { content: ""; display: block; height: var(--end-pad, 0px); flex: 0 0 auto; } /* v0.1.4.1: the list is a flex column, so the spacer must not shrink (it is the end room the last snap point needs) */
+/* v0.1.4.1: fitCounter's ceiling pass (.fit-ceil, only while it measures) lays the card out as v0.1.3.4 did: the bar
+   reserving the Undo slot, the list's 2px top padding, 0.2rem*cs row padding and the 19px tag boxes. The scale it finds
+   is the most the real layout may use, so the type never grows past v0.1.3.4's. */
+html.counter #paneToday.fit-ceil .today-actions { padding: calc(var(--slot-h) + 4px) 16px 6px; }
+html.counter #paneToday.fit-ceil .set-rows { padding-top: 2px; }
+html.counter #paneToday.fit-ceil .set-row { padding: calc(0.2rem * var(--cs, 1)) 0; }
+html.counter #paneToday.fit-ceil .set-row .tag { padding: 2px 7px; line-height: inherit; }
+html.counter #paneToday.fit-ceil .set-row .ex-left { flex: 1 1 auto; align-items: center; }

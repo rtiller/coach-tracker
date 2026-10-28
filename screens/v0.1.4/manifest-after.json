@@ -1,0 +1,666 @@
+{
+ "engine": "webkit",
+ "tag": "after",
+ "shots": [
+  {
+   "file": "screens/v0.1.4/after-a-week-mon-s01.png",
+   "size": "669x867",
+   "what": "(a) Week view, Mon expanded (today)",
+   "errors": [],
+   "cls": "duo-inner L-innerp sheet-lock",
+   "version": "v0.1.4-preview",
+   "pill": null,
+   "openDays": [
+    "Legs AFocusQ"
+   ]
+  },
+  {
+   "file": "screens/v0.1.4/after-a-week-thu-s01.png",
+   "size": "669x867",
+   "what": "(a) Week view after tapping Thu (scrolled to Tue and Thu expanded)",
+   "errors": [],
+   "cls": "duo-inner L-innerp sheet-lock",
+   "version": "v0.1.4-preview",
+   "pill": null,
+   "openDays": [
+    "Upper BPull "
+   ]
+  },
+  {
+   "file": "screens/v0.1.4/after-a-week-collapsed-s01.png",
+   "size": "669x867",
+   "what": "(a) Week view, all days collapsed",
+   "errors": [],
+   "cls": "duo-inner L-innerp sheet-lock",
+   "version": "v0.1.4-preview",
+   "pill": null,
+   "openDays": []
+  },
+  {
+   "file": "screens/v0.1.4/after-a-week-mon-s09.png",
+   "size": "669x951",
+   "what": "(a) Week view, Mon expanded (today)",
+   "errors": [],
+   "cls": "duo-inner L-innerp sheet-lock",
+   "version": "v0.1.4-preview",
+   "pill": null,
+   "openDays": [
+    "Legs AFocusQ"
+   ]
+  },
+  {
+   "file": "screens/v0.1.4/after-a-week-thu-s09.png",
+   "size": "669x951",
+   "what": "(a) Week view after tapping Thu (scrolled to Tue and Thu expanded)",
+   "errors": [],
+   "cls": "duo-inner L-innerp sheet-lock",
+   "version": "v0.1.4-preview",
+   "pill": null,
+   "openDays": [
+    "Upper BPull "
+   ]
+  },
+  {
+   "file": "screens/v0.1.4/after-a-week-collapsed-s09.png",
+   "size": "669x951",
+   "what": "(a) Week view, all days collapsed",
+   "errors": [],
+   "cls": "duo-inner L-innerp sheet-lock",
+   "version": "v0.1.4-preview",
+   "pill": null,
+   "openDays": []
+  },
+  {
+   "file": "screens/v0.1.4/after-a-week-mon-s751.png",
+   "size": "669x751",
+   "what": "(a) Week view, Mon expanded (today)",
+   "errors": [],
+   "cls": "duo-inner L-innerp sheet-lock",
+   "version": "v0.1.4-preview",
+   "pill": null,
+   "openDays": [
+    "Legs AFocusQ"
+   ]
+  },
+  {
+   "file": "screens/v0.1.4/after-a-week-thu-s751.png",
+   "size": "669x751",
+   "what": "(a) Week view after tapping Thu (scrolled to Tue and Thu expanded)",
+   "errors": [],
+   "cls": "duo-inner L-innerp sheet-lock",
+   "version": "v0.1.4-preview",
+   "pill": null,
+   "openDays": [
+    "Upper BPull "
+   ]
+  },
+  {
+   "file": "screens/v0.1.4/after-a-week-collapsed-s751.png",
+   "size": "669x751",
+   "what": "(a) Week view, all days collapsed",
+   "errors": [],
+   "cls": "duo-inner L-innerp sheet-lock",
+   "version": "v0.1.4-preview",
+   "pill": null,
+   "openDays": []
+  },
+  {
+   "file": "screens/v0.1.4/after-a-week-mon-s01-200.png",
+   "size": "669x867",
+   "what": "(a) Week view, Mon expanded (today)",
+   "errors": [],
+   "cls": "duo-inner L-innerp lg-text sheet-lock",
+   "version": "v0.1.4-preview",
+   "pill": null,
+   "openDays": [
+    "Legs AFocusQ"
+   ]
+  },
+  {
+   "file": "screens/v0.1.4/after-a-week-thu-s01-200.png",
+   "size": "669x867",
+   "what": "(a) Week view after tapping Thu (scrolled to Tue and Thu expanded)",
+   "errors": [],
+   "cls": "duo-inner L-innerp lg-text sheet-lock",
+   "version": "v0.1.4-preview",
+   "pill": null,
+   "openDays": [
+    "Upper BPull "
+   ]
+  },
+  {
+   "file": "screens/v0.1.4/after-a-week-collapsed-s01-200.png",
+   "size": "669x867",
+   "what": "(a) Week view, all days collapsed",
+   "errors": [],
+   "cls": "duo-inner L-innerp lg-text sheet-lock",
+   "version": "v0.1.4-preview",
+   "pill": null,
+   "openDays": []
+  },
+  {
+   "file": "screens/v0.1.4/after-a-week-mon-s09-200.png",
+   "size": "669x951",
+   "what": "(a) Week view, Mon expanded (today)",
+   "errors": [],
+   "cls": "duo-inner L-innerp lg-text sheet-lock",
+   "version": "v0.1.4-preview",
+   "pill": null,
+   "openDays": [
+    "Legs AFocusQ"
+   ]
+  },
+  {
+   "file": "screens/v0.1.4/after-a-week-thu-s09-200.png",
+   "size": "669x951",
+   "what": "(a) Week view after tapping Thu (scrolled to Tue and Thu expanded)",
+   "errors": [],
+   "cls": "duo-inner L-innerp lg-text sheet-lock",
+   "version": "v0.1.4-preview",
+   "pill": null,
+   "openDays": [
+    "Upper BPull "
+   ]
+  },
+  {
+   "file": "screens/v0.1.4/after-a-week-collapsed-s09-200.png",
+   "size": "669x951",
+   "what": "(a) Week view, all days collapsed",
+   "errors": [],
+   "cls": "duo-inner L-innerp lg-text sheet-lock",
+   "version": "v0.1.4-preview",
+   "pill": null,
+   "openDays": []
+  },
+  {
+   "file": "screens/v0.1.4/after-a-week-mon-s751-200.png",
+   "size": "669x751",
+   "what": "(a) Week view, Mon expanded (today)",
+   "errors": [],
+   "cls": "duo-inner L-innerp lg-text sheet-lock",
+   "version": "v0.1.4-preview",
+   "pill": null,
+   "openDays": [
+    "Legs AFocusQ"
+   ]
+  },
+  {
+   "file": "screens/v0.1.4/after-a-week-thu-s751-200.png",
+   "size": "669x751",
+   "what": "(a) Week view after tapping Thu (scrolled to Tue and Thu expanded)",
+   "errors": [],
+   "cls": "duo-inner L-innerp lg-text sheet-lock",
+   "version": "v0.1.4-preview",
+   "pill": null,
+   "openDays": [
+    "Upper BPull "
+   ]
+  },
+  {
+   "file": "screens/v0.1.4/after-a-week-collapsed-s751-200.png",
+   "size": "669x751",
+   "what": "(a) Week view, all days collapsed",
+   "errors": [],
+   "cls": "duo-inner L-innerp lg-text sheet-lock",
+   "version": "v0.1.4-preview",
+   "pill": null,
+   "openDays": []
+  },
+  {
+   "file": "screens/v0.1.4/after-a-week-mon-s07.png",
+   "size": "466x678",
+   "what": "(a) Week view, Mon expanded (today)",
+   "errors": [],
+   "cls": "sheet-lock",
+   "version": "v0.1.4-preview",
+   "pill": null,
+   "openDays": [
+    "Legs AFocusQ"
+   ]
+  },
+  {
+   "file": "screens/v0.1.4/after-a-week-thu-s07.png",
+   "size": "466x678",
+   "what": "(a) Week view after tapping Thu (scrolled to Tue and Thu expanded)",
+   "errors": [],
+   "cls": "sheet-lock",
+   "version": "v0.1.4-preview",
+   "pill": null,
+   "openDays": [
+    "Upper BPull "
+   ]
+  },
+  {
+   "file": "screens/v0.1.4/after-a-week-collapsed-s07.png",
+   "size": "466x678",
+   "what": "(a) Week view, all days collapsed",
+   "errors": [],
+   "cls": "sheet-lock",
+   "version": "v0.1.4-preview",
+   "pill": null,
+   "openDays": []
+  },
+  {
+   "file": "screens/v0.1.4/after-a-week-mon-l951.png",
+   "size": "951x669",
+   "what": "(a) Week view, Mon expanded (today)",
+   "errors": [],
+   "cls": "duo-inner L-duo",
+   "version": "v0.1.4-preview",
+   "pill": null,
+   "openDays": [
+    "Legs AFocusQ"
+   ]
+  },
+  {
+   "file": "screens/v0.1.4/after-a-week-thu-l951.png",
+   "size": "951x669",
+   "what": "(a) Week view after tapping Thu (scrolled to Tue and Thu expanded)",
+   "errors": [],
+   "cls": "duo-inner L-duo",
+   "version": "v0.1.4-preview",
+   "pill": null,
+   "openDays": [
+    "Upper BPull "
+   ]
+  },
+  {
+   "file": "screens/v0.1.4/after-a-week-collapsed-l951.png",
+   "size": "951x669",
+   "what": "(a) Week view, all days collapsed",
+   "errors": [],
+   "cls": "duo-inner L-duo",
+   "version": "v0.1.4-preview",
+   "pill": null,
+   "openDays": []
+  },
+  {
+   "file": "screens/v0.1.4/after-a-week-mon-c382.png",
+   "size": "382x560",
+   "what": "(a) Week view, Mon expanded (today)",
+   "errors": [],
+   "cls": "sheet-lock",
+   "version": "v0.1.4-preview",
+   "pill": null,
+   "openDays": [
+    "Legs AFocusQ"
+   ]
+  },
+  {
+   "file": "screens/v0.1.4/after-a-week-thu-c382.png",
+   "size": "382x560",
+   "what": "(a) Week view after tapping Thu (scrolled to Tue and Thu expanded)",
+   "errors": [],
+   "cls": "sheet-lock",
+   "version": "v0.1.4-preview",
+   "pill": null,
+   "openDays": [
+    "Upper BPull "
+   ]
+  },
+  {
+   "file": "screens/v0.1.4/after-a-week-collapsed-c382.png",
+   "size": "382x560",
+   "what": "(a) Week view, all days collapsed",
+   "errors": [],
+   "cls": "sheet-lock",
+   "version": "v0.1.4-preview",
+   "pill": null,
+   "openDays": []
+  },
+  {
+   "file": "screens/v0.1.4/after-a-week-mon-c382-200.png",
+   "size": "382x560",
+   "what": "(a) Week view, Mon expanded (today)",
+   "errors": [],
+   "cls": "lg-text sheet-lock",
+   "version": "v0.1.4-preview",
+   "pill": null,
+   "openDays": [
+    "Legs AFocusQ"
+   ]
+  },
+  {
+   "file": "screens/v0.1.4/after-a-week-thu-c382-200.png",
+   "size": "382x560",
+   "what": "(a) Week view after tapping Thu (scrolled to Tue and Thu expanded)",
+   "errors": [],
+   "cls": "lg-text sheet-lock",
+   "version": "v0.1.4-preview",
+   "pill": null,
+   "openDays": [
+    "Upper BPull "
+   ]
+  },
+  {
+   "file": "screens/v0.1.4/after-a-week-collapsed-c382-200.png",
+   "size": "382x560",
+   "what": "(a) Week view, all days collapsed",
+   "errors": [],
+   "cls": "lg-text sheet-lock",
+   "version": "v0.1.4-preview",
+   "pill": null,
+   "openDays": []
+  },
+  {
+   "file": "screens/v0.1.4/after-a-week-mon-s01-light.png",
+   "size": "669x867",
+   "what": "(a) Week view, Mon expanded (today)",
+   "errors": [],
+   "cls": "duo-inner L-innerp sheet-lock",
+   "version": "v0.1.4-preview",
+   "pill": null,
+   "openDays": [
+    "Legs AFocusQ"
+   ]
+  },
+  {
+   "file": "screens/v0.1.4/after-a-week-thu-s01-light.png",
+   "size": "669x867",
+   "what": "(a) Week view after tapping Thu (scrolled to Tue and Thu expanded)",
+   "errors": [],
+   "cls": "duo-inner L-innerp sheet-lock",
+   "version": "v0.1.4-preview",
+   "pill": null,
+   "openDays": [
+    "Upper BPull "
+   ]
+  },
+  {
+   "file": "screens/v0.1.4/after-a-week-collapsed-s01-light.png",
+   "size": "669x867",
+   "what": "(a) Week view, all days collapsed",
+   "errors": [],
+   "cls": "duo-inner L-innerp sheet-lock",
+   "version": "v0.1.4-preview",
+   "pill": null,
+   "openDays": []
+  },
+  {
+   "file": "screens/v0.1.4/after-a-week-mon-s09-light.png",
+   "size": "669x951",
+   "what": "(a) Week view, Mon expanded (today)",
+   "errors": [],
+   "cls": "duo-inner L-innerp sheet-lock",
+   "version": "v0.1.4-preview",
+   "pill": null,
+   "openDays": [
+    "Legs AFocusQ"
+   ]
+  },
+  {
+   "file": "screens/v0.1.4/after-a-week-thu-s09-light.png",
+   "size": "669x951",
+   "what": "(a) Week view after tapping Thu (scrolled to Tue and Thu expanded)",
+   "errors": [],
+   "cls": "duo-inner L-innerp sheet-lock",
+   "version": "v0.1.4-preview",
+   "pill": null,
+   "openDays": [
+    "Upper BPull "
+   ]
+  },
+  {
+   "file": "screens/v0.1.4/after-a-week-collapsed-s09-light.png",
+   "size": "669x951",
+   "what": "(a) Week view, all days collapsed",
+   "errors": [],
+   "cls": "duo-inner L-innerp sheet-lock",
+   "version": "v0.1.4-preview",
+   "pill": null,
+   "openDays": []
+  },
+  {
+   "file": "screens/v0.1.4/after-c-counter-rest-s06.png",
+   "size": "678x466",
+   "what": "(c) Counter at rest",
+   "errors": [],
+   "cls": "counter counter-scroll",
+   "version": "v0.1.4-preview",
+   "pill": null,
+   "openDays": [
+    "Legs AFocusQ"
+   ]
+  },
+  {
+   "file": "screens/v0.1.4/after-c-counter-undo-s06.png",
+   "size": "678x466",
+   "what": "(c) Counter, Skip tapped, Undo showing",
+   "errors": [],
+   "cls": "counter counter-scroll",
+   "version": "v0.1.4-preview",
+   "pill": "2 more exercises",
+   "openDays": [
+    "Legs ASkippe"
+   ]
+  },
+  {
+   "file": "screens/v0.1.4/after-c-counter-end-s06.png",
+   "size": "678x466",
+   "what": "(c) Counter at the end of the list",
+   "errors": [],
+   "cls": "counter counter-scroll",
+   "version": "v0.1.4-preview",
+   "pill": null,
+   "openDays": [
+    "Legs AFocusQ"
+   ]
+  },
+  {
+   "file": "screens/v0.1.4/after-c-counter-rest-s06-200.png",
+   "size": "678x466",
+   "what": "(c) Counter at rest",
+   "errors": [],
+   "cls": "counter lg-text counter-scroll",
+   "version": "v0.1.4-preview",
+   "pill": "3 more exercises",
+   "openDays": [
+    "Legs AFocusQ"
+   ]
+  },
+  {
+   "file": "screens/v0.1.4/after-c-counter-undo-s06-200.png",
+   "size": "678x466",
+   "what": "(c) Counter, Skip tapped, Undo showing",
+   "errors": [],
+   "cls": "counter lg-text counter-scroll",
+   "version": "v0.1.4-preview",
+   "pill": null,
+   "openDays": [
+    "Legs ASkippe"
+   ]
+  },
+  {
+   "file": "screens/v0.1.4/after-c-counter-end-s06-200.png",
+   "size": "678x466",
+   "what": "(c) Counter at the end of the list",
+   "errors": [],
+   "cls": "counter lg-text counter-scroll",
+   "version": "v0.1.4-preview",
+   "pill": null,
+   "openDays": [
+    "Legs AFocusQ"
+   ]
+  },
+  {
+   "file": "screens/v0.1.4/after-d-home-s09.png",
+   "size": "669x951",
+   "what": "(d) inner portrait home with Up next",
+   "errors": [],
+   "cls": "duo-inner L-innerp",
+   "version": "v0.1.4-preview",
+   "pill": null,
+   "openDays": [
+    "Legs AFocusQ"
+   ]
+  },
+  {
+   "file": "screens/v0.1.4/after-d-home-s09-200.png",
+   "size": "669x951",
+   "what": "(d) inner portrait home with Up next",
+   "errors": [],
+   "cls": "duo-inner L-innerp lg-text",
+   "version": "v0.1.4-preview",
+   "pill": null,
+   "openDays": [
+    "Legs AFocusQ"
+   ]
+  },
+  {
+   "file": "screens/v0.1.4/after-d-home-s09-light.png",
+   "size": "669x951",
+   "what": "(d) inner portrait home with Up next",
+   "errors": [],
+   "cls": "duo-inner L-innerp",
+   "version": "v0.1.4-preview",
+   "pill": null,
+   "openDays": [
+    "Legs AFocusQ"
+   ]
+  },
+  {
+   "file": "screens/v0.1.4/after-d-home-s01.png",
+   "size": "669x867",
+   "what": "(d) inner portrait home with Up next",
+   "errors": [],
+   "cls": "duo-inner L-innerp",
+   "version": "v0.1.4-preview",
+   "pill": null,
+   "openDays": [
+    "Legs AFocusQ"
+   ]
+  },
+  {
+   "file": "screens/v0.1.4/after-d-home-s01-200.png",
+   "size": "669x867",
+   "what": "(d) inner portrait home with Up next",
+   "errors": [],
+   "cls": "duo-inner L-innerp lg-text",
+   "version": "v0.1.4-preview",
+   "pill": null,
+   "openDays": [
+    "Legs AFocusQ"
+   ]
+  },
+  {
+   "file": "screens/v0.1.4/after-d-home-s751.png",
+   "size": "669x751",
+   "what": "(d) inner portrait home with Up next",
+   "errors": [],
+   "cls": "duo-inner L-innerp",
+   "version": "v0.1.4-preview",
+   "pill": null,
+   "openDays": [
+    "Legs AFocusQ"
+   ]
+  },
+  {
+   "file": "screens/v0.1.4/after-d-home-s751-200.png",
+   "size": "669x751",
+   "what": "(d) inner portrait home with Up next",
+   "errors": [],
+   "cls": "duo-inner L-innerp lg-text",
+   "version": "v0.1.4-preview",
+   "pill": null,
+   "openDays": [
+    "Legs AFocusQ"
+   ]
+  },
+  {
+   "file": "screens/v0.1.4/after-d-home-s751-light.png",
+   "size": "669x751",
+   "what": "(d) inner portrait home with Up next",
+   "errors": [],
+   "cls": "duo-inner L-innerp",
+   "version": "v0.1.4-preview",
+   "pill": null,
+   "openDays": [
+    "Legs AFocusQ"
+   ]
+  },
+  {
+   "file": "screens/v0.1.4/after-d-home-s07.png",
+   "size": "466x678",
+   "what": "cover portrait home (no Up next)",
+   "errors": [],
+   "cls": "",
+   "version": "v0.1.4-preview",
+   "pill": null,
+   "openDays": [
+    "Legs AFocusQ"
+   ]
+  },
+  {
+   "file": "screens/v0.1.4/after-d-home-s07-200.png",
+   "size": "466x678",
+   "what": "cover portrait home (no Up next)",
+   "errors": [],
+   "cls": "lg-text",
+   "version": "v0.1.4-preview",
+   "pill": null,
+   "openDays": [
+    "Legs AFocusQ"
+   ]
+  },
+  {
+   "file": "screens/v0.1.4/after-d-home-l951.png",
+   "size": "951x669",
+   "what": "inner landscape, two panes (no Up next)",
+   "errors": [],
+   "cls": "duo-inner L-duo",
+   "version": "v0.1.4-preview",
+   "pill": null,
+   "openDays": [
+    "Legs AFocusQ"
+   ]
+  },
+  {
+   "file": "screens/v0.1.4/after-d-home-c382.png",
+   "size": "382x560",
+   "what": "cover portrait home (no Up next)",
+   "errors": [],
+   "cls": "",
+   "version": "v0.1.4-preview",
+   "pill": null,
+   "openDays": [
+    "Legs AFocusQ"
+   ]
+  },
+  {
+   "file": "screens/v0.1.4/after-d-home-c382-200.png",
+   "size": "382x560",
+   "what": "cover portrait home (no Up next)",
+   "errors": [],
+   "cls": "lg-text",
+   "version": "v0.1.4-preview",
+   "pill": null,
+   "openDays": [
+    "Legs AFocusQ"
+   ]
+  },
+  {
+   "file": "screens/v0.1.4/after-02-progress-body-s01.png",
+   "size": "669x867",
+   "what": "02 Progress > Body",
+   "errors": [],
+   "cls": "duo-inner L-innerp sheet-lock",
+   "version": "v0.1.4-preview",
+   "pill": null,
+   "openDays": [
+    "Legs AFocusQ"
+   ]
+  },
+  {
+   "file": "screens/v0.1.4/after-02-progress-body-s01-200.png",
+   "size": "669x867",
+   "what": "02 Progress > Body",
+   "errors": [],
+   "cls": "duo-inner L-innerp lg-text sheet-lock",
+   "version": "v0.1.4-preview",
+   "pill": null,
+   "openDays": [
+    "Legs AFocusQ"
+   ]
+  }
+ ]
+}

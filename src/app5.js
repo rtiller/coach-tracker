@@ -95,8 +95,17 @@
     clearTimeout(toastTimer); undoFn = null;
     t.classList.remove("show");
     t.setAttribute("aria-hidden", "true");
+    undoRoom();
     reserveSpace();
+    if (typeof syncMorePill === "function") syncMorePill(); /* v0.1.4 (c): the pill comes back, recounted */
     if (typeof queueNav === "function") { queueNav(); setTimeout(queueNav, 220); }
+  }
+  /* v0.1.4: Undo never covers list text. In the Counter the slot overlays the list's bottom (spec (c)), so while Undo
+     shows the actions bar takes the slot's height back (#paneToday.undo-on) and the list ends above the toast; with no
+     Undo the list still runs to the buttons. */
+  function undoRoom() {
+    const pane = document.getElementById("paneToday"), t = document.getElementById("toast");
+    if (pane) pane.classList.toggle("undo-on", t.classList.contains("show") && t.classList.contains("in-slot"));
   }
   function showUndo(msg, fn, ms) {
     const t = document.getElementById("toast");
@@ -106,7 +115,9 @@
     document.getElementById("toastUndo").hidden = !fn;
     t.removeAttribute("aria-hidden");
     t.classList.add("show");
+    undoRoom();
     reserveSpace();
+    if (typeof syncMorePill === "function") syncMorePill(); /* v0.1.4 (c): the pill goes while Undo shows */
     clearTimeout(toastTimer);
     toastTimer = setTimeout(hideToast, ms || 10000);
     if (typeof queueNav === "function") { queueNav(); setTimeout(queueNav, 220); }
@@ -150,6 +161,8 @@
      selected day on the left and the week as rows on the right, no page scroll. Set in JS (html.counter, syncCounter in
      app6) rather than a media query so a keyboard that shrinks the viewport while typing never flips the layout. */
   var counterOn = false;
+  /* v0.1.4.3 (Designer ruling C): the Counter header shows "Today" when "Back to today" does not fit beside "This week ▾" (syncCounter) */
+  var btShort = false;
   function renderToday() {
     const el = document.getElementById("today");
     const m = weekMeta(state.week);
@@ -160,7 +173,7 @@
     const pos = train.indexOf(f.idx) + 1;
     const kicker = '<span class="k-seg">W' + state.week + "\u00a0of\u00a0" + TOTAL_WEEKS + "</span>" + (N_BLOCKS > 1 ? '<span class="k-blk"><span class="k-c">, </span><span class="k-seg">Block\u00a0' + m.block + "</span></span>" : "") + (m.deload ? '<span class="k-tail">, Deload</span>' : "");
     const backHtml = f.picked
-      ? '<button type="button" class="back-today" id="backToday" aria-label="Showing ' + escapeHtml(day.short) + ", " + escapeHtml(day.label) + '. Back to today"><span class="bt-label">Showing ' + escapeHtml(day.short) + ", " + escapeHtml(day.label) + "</span><b>Back to today</b></button>"
+      ? '<button type="button" class="back-today" id="backToday" aria-label="Showing ' + escapeHtml(day.short) + ", " + escapeHtml(day.label) + '. Back to today"><span class="bt-label">Showing ' + escapeHtml(day.short) + ", " + escapeHtml(day.label) + "</span><b>" + (counterOn && btShort ? "Today" : "Back to today") + "</b></button>"
       : '<span class="back-today bt-ph" aria-hidden="true"><b>Back to today</b></span>';
     /* Back to today has one home on every screen: directly under the week strip */
     document.getElementById("backSlot").innerHTML = backHtml;
@@ -256,30 +269,29 @@
   }
 
   /* v0.1.3.4 Counter: the exercise list is its own scroll area between the title block and the pinned actions. While rows
-     are below its visible end, a solid "N more" pill sits on the list's bottom edge (N = rows not fully visible below);
+     are below its visible end, an "N more" control sits under the list (v0.1.4.1: a 22px chip in a 44px tap target) (N = rows not fully visible below);
      a tap scrolls the next rows into view. Hidden at the end of the list, when nothing overflows, and outside the Counter. */
-  /* Counter at 200% text only: each word of an exercise name or its sets in its own span, so the start of every line can be
-     a snap point. Plain text everywhere else (spans shift Chromium's text widths by a fraction of a pixel) */
-  function bigCounter() { return counterOn && document.documentElement.classList.contains("lg-text"); }
+  /* Counter (every text size since v0.1.4): each word of an exercise name or its sets in its own span, so the start of every
+     line can be a snap point. Plain text everywhere else (spans shift Chromium's text widths by a fraction of a pixel) */
+  function snapCounter() { return counterOn; }
   function snapWords(t) {
-    if (!bigCounter()) return escapeHtml(t);
+    if (!snapCounter()) return escapeHtml(t);
     return String(t).split(/\s+/).filter(Boolean).map(function (w) { return '<span class="w">' + escapeHtml(w) + "</span>"; }).join(" ");
   }
   function moreOn() { const c = document.getElementById("today"); return !!c && c.classList.contains("more-on"); }
-  /* v0.1.3.4b, Counter at 200% text only: when the list overflows, the card takes "more-on". The focus line goes (its room
-     pays for the pill's own 44px strip under the list), the list snaps (mandatory) to each row's top and to every line inside
+  /* v0.1.3.4b, and v0.1.4 (c) at every text size: when the list overflows, the card takes "more-on": the pill gets its own
+     44px strip under the list (at 200% text the focus line goes to pay for it; at normal text it stays), the list snaps (mandatory) to each row's top and to every line inside
      a row taller than the list (a row taller than its scroll window is not a snap area itself: browsers let an oversized
      snap area stop anywhere inside it, which is how a line was cut at the list's top), and an end padding lets the last
      snap point reach the top. Measured with the focus line and no strip; re-run on every render and after fitCounter. */
   function layoutMore() {
     const card = document.getElementById("today"), list = card && card.querySelector(".set-rows"), pill = document.getElementById("morePill");
     if (!card || !list || !pill) return;
-    const lg = bigCounter();
-    /* rendered before the text size or the layout changed: the words have the wrong markup, so render again (once: the
-       new markup matches) */
+    const lg = snapCounter();
+    /* rendered before the layout changed: the words have the wrong markup, so render again (once: the new markup matches) */
     if (lg !== !!list.querySelector(".w") && list.querySelector(".set-row")) { renderToday(); return; }
-    if (card.classList.contains("more-on") || list.style.paddingBottom) {
-      card.classList.remove("more-on"); list.style.paddingBottom = "";
+    if (card.classList.contains("more-on") || list.style.getPropertyValue("--end-pad")) {
+      card.classList.remove("more-on"); list.style.removeProperty("--end-pad");
       list.querySelectorAll(".set-row.tall").forEach(function (r) { r.classList.remove("tall"); });
     }
     if (lg && list.scrollHeight - list.clientHeight > 0.5) {
@@ -300,7 +312,9 @@
       });
       const base = list.scrollHeight;
       const pad = Math.max(0, Math.ceil(last + ch - base));
-      if (pad) list.style.paddingBottom = pad + "px";
+      /* v0.1.4: the end room is a spacer after the rows (.set-rows::after), not the list's padding: a flex item cannot
+         shrink below its own padding, so a padded list could not give Undo's height back (spec (c) amendment) */
+      if (pad) list.style.setProperty("--end-pad", pad + "px");
       list.scrollTop = top;
     }
     syncMorePill();
@@ -309,18 +323,56 @@
     const list = document.querySelector("#today .set-rows");
     if (!counterOn || !list || list.scrollHeight - list.clientHeight <= 0.5) return [];
     const rows = list.querySelectorAll(".set-row");
-    if (moreOn()) { /* rows entirely below the visible area */
-      const vb = list.getBoundingClientRect().top + list.clientTop + list.clientHeight;
+    if (moreOn()) { /* rows entirely below the visible area (v0.1.4.3: the area ends at the clip, a row boundary) */
+      const vb = listVisBottom(list);
       return Array.prototype.filter.call(rows, function (r) { return r.getBoundingClientRect().top >= vb - 1; });
     }
     if (list.scrollTop + list.clientHeight >= list.scrollHeight - 1) return [];
     const lb = list.getBoundingClientRect().bottom - list.clientTop;
     return Array.prototype.filter.call(rows, function (r) { return r.getBoundingClientRect().bottom > lb + 1; });
   }
+  /* v0.1.4 (c): the list's end is in view: the last row's bottom is inside the visible area (the end padding below it,
+     which lets the last snap point reach the top, does not count) */
+  function listAtEnd() {
+    const l = document.querySelector("#today .set-rows"), rows = l && l.querySelectorAll(".set-row");
+    if (!l || !rows.length || l.scrollTop + l.clientHeight >= l.scrollHeight - 1) return true;
+    return rows[rows.length - 1].getBoundingClientRect().bottom <= l.getBoundingClientRect().top + l.clientTop + l.clientHeight + 1;
+  }
+  function undoInSlot() { const t = document.getElementById("toast"); return !!t && t.classList.contains("show") && t.classList.contains("in-slot"); }
+  /* v0.1.4.3 (Designer nit, 200% text): the overflowing list (.more-on) ends at a row boundary: a row that would show only
+     partly at the bottom is clipped away whole (clip-path, so nothing moves) and counts as hidden in "N more". A row taller
+     than the list keeps its last whole line instead. */
+  function listVisBottom(list) { const lt = list.getBoundingClientRect().top + list.clientTop; return lt + list.clientHeight - (parseFloat(list.dataset.clipB) || 0); }
+  function clipRows() {
+    const list = document.querySelector("#today .set-rows");
+    if (!list) return;
+    let cut = 0;
+    if (counterOn && moreOn() && list.scrollHeight - list.clientHeight > 0.5) {
+      const lt = list.getBoundingClientRect().top + list.clientTop, vb = lt + list.clientHeight;
+      let edge = -Infinity;
+      list.querySelectorAll(".set-row").forEach(function (r) { const b = r.getBoundingClientRect(); if (b.bottom > lt + 1 && b.bottom <= vb + 0.5) edge = Math.max(edge, b.bottom); });
+      if (edge === -Infinity) list.querySelectorAll(".set-row .sn").forEach(function (u) { const b = u.getBoundingClientRect(); if (b.bottom > lt + 1 && b.bottom <= vb + 0.5) edge = Math.max(edge, b.bottom); });
+      if (edge > -Infinity && vb - edge > 0.5) cut = Math.floor((vb - edge) * 2) / 2;
+    }
+    if (cut) { list.dataset.clipB = String(cut); list.style.clipPath = "inset(0 0 " + cut + "px 0)"; }
+    else if (list.dataset.clipB) { delete list.dataset.clipB; list.style.clipPath = ""; }
+  }
   function syncMorePill() {
     const pill = document.getElementById("morePill");
+    clipRows();
     if (!pill) return;
     const n = hiddenRows().length, strip = moreOn();
+    /* v0.1.4 (c): Undo overlays the list's bottom and the pill's strip, so the pill goes while it shows (recounted after) */
+    pill.classList.toggle("under-undo", strip && undoInSlot());
+    /* the pill goes only when the list's end is in view: with no row wholly below but the last one not yet whole, it
+       stays as "More" (one tap brings the end into view) */
+    if (!n && strip && !listAtEnd()) {
+      if (pill.getAttribute("aria-label") !== "Show the rest of the list") {
+        pill.setAttribute("aria-label", "Show the rest of the list");
+        pill.innerHTML = '<span class="mp-chip"><span>More</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>';
+      }
+      pill.classList.remove("at-end"); pill.hidden = false; return;
+    }
     if (!n) {
       if (!pill.hidden && !pill.classList.contains("at-end") && document.activeElement === pill) { const d = document.getElementById("todayDone"); if (d) d.focus({ preventScroll: true }); }
       /* with the strip the pill only goes invisible, so the list never changes height while it scrolls */
@@ -330,7 +382,7 @@
     const label = n + " more exercise" + (n === 1 ? "" : "s");
     if (pill.getAttribute("aria-label") !== label) {
       pill.setAttribute("aria-label", label);
-      pill.innerHTML = '<span>' + n + ' more</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>';
+      pill.innerHTML = '<span class="mp-chip"><span>' + n + ' more</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>';
     }
     pill.classList.remove("at-end");
     pill.hidden = false;
@@ -339,11 +391,11 @@
      fully visible comes to the top; when it already starts there, the list moves on by its own height less 8px */
   function moreRows() {
     const list = document.querySelector("#today .set-rows"), rows = hiddenRows();
-    if (!list || !rows.length) return;
+    if (!list || (!rows.length && !(moreOn() && !listAtEnd()))) return;
     const lt = list.getBoundingClientRect().top + list.clientTop, max = list.scrollHeight - list.clientHeight;
     if (moreOn()) {
       const next = Array.prototype.find.call(list.querySelectorAll(".set-row"), function (r) { return r.getBoundingClientRect().top > lt + 1; });
-      if (next) list.scrollTop = Math.min(max, list.scrollTop + next.getBoundingClientRect().top - lt);
+      list.scrollTop = next ? Math.min(max, list.scrollTop + next.getBoundingClientRect().top - lt) : max;
       syncMorePill();
       return;
     }
@@ -354,6 +406,7 @@
     syncMorePill();
   }
 
+  function bindTail(t) { return String(t).replace(/ ([A-Za-z]|[0-9]+)$/, "\u00a0$1"); }
   function stripIcon(kind) {
     if (kind === "done") return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
     if (kind === "skip") return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"><line x1="6" y1="12" x2="18" y2="12"/></svg>';
@@ -371,7 +424,9 @@
       html += '<button type="button" class="wd' + (today ? " is-today" : "") + (viewing ? " is-view" : "") + '" data-strip="' + idx + '" aria-pressed="' + viewing + '" aria-label="' + escapeHtml(day.short) + ": " + word + (today ? ", today" : "") + '. Show this day">' +
         '<span class="d">' + escapeHtml(day.short) + "</span>" +
         /* Counter rows also name the session (hidden in the strip) */
-        '<span class="ss">' + escapeHtml(day.rest ? "Rest" : day.label) + "</span>" +
+        /* v0.1.4.3: a trailing single letter or number stays with the word before it when the name wraps ("Full" / "body A");
+           the rendered name only, never the plan data */
+        '<span class="ss">' + escapeHtml(day.rest ? "Rest" : bindTail(day.label)) + "</span>" +
         '<span class="dot ' + st + (today ? " today" : "") + '">' + stripIcon(st) + "</span>" +
         '<span class="s">' + word + "</span></button>";
     });
@@ -420,9 +475,10 @@
     if (exl) { exl.scrollTop = 0; syncMorePill(); }
     const row = list && (list.querySelector(".wd.is-view") || list.querySelector(".wd.is-today"));
     if (!row) return;
-    const r = row.getBoundingClientRect(), b = list.getBoundingClientRect();
-    if (r.top < b.top + 4) list.scrollTop += r.top - b.top - 4;
-    else if (r.bottom > b.bottom - 4) list.scrollTop += r.bottom - b.bottom + 4;
+    /* v0.1.4.3 (Designer, ruling (a)): the smallest scroll from the list's top that shows the row whole, so a Sat or Sun row
+       that needs one ends at the list's bottom edge (Monday may then be partly hidden); the picked row wins over today's */
+    const r = row.getBoundingClientRect(), b = list.getBoundingClientRect(), end = r.bottom - b.top - list.clientTop + list.scrollTop;
+    list.scrollTop = Math.max(0, Math.ceil(end - list.clientHeight - 0.01));
   }
 
   function renderSheetHead() {
@@ -512,7 +568,7 @@
       const el = endScroller(); if (!el) return 0;
       return el.scrollHeight - el.clientHeight - el.scrollTop;
     }
-    let atEnd = false, lastH = -1, holdUntil = 0;
+    let atEnd = false, lastH = -1, holdUntil = 0, padRaf = 0;
     document.addEventListener("scroll", function () { if (performance.now() > holdUntil) atEnd = endGap() <= 24; }, { passive: true, capture: true });
     if (typeof ResizeObserver !== "function") return;
     const ro = new ResizeObserver(function () {
@@ -522,10 +578,17 @@
       else if (h !== lastH && atEnd) {
         const g = endGap();
         /* our own scroll must not read as the reader leaving the end while the row is still growing */
-        if (g > 0) { endScroller().scrollTop += g; holdUntil = performance.now() + 400; }
+        /* v0.1.4.2: never past the top limit the day pick uses (revealCard): a reader at the top of a home that only
+           just overflows counts as "at the end", and scrolling the whole gap put the card's top (Skip) under the status bar */
+        let d = g;
+        if (!counterOn) { const card = document.getElementById("today"); if (card && card.getClientRects().length) d = Math.min(d, Math.max(0, card.getBoundingClientRect().top - viewLimits().topLim)); }
+        if (d >= 1) { endScroller().scrollTop += d; holdUntil = performance.now() + 400; }
       }
       lastH = h;
-      if (document.getElementById("toast").classList.contains("show")) reserveSpace();
+      /* v0.1.4.3: deferred a frame. --pin-pad sizes #navEnd, which this observer watches, so setting it inside the callback
+         resized an observed element during delivery (WebKit: "ResizeObserver loop completed with undelivered notifications",
+         a floating toast during a resize) */
+      cancelAnimationFrame(padRaf); padRaf = requestAnimationFrame(function () { if (document.getElementById("toast").classList.contains("show")) reserveSpace(); });
     });
     ["navGroup", "toast", "navEnd"].forEach(function (id) { const n = document.getElementById(id); if (n) ro.observe(n); });
   })();

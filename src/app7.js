@@ -20,7 +20,7 @@
   window.addEventListener("resize", detectLargeText);
   /* deferred a frame so a class change never re-enters the observer in the same frame (WebKit logs a loop error) */
   var lgRaf = 0;
-  if (window.ResizeObserver) new ResizeObserver(function () { cancelAnimationFrame(lgRaf); lgRaf = requestAnimationFrame(function () { detectLargeText(); if (PLAN) syncNav(); if (counterOn) fitCounter(); }); }).observe(document.documentElement);
+  if (window.ResizeObserver) new ResizeObserver(function () { cancelAnimationFrame(lgRaf); lgRaf = requestAnimationFrame(function (ts) { detectLargeText(); syncCounter(); if (PLAN) syncNav(); if (counterOn && !fitFresh(ts)) { fitTs = ts; try { fitCounter(); } finally { fitTs = -1; } } }); }).observe(document.documentElement);
 
   /* back from the background on a new day: follow the calendar unless a week was picked on purpose */
   let shownDay = localDay();

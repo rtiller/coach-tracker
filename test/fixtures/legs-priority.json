@@ -1,0 +1,52 @@
+{
+  "schema": 1,
+  "meta": { "name": "Legs priority", "weeks": 6, "deload": "last", "units": "lb", "deloadNote": "Same weights, about half the sets." },
+  "days": [
+    { "key": "legsA", "label": "Legs A", "focus": "Quads", "priority": true },
+    { "key": "upperA", "label": "Upper A", "focus": "Push focus" },
+    { "key": "legsB", "label": "Legs B", "focus": "Hamstrings and glutes", "priority": true },
+    { "key": "upperB", "label": "Upper B", "focus": "Pull focus" },
+    { "key": "legsC", "label": "Legs C", "focus": "Leg volume + arms", "priority": true },
+    { "rest": true },
+    { "rest": true }
+  ],
+  "blocks": {
+    "1": {
+      "legsA": [
+        { "name": "Hack squat or back squat", "sets": "4 x 6-8", "tags": ["anchor", "priority"] },
+        { "name": "Leg press", "sets": "3 x 10-12", "tags": ["priority"] },
+        { "name": "Leg extension", "sets": "3 x 12-15", "tags": ["accessory"] },
+        { "name": "Seated calf raise", "sets": "3 x 12-15", "tags": ["accessory"] },
+        { "name": "Walking lunge", "sets": "2 x 10/leg", "tags": ["optional"] }
+      ],
+      "upperA": [
+        { "name": "Bench press", "sets": "4 x 5-7", "tags": ["anchor"] },
+        { "name": "Seated dumbbell press", "sets": "3 x 8-10", "tags": [] },
+        { "name": "Incline dumbbell press", "sets": "3 x 8-10", "tags": [] },
+        { "name": "Lateral raise", "sets": "3 x 12-15", "tags": ["accessory"] },
+        { "name": "Triceps pushdown", "sets": "2 x 10-12", "tags": ["optional"] }
+      ],
+      "legsB": [
+        { "name": "Romanian deadlift", "sets": "4 x 6-8", "tags": ["anchor", "priority"] },
+        { "name": "Hip thrust", "sets": "3 x 8-10", "tags": ["priority"] },
+        { "name": "Lying leg curl", "sets": "3 x 10-12", "tags": [] },
+        { "name": "Standing calf raise", "sets": "3 x 12-15", "tags": ["accessory"] },
+        { "name": "Back extension", "sets": "2 x 12", "tags": ["optional"] }
+      ],
+      "upperB": [
+        { "name": "Barbell row", "sets": "4 x 6-8", "tags": ["anchor"] },
+        { "name": "Lat pulldown", "sets": "3 x 10-12", "tags": [] },
+        { "name": "Seated cable row", "sets": "3 x 10-12", "tags": [] },
+        { "name": "Face pull", "sets": "3 x 12-15", "tags": ["accessory"] },
+        { "name": "Biceps curl", "sets": "2 x 10-12", "tags": ["optional"] }
+      ],
+      "legsC": [
+        { "name": "Front squat", "sets": "3 x 8", "tags": ["anchor", "priority"] },
+        { "name": "Bulgarian split squat", "sets": "3 x 10/leg", "tags": ["priority"] },
+        { "name": "Leg curl", "sets": "3 x 12", "tags": [] },
+        { "name": "Hammer curl", "sets": "3 x 10-12", "tags": ["accessory"] },
+        { "name": "Overhead triceps extension", "sets": "3 x 10-12", "tags": ["accessory"] }
+      ]
+    }
+  }
+}

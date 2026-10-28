@@ -146,7 +146,7 @@ function serveHtml(html) {
     const note = (state, g, extra) => { states++;
       for (const k of Object.keys(g.bad)) if (g.bad[k].length) { (fl[k] = fl[k] || []).push(state + ": " + g.bad[k].slice(0, 3).join("; ")); for (const x of g.bad[k]) { const key = k + " " + x.replace(/ [\d.x>-]+$/, ""); uniq[key] = uniq[key] || size + " / " + state + " / " + x; } }
       if (g.hs > 0) (fl.hscroll = fl.hscroll || []).push(state + ": " + g.hs);
-      const m = g.mode, okMode = !m.duoInner && !m.duo && !m.innerp && !m.twoPane && (land ? m.counter : !m.counter);
+      const m = g.mode, okMode = !m.duoInner && !m.duo && !m.innerp && !m.twoPane && (land && !(big && w < 700) ? m.counter : !m.counter); /* changed on Designer request, 2026-10-27: 200% text under 700 wide is the single column */
       if (!okMode) (fl.mode = fl.mode || []).push(state + ": " + J(m));
       if (g.boxOk && !g.boxOk.in) (fl.box = fl.box || []).push(state + ": " + J(g.boxOk));
       if (extra) (fl[extra[0]] = fl[extra[0]] || []).push(state + ": " + extra[1]); };
@@ -168,7 +168,9 @@ function serveHtml(html) {
       /* the cover pattern never scrolls on show (LEARNINGS: a pinned bottom group always covers the card); the slot
          follows the card, so it may sit a short scroll away. Record whether it showed in view, then scroll it in. */
       await safeTap(p, "#today [data-skip]:visible"); await p.waitForTimeout(400);
-      const inView = await p.evaluate(ins => { const t = document.getElementById("toastUndo"); if (!t || !t.getClientRects().length) return false; const r = t.getBoundingClientRect(); return r.top >= ins.t && r.bottom <= innerHeight - ins.b; }, ins);
+      /* v0.1.4: "in view" is the whole toast, not only its button: a toast whose button shows but whose
+         bottom pokes out of the clear zone is a short scroll away too. The assertion below is unchanged. */
+      const inView = await p.evaluate(ins => { const t = document.getElementById("toastUndo"); if (!t || !t.getClientRects().length) return false; const s = t.closest(".toast") || t, r = s.getBoundingClientRect(); return r.top >= ins.t - 0.5 && r.bottom <= innerHeight - ins.b + 0.5; }, ins);
       if (!inView) { undoAway.push(size); await p.evaluate(() => document.getElementById("toastSlot").scrollIntoView({ block: "nearest" })); await p.waitForTimeout(250); }
       const u = await p.evaluate(ins => { const t = document.getElementById("toastUndo"); if (!t || !t.getClientRects().length) return null; const r = t.getBoundingClientRect(), s = document.querySelector(".toast.show") || t.closest("[class*=toast]"), sr = s.getBoundingClientRect();
         const hit = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
@@ -189,7 +191,7 @@ function serveHtml(html) {
       await p.focus("#updCode"); await p.waitForTimeout(150); await p.setViewportSize({ width: w, height: h - kb }); await p.waitForTimeout(500);
       const k = await p.evaluate(() => { const vv = visualViewport, lo = vv.offsetTop, hi = vv.offsetTop + vv.height, f = document.getElementById("updCode").getBoundingClientRect(), u = document.getElementById("updUse").getBoundingClientRect();
         return { lo, hi, field: [f.top, f.bottom], use: [u.top, u.bottom], counter: document.documentElement.classList.contains("counter") }; });
-      if (!(k.field[0] >= k.lo - 0.5 && k.field[1] <= k.hi + 0.5 && k.use[1] <= k.hi + 0.5 && k.counter === land)) (fl.keyboard = fl.keyboard || []).push(J(k));
+      if (!(k.field[0] >= k.lo - 0.5 && k.field[1] <= k.hi + 0.5 && k.use[1] <= k.hi + 0.5 && k.counter === (land && !(big && w < 700)))) (fl.keyboard = fl.keyboard || []).push(J(k));
       await P(p, "update plan, keyboard up", "#updBox", { kb: true });
       await p.setViewportSize({ width: w, height: h }); await p.waitForTimeout(300); await p.evaluate(() => document.activeElement && document.activeElement.blur()); await p.waitForTimeout(900);
       await P(p, "update plan, keyboard down", "#updBox", { box: "#updBox" });

@@ -3,7 +3,7 @@
 
   /* ================= Constants ================= */
   const APP_ID = "coach-tracker";
-  const APP_VERSION = "v0.1.3.4-preview";
+  const APP_VERSION = "v0.1.4.3-preview";
   /* Storage prefix is per app, never per person. STORE_SCHEMA bumps only with a written migration. */
   const LS_PREFIX = "ct1-";
   const STORE_SCHEMA = 1;
@@ -18,7 +18,9 @@
   const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
   /* In a browser tab the #p= fragment stays in the address bar, so Add to Home Screen saves a URL that still
      carries the plan (the Home Screen app on iOS starts with empty storage of its own). Processing is idempotent:
-     a link already seen on this device is ignored. In a Home Screen app the fragment is cleared after load. */
+     a link already seen on this device is ignored. In a Home Screen app the fragment is cleared after load.
+     v0.1.4: this is the iOS flow only. Off iOS (no navigator.standalone) the fragment is cleared once the plan is saved
+     (clearSavedLink, src/app6.js). */
   const KEEP_LINK_IN_TAB = true;
 
   /* ================= Storage ================= */
@@ -58,6 +60,13 @@
     setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
   }
   let fatalShown = false;
+  let mutedErrors = 0;
+  function errorIsOurs(ev) {
+    if (ev.error && typeof ev.error === "object" && ev.error.stack) return true;
+    const f = String(ev.filename || "");
+    if (!f) return false;
+    try { return new URL(f, location.href).origin === location.origin; } catch (e) { return false; }
+  }
   function showFatal(err) {
     if (fatalShown || !document.body) return;
     fatalShown = true;
@@ -82,6 +91,11 @@
     window.addEventListener("error", function (ev) {
       const m = String((ev && ev.message) || "");
       if (/ResizeObserver loop/.test(m) || !ev.error && !m) return; /* benign browser noise, or a resource load */
+      /* v0.1.4: only an error we can attribute shows the panel: an error object with a stack, or a source file on this
+         page's origin. A muted cross-origin error ("Script error.", no file, line 0) is never ours: every script here is
+         inline and the CSP loads nothing else, so it comes from script the browser or an extension injected (Safari's
+         page menu, Hide Distracting Items, Translate, content blockers). It is counted (About shows the count), not shown. */
+      if (!errorIsOurs(ev)) { mutedErrors++; return; }
       showFatal(ev.error || m);
     });
     window.addEventListener("unhandledrejection", function (ev) { showFatal(ev && ev.reason); });

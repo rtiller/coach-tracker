@@ -17,6 +17,8 @@ const { fs, path } = L;
 const B = "b-4day-upper-lower";
 const CSP = `<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; base-uri 'none'; form-action 'none'" />`;
 const REPO = "https://github.com/rtiller/coach-tracker";
+/* v0.1.4.2: the exact version this build ships (was: any "v<digit>" string), shown in About and in the file's head comment */
+const VERSION = "v0.1.4.3-preview";
 const COPY = ["About", "Your data stays here",
   "Your plan and logs stay in this browser's storage on this device. Nothing leaves it unless you export or share your link.",
   "No accounts and no analytics. This site only delivers the blank page, and your plan fills it in right here.",
@@ -58,7 +60,7 @@ function serve(html) {
   }
 
   // ---- 1. About from More in every layout ----
-  const LAYOUTS = [[382, 560, 34, "cover portrait"], [669, 751, 34, "inner portrait"], [951, 585, 34, "inner landscape"], [678, 396, 21, "Counter"], [644, 382, 21, "Counter"], [678, 396, 21, "Counter 200%"]];
+  const LAYOUTS = [[382, 560, 34, "cover portrait"], [669, 751, 34, "inner portrait"], [951, 585, 34, "inner landscape"], [678, 396, 21, "Counter"], [644, 382, 21, "Counter"], [678, 396, 21, "Counter size at 200% (the single column, changed on Designer request 2026-10-27)"]];
   if (!remote) for (const [w, h, sb, name] of LAYOUTS) {
     const size = `${w}x${h} ${name}`;
     const ctx = await L.context(b, engine, w, h, { seed: L.seedFor(B), dark: true }), p = await ctx.newPage(), W = L.watch(p);
@@ -78,6 +80,7 @@ function serve(html) {
         ovx: pg.scrollWidth - pg.clientWidth, focus: document.activeElement && document.activeElement.id }; }, COPY);
     rec(size, "About opens as a full page from More, holds every sentence of its copy and the version, the footer scrolls into reach, no sideways scroll",
       g.open && g.full && !g.missing.length && /^v\d/.test(g.ver) && g.footReach && g.ovx <= 1, J(g));
+    rec(size, "About shows the version " + VERSION, g.ver.trim() === VERSION, J(g.ver));
     rec(size, "the repo link is the hard-coded GitHub address, opens in a new tab with noopener noreferrer; Get your own copy and Close are >= 44px tall",
       g.link[0] === REPO && g.link[1] === "_blank" && g.link[2] === "noopener noreferrer" && g.copyBtn[1] >= 44 && g.close[0] >= 44 && g.close[1] >= 44, J(g));
     await tap(p, "#aboutClose");
@@ -113,6 +116,7 @@ function serve(html) {
   }
   if (!remote) {
     const s = await session(url, "local"), txt = s.got.toString("utf8");
+    rec("copy", "the file's head comment names the same version (" + VERSION + ")", shipped.toString("utf8").split("\n").slice(0, 3).some(l => l.includes("<!-- coach-tracker " + VERSION + " ")), J(shipped.toString("utf8").split("\n")[1].slice(0, 60)));
     rec("copy", "Get your own copy saves coach-tracker.html, byte-identical to the shipped index.html (no normalization) after a seeded session", s.dlName === "coach-tracker.html" && Buffer.compare(s.got, shipped) === 0, J({ got: s.got.length, want: shipped.length }));
     const vals = []; s.stored.forEach(([k, v]) => { vals.push(k); if (v.length > 6 && !html.includes(v)) vals.push(v); try { (function walk(o) { if (o && typeof o === "object") Object.values(o).forEach(walk); else if (typeof o === "string" && o.length > 4 && !html.includes(o)) vals.push(o); })(JSON.parse(v)); } catch (e) {} });
     const fx = [codeB, "181.7", "193.5", plan.meta.name].concat(plan.days.map(d => d.title || "").filter(x => x.length > 5 && !html.includes(x)));

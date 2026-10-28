@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- coach-tracker v0.1.3.4-preview · generic workout tracker · the plan arrives in the #p= link fragment and is stored on this device only -->
+<!-- coach-tracker v0.1.4.3-preview · generic workout tracker · the plan arrives in the #p= link fragment and is stored on this device only -->
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
@@ -19,18 +19,36 @@
 <script>/* Layout mode, one definition. html.duo-inner when the layout viewport's short side is at least 520 (the Duo inner
    screen; every slab phone tops out near 440). Wider than tall adds html.L-duo (two panes), otherwise html.L-innerp (inner
    portrait). Anything else is the phone layout (the Counter in short landscape, app6). The device screen is not used:
-   Safari on the real Duo reports the wrong one. Re-checked on resize, orientationchange and unfold; frozen while a text
+   Safari on the real Duo reports the wrong one. Re-checked on resize, orientationchange and unfold (and, v0.1.4.2, as the page settles after start); frozen while a text
    field has focus and for 700ms after, so a keyboard never flips it. window.LAYOUT.matches is true for every layout but
    two panes (the old cover query), with change listeners. */
 (function () { var h = document.documentElement, hold = 0, ls = [], cur = null;
   var entry = function () { var a = document.activeElement; return !!a && (a.tagName === "TEXTAREA" || (a.tagName === "INPUT" && !/^(button|checkbox|radio|file|submit|reset|range|color)$/i.test(a.type))); };
-  var want = function () { var w = window.innerWidth, ht = window.innerHeight; /*WANT*/return Math.min(w, ht) >= 520 ? (w > ht ? "duo" : "innerp") : "phone";/*END*/ };
+  /* v0.1.4.3: the mode comes from media queries, which measure the viewport the CSS lays out with. window.innerWidth and
+     innerHeight can disagree with it on a Home Screen app (the owner's cover screen in landscape laid out 678 wide yet
+     never got the Counter), and a query's change event fires even when no resize does. */
+  var mq = function (q) { try { return window.matchMedia(q); } catch (e) { return { matches: false }; } };
+  var MQ_IN = mq("(min-width: 520px) and (min-height: 520px)"), MQ_LAND = mq("(orientation: landscape)");
+  var want = function () { var w = window.innerWidth, ht = window.innerHeight; /* w and ht only for gate-slab's rule mutations */ /*WANT*/return MQ_IN.matches ? (MQ_LAND.matches ? "duo" : "innerp") : "phone";/*END*/ };
   var apply = function (m) { cur = m; h.classList.toggle("duo-inner", m !== "phone"); h.classList.toggle("L-duo", m === "duo"); h.classList.toggle("L-innerp", m === "innerp"); };
   var sync = function () { if (entry() || performance.now() < hold) return; var m = want(); if (m === cur) return; apply(m); ls.forEach(function (f) { try { f({ matches: m !== "duo" }); } catch (e) { setTimeout(function () { throw e; }); } }); };
   apply(want());
   window.addEventListener("resize", sync); window.addEventListener("orientationchange", sync);
-  try { var o = window.matchMedia("(orientation: landscape)"); if (o.addEventListener) o.addEventListener("change", sync); else o.addListener(sync); } catch (e) {}
+  [MQ_IN, MQ_LAND].forEach(function (o) { try { if (o.addEventListener) o.addEventListener("change", sync); else o.addListener(sync); } catch (e) {} });
   document.addEventListener("focusout", function () { hold = performance.now() + 700; setTimeout(sync, 720); }, true);
+  /* v0.1.4.2: a Home Screen launch can read a stale viewport for a moment and fire no resize after it settles, which
+     left the phone layout up until focus next moved (the first focusout re-check then flipped the home mid-visit).
+     Re-check as the page settles: load, pageshow, visibility, the visual viewport, and a short poll after start. */
+  /* v0.1.4.3: the settle checks re-checked only these classes, so every other resize-only layout (the Counter on the
+     cover screen in landscape) kept the stale viewport's answer. When the viewport has changed with no resize event,
+     fire the resize the browser skipped, so every layout that listens for one re-checks. */
+  var lw = window.innerWidth, lh = window.innerHeight;
+  window.addEventListener("resize", function () { lw = window.innerWidth; lh = window.innerHeight; }, true);
+  var settle = function () { if (window.innerWidth !== lw || window.innerHeight !== lh) { lw = window.innerWidth; lh = window.innerHeight; try { window.dispatchEvent(new Event("resize")); } catch (e) {} } sync(); };
+  window.addEventListener("load", settle); window.addEventListener("pageshow", settle);
+  document.addEventListener("visibilitychange", function () { if (!document.hidden) settle(); });
+  try { if (window.visualViewport) window.visualViewport.addEventListener("resize", settle); } catch (e) {}
+  [50, 150, 300, 600, 1000, 1600, 2500].forEach(function (t) { setTimeout(settle, t); });
   window.LAYOUT = { get matches() { return cur !== "duo"; }, get mode() { return cur; }, sync: sync,
     addEventListener: function (t, f) { ls.push(f); }, addListener: function (f) { ls.push(f); } };
 })();</script>
@@ -69,6 +87,8 @@
     --pl: calc(var(--gut) + var(--safe-l));
     --pr: calc(var(--gut) + var(--safe-r));
     --gap: 10px;
+    /* v0.1.4: one type variable for every kicker (the Today card's, Up next's, the header's phase line) */
+    --t-kick: 0.72rem;
     --shadow-pop: 0 6px 24px rgba(29, 33, 30, 0.28); /* l-ink at 28% */
     --scrim: rgba(29, 33, 30, 0.38); /* l-ink at 38% */
     --mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
@@ -156,7 +176,7 @@
     color: var(--ember-text);
     font-family: var(--mono);
     font-weight: 700;
-    font-size: 0.72rem;
+    font-size: var(--t-kick);
     letter-spacing: 0.24em;
     text-transform: uppercase;
   }
@@ -425,10 +445,14 @@
   .banner .bbody { color: var(--mist); font-size: 0.8rem; margin-top: 4px; line-height: 1.5; }
 
   /* ---- Session cards ---- */
-  .day-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; align-items: start; }
-  /* inner portrait (v0.1.3.3: inside the Week and progress page): session and progress cards in two columns */
+  /* v0.1.4 (a): one column of full-width rows, Mon to Sun, whenever the week list is under 820px wide (every layout of the
+     device). At 820px and wider, two columns, the open day across both, the order kept (row flow, never dense). The width
+     is measured (.cols2, syncDayCols in src/app4b.js): a CSS size container broke WebKit's scroll anchoring in the other pane. */
+  .day-grid { display: grid; grid-template-columns: minmax(0, 1fr); grid-auto-flow: row; gap: 10px; align-items: start; }
+  .day-wrap.cols2 > .day-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: var(--gap); }
+  .day-wrap.cols2 > .day-grid > .day.open { grid-column: 1 / -1; }
+  /* inner portrait (v0.1.3.3: inside the Week and progress page): progress cards in two columns */
   :where(html.L-innerp) {
-    .day-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: var(--gap); }
     .prog-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: var(--gap); align-items: start; }
     .prog-grid > .card:last-child:nth-child(odd) { grid-column: 1 / -1; }
   }
@@ -708,6 +732,7 @@
       border-radius: 20px 20px 0 0;
       overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch;
       padding: 0 var(--pr) calc(24px + 50px + var(--safe-b)) var(--pl);
+      scroll-padding-top: calc(var(--head-h, 0px) + 8px); /* v0.1.4: clear of the sticky head (--head-h, src/app4b.js) */
       transform: translateY(100%); visibility: hidden;
       transition: transform .24s ease, visibility 0s linear .24s;
     }
@@ -1032,7 +1057,8 @@ html.counter #paneToday {
   --slot-h: max(56px, calc(2.5rem + 12px));
   /* Skip and Mark day done; 44px at 200% text (below; v0.1.3.4: the 3rem rule gave 70px and squeezed the exercise list) */
   --btn-h: max(44px, calc(3rem * var(--cs, 1)));
-  --act-h: calc(var(--slot-h) + 10px + var(--btn-h));
+  /* v0.1.4 (c): the list runs to the buttons; the Undo slot overlays the list's bottom, so the bar reserves no slot */
+  --act-h: calc(6px + var(--btn-h));
   position: fixed; inset: 0; display: grid; grid-template-columns: minmax(0, 56fr) minmax(0, 44fr); grid-template-rows: var(--hh) minmax(0, 1fr) auto;
   column-gap: 12px; padding: calc(var(--safe-t) + var(--cpad)) max(var(--safe-r), 12px) calc(var(--safe-b) + var(--cpad-b)) max(var(--safe-l), 12px);
 }
@@ -1042,7 +1068,11 @@ html.counter #paneToday::after { grid-column: 2; }
 /* rows would fall under 44px (644x382 with a 21px bottom inset gives 42.9): the bottom padding goes (the panels end at
    the safe area's edge, never inside it) */
 html.counter.counter-tight #paneToday { --cpad-b: 0px; }
-html.counter.lg-text #paneToday { grid-template-columns: minmax(0, 52fr) minmax(0, 48fr); }
+/* large text (Designer, v0.1.4.3): the header line is taller than a 32px row, so the header row keeps its full 44px and
+   the pane's padding is 6px top and bottom, inside the safe area (never in place of it), for both cards alike; the tight
+   rule above does not apply here */
+html.counter.lg-text #paneToday, html.counter.lg-text.counter-tight #paneToday { --hh: 44px; --cpad: 6px; --cpad-b: 6px; }
+/* v0.1.4.3 (Designer A+): 200% text keeps the 56/44 columns; day names wrap now, and a week column under 12ch of names gives the single column */
 /* the header, week note and start nudge live in portrait and in the page; a start date is asked for by its own prompt */
 html.counter #header, html.counter #startNudge, html.counter #weekNote, html.counter #navMark, html.counter #navEnd { display: none !important; }
 html.counter #paneToday section.today { grid-column: 1; grid-row: 1 / 4; margin: 0; min-height: 0; display: flex; flex-direction: column; overflow-y: auto; overscroll-behavior: contain; scroll-padding-bottom: var(--act-h);
@@ -1070,90 +1100,105 @@ html.counter #paneToday .today-hero .sub { font-size: max(0.8125rem, calc(0.92re
    Its natural height when every row fits (nothing changes at normal text); it shrinks and scrolls when they do not.
    Before, the whole card scrolled under the opaque sticky actions bar, whose top is the reserved Undo slot (92px at
    200% text), so the rows sat behind a blank band with no sign that they were there. */
-html.counter #paneToday .set-rows { flex: 0 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 2px 16px 0; }
+html.counter #paneToday .set-rows { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 0 16px; display: flex; flex-direction: column; }
+/* v0.1.4.1: with the scale capped at v0.1.3.4's, a day that fits leaves room under its rows; the list takes it and its rows share it, so the list still runs to the buttons (no free room when it overflows) */
+html.counter #paneToday .set-rows > .set-row { flex: 1 0 auto; }
 /* "N more": solid, on the list's bottom edge (right side, so the start of the row above stays readable), at least 44px;
    it sits above the actions bar, so it never covers Skip, Mark day done or the Undo slot. No mask, fade or gradient. */
 .more-pill { display: none; }
 html.counter #paneToday .more-pill:not([hidden]) { display: inline-flex; align-items: center; gap: 4px; flex: 0 0 auto; align-self: flex-end; position: relative; z-index: 2;
-  min-height: 44px; min-width: 44px; margin: calc(-44px - 6px) 16px 6px 0; padding: 0 12px 0 14px; box-sizing: border-box; border-radius: 22px;
-  background: var(--bone); color: var(--ink); border: 1px solid var(--line); box-shadow: none; font: inherit; font-size: var(--c-mono); font-weight: 700; line-height: 1.1; white-space: nowrap; }
-html.counter #paneToday .more-pill svg { width: 1.1em; height: 1.1em; flex: 0 0 auto; }
+  min-height: 44px; min-width: 44px; margin: calc(-44px - 6px) 16px 6px 0; padding: 0 2px; box-sizing: border-box; justify-content: center;
+  background: transparent; color: var(--ink); border: 0; box-shadow: none; font: inherit; font-size: var(--c-mono); font-weight: 700; line-height: 1; white-space: nowrap; }
+/* v0.1.4.1: the 44px button is the tap target only (transparent); what shows is a small chip, at most 22px tall at any
+   text size (its type stops at 16px; the button's aria-label carries the full count) */
+html.counter #paneToday .more-pill .mp-chip { display: inline-flex; align-items: center; gap: 3px; height: 22px; box-sizing: border-box; padding: 0 7px 0 9px;
+  border-radius: 11px; background: var(--bone); border: 1px solid var(--line); font-size: min(var(--c-mono), 16px); line-height: 1; overflow: hidden; }
+html.counter #paneToday .more-pill svg { width: 1em; height: 1em; flex: 0 0 auto; }
 /* 200% text: the list keeps room for the 44px pill (46px) when it scrolls. To fund it the buttons drop to 44px, the 4px gap
    above them goes and so do the gaps around the list, so a two-line day title still leaves that room at 644x382 */
-html.counter.lg-text #paneToday { --btn-h: 44px; --act-h: calc(var(--slot-h) + 6px + var(--btn-h)); }
-html.counter.lg-text #paneToday .today-actions { padding-top: var(--slot-h); }
+html.counter.lg-text #paneToday { --btn-h: 44px; --act-h: calc(6px + var(--btn-h)); }
+html.counter.lg-text #paneToday .today-actions { padding-top: 0; }
 html.counter.lg-text #paneToday .toast-slot { margin-bottom: calc(var(--btn-h) + 7px); } /* the bar's 6px bottom padding and 1px margin: the slot ends where the buttons start */
 html.counter.lg-text #paneToday .set-rows { min-height: 46px; box-sizing: border-box; padding-top: 0; padding-bottom: 2px; } /* 2px: WebKit scrolls in whole pixels, so a list at a fractional top could not bring the last row's final pixel into view */
 html.counter.lg-text #paneToday .today-hero { padding-bottom: 0; }
 html.counter.lg-text #paneToday .more-pill:not([hidden]) { margin: -45px 16px 1px 0; }
-/* v0.1.3.4b, 200% text, a list that overflows (.more-on, set by layoutMore): the pill has its own 44px strip under the list
-   (right side), so it never covers a row; the focus line goes to pay for it. The list snaps: each row's top (.snap-top, a
+/* v0.1.3.4b, and since v0.1.4 (c) at every text size: a list that overflows (.more-on, set by layoutMore) gives the pill its
+   own 44px strip under the list (right side), so it never covers a row or a tag; no overflow, no strip. At 200% text the
+   focus line goes to pay for it (it stays at normal text). The list snaps: each row's top (.snap-top, a
    1px marker, since a row taller than the window must not be a snap area) and the start of each line inside a row, so a
    scroll always settles with a whole line at the top. Rows start flush (no top padding), so a row's top is its first line. */
 .set-row .snap-top { display: none; }
 html.counter.lg-text #paneToday .today.more-on .today-hero .sub { display: none; }
 html.counter.lg-text #paneToday .today.more-on .today-hero h2 { line-height: 1; } /* 7px back from a two-line title */
-html.counter.lg-text #paneToday .today.more-on .set-rows { min-height: 43px; padding-bottom: 0; scroll-snap-type: y mandatory; }
-html.counter.lg-text #paneToday .today.more-on .set-row { position: relative; padding-top: 0; scroll-snap-align: start; }
-html.counter.lg-text #paneToday .today.more-on .set-row.tall { scroll-snap-align: none; }
-html.counter.lg-text #paneToday .today.more-on .set-row .snap-top { display: block; position: absolute; top: 0; left: 0; width: 1px; height: 1px; scroll-snap-align: start; }
-html.counter.lg-text #paneToday .today.more-on .set-row .w,
-html.counter.lg-text #paneToday .today.more-on .set-row .ex-dl { display: inline-block; }
-html.counter.lg-text #paneToday .today.more-on .set-row .sn { scroll-snap-align: start; } /* the first word, tag or note of each line (layoutMore) */
-html.counter.lg-text #paneToday .today.more-on .set-row .ex-name { line-height: 1.25; } /* at least the font's content height (1.21em), so a line's glyph box ends where the next line's snap point starts */
-html.counter.lg-text #paneToday .today.more-on .more-pill:not([hidden]) { margin: 0 16px 0 0; }
-html.counter.lg-text #paneToday .today.more-on .more-pill.at-end { visibility: hidden; }
-html.counter #paneToday .set-row { min-height: calc(2.4rem * var(--cs, 1)); margin: 0; padding: calc(0.2rem * var(--cs, 1)) 0; gap: 2px 12px; flex-wrap: nowrap;
+html.counter #paneToday .today.more-on .set-rows { min-height: 43px; padding-bottom: 0; scroll-snap-type: y mandatory; }
+html.counter #paneToday .today.more-on .set-row { position: relative; padding-top: 0; scroll-snap-align: start; }
+html.counter #paneToday .today.more-on .set-row.tall { scroll-snap-align: none; }
+html.counter #paneToday .today.more-on .set-row .snap-top { display: block; position: absolute; top: 0; left: 0; width: 1px; height: 1px; scroll-snap-align: start; }
+html.counter #paneToday .today.more-on .set-row .w,
+html.counter #paneToday .today.more-on .set-row .ex-dl { display: inline-block; white-space: pre; } /* v0.1.4.3: pre keeps the leading space an inline-block drops ("6-8 · deload", as at 100%) */
+html.counter #paneToday .today.more-on .set-row .sn { scroll-snap-align: start; } /* the first word, tag or note of each line (layoutMore) */
+html.counter #paneToday .today.more-on .set-row .ex-name { line-height: normal; } /* v0.1.4: the font's own line height, never less than its glyph box (1.25 was under it: 1.35em on the Android test font), so a line's glyphs end where the next line's snap point starts and a sliver of the next line at the list's edge never touches them */
+html.counter #paneToday .today.more-on .more-pill:not([hidden]) { margin: 0 16px 0 0; }
+html.counter #paneToday .today.more-on .more-pill.at-end, html.counter #paneToday .today.more-on .more-pill.under-undo { visibility: hidden; } /* v0.1.4: hidden (its strip stays) at the list end and while Undo shows */
+html.counter #paneToday .set-row { min-height: calc(2.4rem * var(--cs, 1)); margin: 0; padding: calc(0.1rem * var(--cs, 1)) 0; gap: 2px 12px; flex-wrap: nowrap;
   background: transparent; border-radius: 0; border-bottom: 1px solid var(--line); }
 html.counter #paneToday .set-row:last-child { border-bottom: 0; }
-html.counter #paneToday .set-row .ex-left { flex: 1 1 auto; min-width: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 2px 8px; }
+html.counter #paneToday .set-row .ex-left { flex: 1 1 8ch; min-width: 0; display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 8px; }
 html.counter #paneToday .set-row .ex-name { font-size: var(--c-name); font-weight: 600; line-height: 1.2; overflow-wrap: anywhere; }
-html.counter #paneToday .set-row .tag { font-size: max(0.625rem, calc(0.66rem * var(--cs, 1))); }
+html.counter #paneToday .set-row .tag { font-size: max(0.625rem, calc(0.66rem * var(--cs, 1))); padding: 1px 6px; line-height: 1.2; } /* v0.1.4.1: rows 0.1rem*cs top and bottom (was 0.2rem) and 14px tag boxes (were 19px), so the longest day fits at 100% text; the Week view keeps its tags as they were */
 html.counter #paneToday .set-row .ex-sets { font-family: var(--mono); font-size: var(--c-mono); white-space: nowrap; flex-shrink: 0; }
 html.counter #paneToday .today .ex-hint { flex: 0 0 auto; }
 html.counter #paneToday .today-rest { flex: 0 0 auto; }
-/* Skip and Mark day done sit at the panel's bottom; spare space stays inside the panel, above them. The bar's top
-   --slot-h is the reserved Undo slot, which #toastSlot covers (below), so Undo shows just above the buttons and nothing moves. */
-html.counter #paneToday .today-actions { flex: 0 0 auto; margin-top: auto; padding: calc(var(--slot-h) + 4px) 16px 6px; position: sticky; bottom: 0; z-index: 1; background: var(--panel); margin: auto 1px 1px; border-radius: 0 0 15px 15px; }
+/* Skip and Mark day done sit at the panel's bottom; spare space stays inside the panel, above them. v0.1.4 (c): the bar no
+   longer reserves the Undo slot; the list runs to the buttons and #toastSlot (below) overlays the list's bottom, opacity only. */
+html.counter #paneToday .today-actions { flex: 0 0 auto; margin-top: auto; padding: 2px 16px 4px; position: sticky; bottom: 0; z-index: 1; background: var(--panel); margin: auto 1px 1px; border-radius: 0 0 15px 15px; }
 html.counter #paneToday .btn-done { min-height: var(--btn-h); font-size: max(0.9375rem, calc(1.05rem * var(--cs, 1))); }
 html.counter #paneToday #navGroup { display: contents; }
-/* Week header: the same height as the Today header. "Week and progress" + chevron is a plain label on the left and the
-   whole row is its button; Back to today sits on the right, its space always kept (hidden while today is selected) */
+/* Week header: the same height as the Today header. "This week" + chevron is a plain label on the left, its button sized
+   to its own content; Back to today sits on the right (margin-left: auto), shown only off today (Designer A+).
+   v0.1.4.3: the button no longer grows (was flex: 1 1 0), so its width does not change when Back to today comes and goes;
+   8px of its own padding after the chevron keep the A+ 8px spare */
 html.counter #paneToday #outerNav { grid-column: 2; grid-row: 1; margin: 0; min-height: 0; height: var(--hh); display: block; overflow: visible; }
-html.counter #paneToday #outerNav .nav-row { display: flex; flex-wrap: nowrap; margin: 0; padding: 0; min-height: 0; height: var(--hh); align-items: flex-start; gap: 0; overflow: visible; }
-html.counter #paneToday .outer-nav .open-plan { order: 1; flex: 1 1 0; min-width: 0; width: auto; height: 44px; min-height: 44px; margin: calc(var(--hh) - 44px) 0 0; padding: 0 0 0 16px; border: 0; border-radius: 16px 0 0 0;
+html.counter #paneToday #outerNav .nav-row { display: flex; flex-wrap: nowrap; margin: 0; padding: 0; min-height: 0; height: var(--hh); align-items: flex-start; gap: 12px; overflow: visible; } /* v0.1.4.3: 12px, the header fit rule's gap (syncCounter headRoom); Back to today keeps the right (margin-left: auto) */
+html.counter #paneToday .outer-nav .open-plan { order: 1; flex: 0 0 auto; min-width: 0; width: auto; height: 44px; min-height: 44px; margin: calc(var(--hh) - 44px) 0 0; padding: 0 8px 0 16px; border: 0; border-radius: 16px 0 0 0;
   background: transparent; box-shadow: none; color: var(--mist); font-family: inherit; font-size: var(--c-kick); font-weight: 700; letter-spacing: 0; line-height: 1.3; text-decoration: none;
-  display: flex; align-items: center; justify-content: flex-start; gap: 3px; text-align: left; white-space: nowrap; }
-html.counter #paneToday .outer-nav .open-plan > span:first-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+  display: flex; align-items: center; justify-content: flex-start; gap: 0.1875rem; text-align: left; white-space: nowrap; }
+/* v0.1.4.3 (Designer A+): "This week" (set by syncCounter), never an ellipsis; Back to today only off today, nowrap, its
+   label's right edge on the status circles' edge (10px in, the rows' circle margin); var(--gap) between them */
+html.counter #paneToday .outer-nav .open-plan > span:first-child { min-width: 0; overflow: visible; text-overflow: clip; }
 html.counter #paneToday .open-plan .chev { display: inline; color: var(--mist); }
-html.counter #paneToday #backSlot { order: 2; flex: 0 0 auto; display: flex; margin-top: calc(var(--hh) - 44px); }
+html.counter #paneToday #backSlot { order: 2; flex: 0 0 auto; display: flex; margin-top: calc(var(--hh) - 44px); margin-left: auto; }
 html.counter #paneToday #backSlot .back-today { margin: 0; width: auto; height: 44px; min-height: 44px; min-width: 44px; padding: 0 8px 0 4px; border: 0; border-radius: 12px; background: transparent;
   display: inline-flex; align-items: center; justify-content: center; font-size: var(--c-kick); white-space: nowrap; }
 html.counter #paneToday #backSlot .back-today .bt-label { display: none; }
-html.counter #paneToday #backSlot .bt-ph { visibility: hidden; }
+html.counter #paneToday #backSlot .bt-ph { display: none; }
+html.counter #paneToday #backSlot .back-today { padding-right: 10px; }
 html.counter #paneToday #weekStrip { grid-column: 2; grid-row: 2 / 4; margin-top: 0; min-height: 0; overflow: hidden; container-type: size; background: transparent; border: 0; border-radius: 0 0 16px 16px; }
 /* seven equal rows; the type follows the row (--rh): name clamp(17px, 0.40 x row, 22px),
    day label clamp(13px, 0.30 x row, 16px) (in rem, so 200% text doubles the floors); both stay on one line with an
-   ellipsis (the sizes are the panel's --c-name and --c-mono, shared with the Today panel). Status glyph 24px centered in a 44x44 box. */
+   (v0.1.4.3: names wrap to two lines, no ellipsis) (the sizes are the panel's --c-name and --c-mono, shared with the Today panel). Status glyph 24px centered in a 44x44 box. */
 html.counter #paneToday .wstrip { display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: repeat(7, minmax(0, 1fr)); grid-auto-flow: row; height: 100%; box-sizing: border-box; padding: 0; margin: 0; gap: 0; border: 0; border-radius: 0; background: transparent; overflow: hidden; }
-html.counter #paneToday .wd { min-height: 0; height: auto; flex-direction: row; align-items: center; justify-content: flex-start; gap: 8px; padding: 0 0 0 16px; text-align: left; overflow: hidden; }
-html.counter #paneToday .wd .d { flex: 0 0 3.1em; font-family: var(--mono); font-weight: 700; letter-spacing: 0.06em; font-size: var(--c-mono); line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-html.counter #paneToday .wd .ss { display: block; flex: 1 1 auto; min-width: 0; font-weight: 600; font-size: var(--c-name); line-height: 1.2; color: var(--bone); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* v0.1.4.3 (Designer A+): a day name wraps to two lines and never truncates; the line is centered in the row and the day
+   label and circle sit on the name's first line */
+html.counter #paneToday .wd { min-height: 0; height: auto; flex-direction: row; flex-wrap: wrap; align-content: center; align-items: flex-start; justify-content: flex-start; gap: 0 8px; padding: 0 0 0 16px; text-align: left; overflow: hidden; }
+html.counter #paneToday .wd .d { flex: 0 0 3.1em; font-family: var(--mono); font-weight: 700; letter-spacing: 0.06em; font-size: var(--c-mono); line-height: 1.2; white-space: nowrap; overflow: hidden;
+  margin-top: calc((var(--c-name) - var(--c-mono)) * 0.6); }
+html.counter #paneToday .wd .ss { display: block; flex: 1 1 0; min-width: 0; font-weight: 600; font-size: var(--c-name); line-height: 1.2; color: var(--bone); white-space: normal; overflow-wrap: anywhere; overflow: visible; text-overflow: clip; }
 html.counter #paneToday .wd .s { display: none; }
-html.counter #paneToday .wd .dot { flex: 0 0 24px; width: 24px; height: 24px; box-sizing: border-box; margin: 0 10px; }
+html.counter #paneToday .wd .dot { flex: 0 0 24px; width: 24px; height: 24px; box-sizing: border-box; margin: calc(var(--c-name) * 0.6 - 12px) 10px 0; }
 html.counter #paneToday .wd .dot svg { width: 14px; height: 14px; }
 /* the Undo slot: over the reserved top of the actions bar, right above Skip and Mark day done */
 html.counter #paneToday .toast-slot { grid-column: 1; grid-row: 1 / 4; align-self: end; position: relative; z-index: 2; height: var(--slot-h); box-sizing: border-box; padding: 0 16px;
-  margin: 0 1px calc(var(--btn-h) + 10px) 1px; } /* inset 1px like the actions bar, so the slot stays inside it */
+  margin: 0 1px calc(var(--btn-h) + 5px) 1px; } /* v0.1.4: ends where the buttons start (the bar's 4px bottom padding and 1px margin) */ /* inset 1px like the actions bar, so the slot stays inside it */
 html.counter #paneToday .toast-slot { pointer-events: none; } /* an empty slot never takes a tap or covers a rest day */
 html.counter #paneToday .toast-slot > * { pointer-events: auto; }
-/* 200% text: day rows keep one line with an ellipsis and the right column grows to 48% */
+/* 200% text: a narrower day label (v0.1.4.3: the 48% column is gone; names wrap) */
 html.counter.lg-text #paneToday .wd .d { flex-basis: 2.6em; letter-spacing: 0; }
 /* 200% text: a set line that does not fit beside the name goes under it (whole words, never over the tag) */
 html.counter.lg-text #paneToday .set-row { flex-wrap: wrap; }
-html.counter.lg-text #paneToday .set-row .ex-left { flex: 1 1 12em; }
+html.counter.lg-text #paneToday .set-row .ex-left { flex: 1 1 8ch; min-width: min-content; } /* v0.1.4 addendum: the sets go under the name only when the name column would be under 8ch, still right aligned. v0.1.4.3: never narrower than its longest word (names break only between words at 200%), so a word longer than 8ch sends the sets under the name instead of running into them (780x360 200%: "Overhead" over "4") */
 html.counter.lg-text #paneToday .set-row .ex-name { overflow-wrap: normal; word-break: normal; }
-html.counter.lg-text #paneToday .set-row .ex-sets { white-space: normal; flex-shrink: 1; }
+html.counter.lg-text #paneToday .set-row .ex-sets { white-space: nowrap; flex-shrink: 0; } /* v0.1.4 addendum: sets never wrap */
 html.counter #paneToday .skip-bottom { display: inline-flex; align-items: center; justify-content: center; min-height: var(--btn-h); }
 /* Counter: Update plan fits whole between the top clear zone and the bottom safe area (678x396 and 644x382): a two-line
    field, tighter gaps, and the "Plan code" label kept for screen readers only (the field's placeholder says the same) */
@@ -1199,6 +1244,61 @@ html.counter.counter-short #paneToday .wstrip { height: auto; grid-template-rows
 /* the Counter with the keyboard up at 200% text leaves ~130px: the field drops to one line (it scrolls) so the field and
    Use this plan both stay above the keyboard */
 html.counter .upd-box.typing .code-in { height: min(2.9rem, 56px); min-height: min(2.9rem, 56px); }
+/* v0.1.4.3: the single column in a short landscape window (200% text under 700 wide, Designer option 3) has the same
+   keyboard room as the Counter, so the field drops to one line there too (667x375 at 200%: Use this plan was under the keyboard) */
+@media (orientation: landscape) and (max-height: 499.98px) { .upd-box.typing .code-in { height: min(2.9rem, 56px); min-height: min(2.9rem, 56px); } }
+
+/* ---- v0.1.4 (d): inner portrait home, a full-width Week and progress row ----
+   Today card, strip, Week and progress. (v0.1.4.3: the Up next card from (d) is gone on the owner's request; inner
+   portrait was the only layout that showed it.) */
+:where(html.L-innerp) {
+  /* Week and progress: one row from card edge to card edge (the hidden Back to today placeholder no longer takes the left
+     part), at least 44px tall, the chevron centred in its own 44x44 area at the right end */
+  #backSlot:has(> .bt-ph) { display: none; }
+  .outer-nav .open-plan { flex: 1 1 100%; padding-right: 0; }
+  .open-plan .chev-box { display: inline-flex; flex: 0 0 44px; width: 44px; height: 44px; align-items: center; justify-content: center; margin: -1px 0; }
+  /* (the -1px margins lay the 44x44 area over the button's 1px borders, so the button stays 44px tall as in v0.1.3.4) */
+}
+
+/* v0.1.4 Designer addendum 2 (owner-approved): every exercise row (Week view, Today card, Up next, the Counter). The name block
+   takes the room (grows from an 8ch basis, min-width 0) and the sets sit at its right: never wrapped, tabular, right
+   aligned and on the name's first line (baseline). Name and tag wrap inside the name block, so a long name pushes the
+   tag under it, never the sets onto a left-aligned line. Flex rather than a two-track grid: the same columns, and the
+   8ch rule (sets on their own line, still right aligned, when the name column would be narrower) needs no container
+   query (a size container broke WebKit's scroll anchoring, see syncDayCols). */
+.ex, .set-row { align-items: baseline; }
+.ex > .ex-left, .set-row > .ex-left { flex: 1 1 8ch; min-width: 0; align-items: baseline; }
+.ex > .ex-sets, .set-row > .ex-sets { margin-left: auto; text-align: right; white-space: nowrap; flex-shrink: 0; font-variant-numeric: tabular-nums; }
+.ex-left > .ex-name { min-width: 0; overflow-wrap: break-word; }
+/* v0.1.4: in the Counter's snapping list (200% text) the sets sit at the top of the name's first line, not on its
+   baseline: the sets' mono glyph box is deeper than the name's, so on the baseline it reached 3px into the name's second
+   line, and a snap to that line left the sets cut at the list's top. At the top it ends inside the first line. */
+html.counter #paneToday .today.more-on .set-row > .ex-sets { align-self: flex-start; }
+/* v0.1.4: in the Counter a tag beside the name is centred on the name's line, as in v0.1.3.4, not on its baseline: on the
+   baseline its taller line box hung 3px under the name's, and five such rows put the measured 06 size (678x466 app, the
+   longest day) 2px over at the smallest type step, so the list scrolled behind the pill's strip. The sets keep the baseline. */
+.ex > .ex-left > .tag, .set-row > .ex-left > .tag { align-self: center; } /* everywhere: the same row heights as v0.1.3.4 */
+/* and everywhere the sets' line box is no taller than their glyphs (the monospace face's normal line height is deeper than
+   the name's), so on the baseline it does not hang under the name's line and make the row taller than in v0.1.3.4 */
+.ex > .ex-sets, .set-row > .ex-sets { line-height: 1.15; }
+
+/* v0.1.4: Undo never covers list text (app5 undoRoom). While it shows in the Counter, the actions bar takes back the
+   slot's height (as in v0.1.3.4) and the pill's strip goes (the pill is hidden under Undo anyway), so the list ends just
+   above the toast. The slot's scroll margins are the safe areas, so scrolling the slot into view stops clear of them. */
+html.counter #paneToday.undo-on .today-actions { padding-top: calc(var(--slot-h) + 2px); }
+html.counter #paneToday.undo-on .more-pill:not([hidden]) { display: none; } /* with or without its strip: a list that Undo shortened must not get a pill over its rows */
+.toast-slot { scroll-margin-top: var(--safe-t, 0px); scroll-margin-bottom: var(--safe-b, 0px); }
+/* v0.1.4: the list's end room (app5 layoutMore, --end-pad) is a spacer after its rows, so the list can still shrink (a flex
+   item never shrinks below its own padding) */
+html.counter #paneToday .set-rows::after { content: ""; display: block; height: var(--end-pad, 0px); flex: 0 0 auto; } /* v0.1.4.1: the list is a flex column, so the spacer must not shrink (it is the end room the last snap point needs) */
+/* v0.1.4.1: fitCounter's ceiling pass (.fit-ceil, only while it measures) lays the card out as v0.1.3.4 did: the bar
+   reserving the Undo slot, the list's 2px top padding, 0.2rem*cs row padding and the 19px tag boxes. The scale it finds
+   is the most the real layout may use, so the type never grows past v0.1.3.4's. */
+html.counter #paneToday.fit-ceil .today-actions { padding: calc(var(--slot-h) + 4px) 16px 6px; }
+html.counter #paneToday.fit-ceil .set-rows { padding-top: 2px; }
+html.counter #paneToday.fit-ceil .set-row { padding: calc(0.2rem * var(--cs, 1)) 0; }
+html.counter #paneToday.fit-ceil .set-row .tag { padding: 2px 7px; line-height: inherit; }
+html.counter #paneToday.fit-ceil .set-row .ex-left { flex: 1 1 auto; align-items: center; }
 </style>
 </head>
 <body>
@@ -1248,7 +1348,7 @@ html.counter .upd-box.typing .code-in { height: min(2.9rem, 56px); min-height: m
       <div class="outer-nav" id="outerNav">
         <div class="nav-row" id="navRow">
         <div id="backSlot"></div>
-        <button type="button" class="open-plan" id="openPlan" aria-haspopup="dialog" aria-controls="planPane" aria-expanded="false"><span>Week and progress</span><span class="chev" aria-hidden="true">▾</span></button>
+        <button type="button" class="open-plan" id="openPlan" aria-haspopup="dialog" aria-controls="planPane" aria-expanded="false"><span>Week and progress</span><span class="chev-box" aria-hidden="true"><span class="chev">▾</span></span></button>
         </div>
       </div>
       <div class="toast-slot" id="toastSlot"></div>
@@ -1342,7 +1442,7 @@ html.counter .upd-box.typing .code-in { height: min(2.9rem, 56px); min-height: m
        (so it can never end this element). It never runs, and the app never writes to it. -->
   <script type="text/plain" id="app-src">
 ~1!DOCTYPE html>
-~1!-- coach-tracker v0.1.3.4-preview · generic workout tracker · the plan arrives in the #p= link fragment and is stored on this device only -->
+~1!-- coach-tracker v0.1.4.3-preview · generic workout tracker · the plan arrives in the #p= link fragment and is stored on this device only -->
 ~1html lang="en">
 ~1head>
 ~1meta charset="UTF-8" />
@@ -1362,18 +1462,36 @@ html.counter .upd-box.typing .code-in { height: min(2.9rem, 56px); min-height: m
 ~1script>/* Layout mode, one definition. html.duo-inner when the layout viewport's short side is at least 520 (the Duo inner
    screen; every slab phone tops out near 440). Wider than tall adds html.L-duo (two panes), otherwise html.L-innerp (inner
    portrait). Anything else is the phone layout (the Counter in short landscape, app6). The device screen is not used:
-   Safari on the real Duo reports the wrong one. Re-checked on resize, orientationchange and unfold; frozen while a text
+   Safari on the real Duo reports the wrong one. Re-checked on resize, orientationchange and unfold (and, v0.1.4.2, as the page settles after start); frozen while a text
    field has focus and for 700ms after, so a keyboard never flips it. window.LAYOUT.matches is true for every layout but
    two panes (the old cover query), with change listeners. */
 (function () { var h = document.documentElement, hold = 0, ls = [], cur = null;
   var entry = function () { var a = document.activeElement; return !!a && (a.tagName === "TEXTAREA" || (a.tagName === "INPUT" && !/^(button|checkbox|radio|file|submit|reset|range|color)$/i.test(a.type))); };
-  var want = function () { var w = window.innerWidth, ht = window.innerHeight; /*WANT*/return Math.min(w, ht) >= 520 ? (w > ht ? "duo" : "innerp") : "phone";/*END*/ };
+  /* v0.1.4.3: the mode comes from media queries, which measure the viewport the CSS lays out with. window.innerWidth and
+     innerHeight can disagree with it on a Home Screen app (the owner's cover screen in landscape laid out 678 wide yet
+     never got the Counter), and a query's change event fires even when no resize does. */
+  var mq = function (q) { try { return window.matchMedia(q); } catch (e) { return { matches: false }; } };
+  var MQ_IN = mq("(min-width: 520px) and (min-height: 520px)"), MQ_LAND = mq("(orientation: landscape)");
+  var want = function () { var w = window.innerWidth, ht = window.innerHeight; /* w and ht only for gate-slab's rule mutations */ /*WANT*/return MQ_IN.matches ? (MQ_LAND.matches ? "duo" : "innerp") : "phone";/*END*/ };
   var apply = function (m) { cur = m; h.classList.toggle("duo-inner", m !== "phone"); h.classList.toggle("L-duo", m === "duo"); h.classList.toggle("L-innerp", m === "innerp"); };
   var sync = function () { if (entry() || performance.now() ~1 hold) return; var m = want(); if (m === cur) return; apply(m); ls.forEach(function (f) { try { f({ matches: m !== "duo" }); } catch (e) { setTimeout(function () { throw e; }); } }); };
   apply(want());
   window.addEventListener("resize", sync); window.addEventListener("orientationchange", sync);
-  try { var o = window.matchMedia("(orientation: landscape)"); if (o.addEventListener) o.addEventListener("change", sync); else o.addListener(sync); } catch (e) {}
+  [MQ_IN, MQ_LAND].forEach(function (o) { try { if (o.addEventListener) o.addEventListener("change", sync); else o.addListener(sync); } catch (e) {} });
   document.addEventListener("focusout", function () { hold = performance.now() + 700; setTimeout(sync, 720); }, true);
+  /* v0.1.4.2: a Home Screen launch can read a stale viewport for a moment and fire no resize after it settles, which
+     left the phone layout up until focus next moved (the first focusout re-check then flipped the home mid-visit).
+     Re-check as the page settles: load, pageshow, visibility, the visual viewport, and a short poll after start. */
+  /* v0.1.4.3: the settle checks re-checked only these classes, so every other resize-only layout (the Counter on the
+     cover screen in landscape) kept the stale viewport's answer. When the viewport has changed with no resize event,
+     fire the resize the browser skipped, so every layout that listens for one re-checks. */
+  var lw = window.innerWidth, lh = window.innerHeight;
+  window.addEventListener("resize", function () { lw = window.innerWidth; lh = window.innerHeight; }, true);
+  var settle = function () { if (window.innerWidth !== lw || window.innerHeight !== lh) { lw = window.innerWidth; lh = window.innerHeight; try { window.dispatchEvent(new Event("resize")); } catch (e) {} } sync(); };
+  window.addEventListener("load", settle); window.addEventListener("pageshow", settle);
+  document.addEventListener("visibilitychange", function () { if (!document.hidden) settle(); });
+  try { if (window.visualViewport) window.visualViewport.addEventListener("resize", settle); } catch (e) {}
+  [50, 150, 300, 600, 1000, 1600, 2500].forEach(function (t) { setTimeout(settle, t); });
   window.LAYOUT = { get matches() { return cur !== "duo"; }, get mode() { return cur; }, sync: sync,
     addEventListener: function (t, f) { ls.push(f); }, addListener: function (f) { ls.push(f); } };
 })();~1/script>
@@ -1412,6 +1530,8 @@ html.counter .upd-box.typing .code-in { height: min(2.9rem, 56px); min-height: m
     --pl: calc(var(--gut) + var(--safe-l));
     --pr: calc(var(--gut) + var(--safe-r));
     --gap: 10px;
+    /* v0.1.4: one type variable for every kicker (the Today card's, Up next's, the header's phase line) */
+    --t-kick: 0.72rem;
     --shadow-pop: 0 6px 24px rgba(29, 33, 30, 0.28); /* l-ink at 28% */
     --scrim: rgba(29, 33, 30, 0.38); /* l-ink at 38% */
     --mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
@@ -1499,7 +1619,7 @@ html.counter .upd-box.typing .code-in { height: min(2.9rem, 56px); min-height: m
     color: var(--ember-text);
     font-family: var(--mono);
     font-weight: 700;
-    font-size: 0.72rem;
+    font-size: var(--t-kick);
     letter-spacing: 0.24em;
     text-transform: uppercase;
   }
@@ -1768,10 +1888,14 @@ html.counter .upd-box.typing .code-in { height: min(2.9rem, 56px); min-height: m
   .banner .bbody { color: var(--mist); font-size: 0.8rem; margin-top: 4px; line-height: 1.5; }
 
   /* ---- Session cards ---- */
-  .day-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; align-items: start; }
-  /* inner portrait (v0.1.3.3: inside the Week and progress page): session and progress cards in two columns */
+  /* v0.1.4 (a): one column of full-width rows, Mon to Sun, whenever the week list is under 820px wide (every layout of the
+     device). At 820px and wider, two columns, the open day across both, the order kept (row flow, never dense). The width
+     is measured (.cols2, syncDayCols in src/app4b.js): a CSS size container broke WebKit's scroll anchoring in the other pane. */
+  .day-grid { display: grid; grid-template-columns: minmax(0, 1fr); grid-auto-flow: row; gap: 10px; align-items: start; }
+  .day-wrap.cols2 > .day-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: var(--gap); }
+  .day-wrap.cols2 > .day-grid > .day.open { grid-column: 1 / -1; }
+  /* inner portrait (v0.1.3.3: inside the Week and progress page): progress cards in two columns */
   :where(html.L-innerp) {
-    .day-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: var(--gap); }
     .prog-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: var(--gap); align-items: start; }
     .prog-grid > .card:last-child:nth-child(odd) { grid-column: 1 / -1; }
   }
@@ -2051,6 +2175,7 @@ html.counter .upd-box.typing .code-in { height: min(2.9rem, 56px); min-height: m
       border-radius: 20px 20px 0 0;
       overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch;
       padding: 0 var(--pr) calc(24px + 50px + var(--safe-b)) var(--pl);
+      scroll-padding-top: calc(var(--head-h, 0px) + 8px); /* v0.1.4: clear of the sticky head (--head-h, src/app4b.js) */
       transform: translateY(100%); visibility: hidden;
       transition: transform .24s ease, visibility 0s linear .24s;
     }
@@ -2375,7 +2500,8 @@ html.counter #paneToday {
   --slot-h: max(56px, calc(2.5rem + 12px));
   /* Skip and Mark day done; 44px at 200% text (below; v0.1.3.4: the 3rem rule gave 70px and squeezed the exercise list) */
   --btn-h: max(44px, calc(3rem * var(--cs, 1)));
-  --act-h: calc(var(--slot-h) + 10px + var(--btn-h));
+  /* v0.1.4 (c): the list runs to the buttons; the Undo slot overlays the list's bottom, so the bar reserves no slot */
+  --act-h: calc(6px + var(--btn-h));
   position: fixed; inset: 0; display: grid; grid-template-columns: minmax(0, 56fr) minmax(0, 44fr); grid-template-rows: var(--hh) minmax(0, 1fr) auto;
   column-gap: 12px; padding: calc(var(--safe-t) + var(--cpad)) max(var(--safe-r), 12px) calc(var(--safe-b) + var(--cpad-b)) max(var(--safe-l), 12px);
 }
@@ -2385,7 +2511,11 @@ html.counter #paneToday::after { grid-column: 2; }
 /* rows would fall under 44px (644x382 with a 21px bottom inset gives 42.9): the bottom padding goes (the panels end at
    the safe area's edge, never inside it) */
 html.counter.counter-tight #paneToday { --cpad-b: 0px; }
-html.counter.lg-text #paneToday { grid-template-columns: minmax(0, 52fr) minmax(0, 48fr); }
+/* large text (Designer, v0.1.4.3): the header line is taller than a 32px row, so the header row keeps its full 44px and
+   the pane's padding is 6px top and bottom, inside the safe area (never in place of it), for both cards alike; the tight
+   rule above does not apply here */
+html.counter.lg-text #paneToday, html.counter.lg-text.counter-tight #paneToday { --hh: 44px; --cpad: 6px; --cpad-b: 6px; }
+/* v0.1.4.3 (Designer A+): 200% text keeps the 56/44 columns; day names wrap now, and a week column under 12ch of names gives the single column */
 /* the header, week note and start nudge live in portrait and in the page; a start date is asked for by its own prompt */
 html.counter #header, html.counter #startNudge, html.counter #weekNote, html.counter #navMark, html.counter #navEnd { display: none !important; }
 html.counter #paneToday section.today { grid-column: 1; grid-row: 1 / 4; margin: 0; min-height: 0; display: flex; flex-direction: column; overflow-y: auto; overscroll-behavior: contain; scroll-padding-bottom: var(--act-h);
@@ -2413,90 +2543,105 @@ html.counter #paneToday .today-hero .sub { font-size: max(0.8125rem, calc(0.92re
    Its natural height when every row fits (nothing changes at normal text); it shrinks and scrolls when they do not.
    Before, the whole card scrolled under the opaque sticky actions bar, whose top is the reserved Undo slot (92px at
    200% text), so the rows sat behind a blank band with no sign that they were there. */
-html.counter #paneToday .set-rows { flex: 0 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 2px 16px 0; }
+html.counter #paneToday .set-rows { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 0 16px; display: flex; flex-direction: column; }
+/* v0.1.4.1: with the scale capped at v0.1.3.4's, a day that fits leaves room under its rows; the list takes it and its rows share it, so the list still runs to the buttons (no free room when it overflows) */
+html.counter #paneToday .set-rows > .set-row { flex: 1 0 auto; }
 /* "N more": solid, on the list's bottom edge (right side, so the start of the row above stays readable), at least 44px;
    it sits above the actions bar, so it never covers Skip, Mark day done or the Undo slot. No mask, fade or gradient. */
 .more-pill { display: none; }
 html.counter #paneToday .more-pill:not([hidden]) { display: inline-flex; align-items: center; gap: 4px; flex: 0 0 auto; align-self: flex-end; position: relative; z-index: 2;
-  min-height: 44px; min-width: 44px; margin: calc(-44px - 6px) 16px 6px 0; padding: 0 12px 0 14px; box-sizing: border-box; border-radius: 22px;
-  background: var(--bone); color: var(--ink); border: 1px solid var(--line); box-shadow: none; font: inherit; font-size: var(--c-mono); font-weight: 700; line-height: 1.1; white-space: nowrap; }
-html.counter #paneToday .more-pill svg { width: 1.1em; height: 1.1em; flex: 0 0 auto; }
+  min-height: 44px; min-width: 44px; margin: calc(-44px - 6px) 16px 6px 0; padding: 0 2px; box-sizing: border-box; justify-content: center;
+  background: transparent; color: var(--ink); border: 0; box-shadow: none; font: inherit; font-size: var(--c-mono); font-weight: 700; line-height: 1; white-space: nowrap; }
+/* v0.1.4.1: the 44px button is the tap target only (transparent); what shows is a small chip, at most 22px tall at any
+   text size (its type stops at 16px; the button's aria-label carries the full count) */
+html.counter #paneToday .more-pill .mp-chip { display: inline-flex; align-items: center; gap: 3px; height: 22px; box-sizing: border-box; padding: 0 7px 0 9px;
+  border-radius: 11px; background: var(--bone); border: 1px solid var(--line); font-size: min(var(--c-mono), 16px); line-height: 1; overflow: hidden; }
+html.counter #paneToday .more-pill svg { width: 1em; height: 1em; flex: 0 0 auto; }
 /* 200% text: the list keeps room for the 44px pill (46px) when it scrolls. To fund it the buttons drop to 44px, the 4px gap
    above them goes and so do the gaps around the list, so a two-line day title still leaves that room at 644x382 */
-html.counter.lg-text #paneToday { --btn-h: 44px; --act-h: calc(var(--slot-h) + 6px + var(--btn-h)); }
-html.counter.lg-text #paneToday .today-actions { padding-top: var(--slot-h); }
+html.counter.lg-text #paneToday { --btn-h: 44px; --act-h: calc(6px + var(--btn-h)); }
+html.counter.lg-text #paneToday .today-actions { padding-top: 0; }
 html.counter.lg-text #paneToday .toast-slot { margin-bottom: calc(var(--btn-h) + 7px); } /* the bar's 6px bottom padding and 1px margin: the slot ends where the buttons start */
 html.counter.lg-text #paneToday .set-rows { min-height: 46px; box-sizing: border-box; padding-top: 0; padding-bottom: 2px; } /* 2px: WebKit scrolls in whole pixels, so a list at a fractional top could not bring the last row's final pixel into view */
 html.counter.lg-text #paneToday .today-hero { padding-bottom: 0; }
 html.counter.lg-text #paneToday .more-pill:not([hidden]) { margin: -45px 16px 1px 0; }
-/* v0.1.3.4b, 200% text, a list that overflows (.more-on, set by layoutMore): the pill has its own 44px strip under the list
-   (right side), so it never covers a row; the focus line goes to pay for it. The list snaps: each row's top (.snap-top, a
+/* v0.1.3.4b, and since v0.1.4 (c) at every text size: a list that overflows (.more-on, set by layoutMore) gives the pill its
+   own 44px strip under the list (right side), so it never covers a row or a tag; no overflow, no strip. At 200% text the
+   focus line goes to pay for it (it stays at normal text). The list snaps: each row's top (.snap-top, a
    1px marker, since a row taller than the window must not be a snap area) and the start of each line inside a row, so a
    scroll always settles with a whole line at the top. Rows start flush (no top padding), so a row's top is its first line. */
 .set-row .snap-top { display: none; }
 html.counter.lg-text #paneToday .today.more-on .today-hero .sub { display: none; }
 html.counter.lg-text #paneToday .today.more-on .today-hero h2 { line-height: 1; } /* 7px back from a two-line title */
-html.counter.lg-text #paneToday .today.more-on .set-rows { min-height: 43px; padding-bottom: 0; scroll-snap-type: y mandatory; }
-html.counter.lg-text #paneToday .today.more-on .set-row { position: relative; padding-top: 0; scroll-snap-align: start; }
-html.counter.lg-text #paneToday .today.more-on .set-row.tall { scroll-snap-align: none; }
-html.counter.lg-text #paneToday .today.more-on .set-row .snap-top { display: block; position: absolute; top: 0; left: 0; width: 1px; height: 1px; scroll-snap-align: start; }
-html.counter.lg-text #paneToday .today.more-on .set-row .w,
-html.counter.lg-text #paneToday .today.more-on .set-row .ex-dl { display: inline-block; }
-html.counter.lg-text #paneToday .today.more-on .set-row .sn { scroll-snap-align: start; } /* the first word, tag or note of each line (layoutMore) */
-html.counter.lg-text #paneToday .today.more-on .set-row .ex-name { line-height: 1.25; } /* at least the font's content height (1.21em), so a line's glyph box ends where the next line's snap point starts */
-html.counter.lg-text #paneToday .today.more-on .more-pill:not([hidden]) { margin: 0 16px 0 0; }
-html.counter.lg-text #paneToday .today.more-on .more-pill.at-end { visibility: hidden; }
-html.counter #paneToday .set-row { min-height: calc(2.4rem * var(--cs, 1)); margin: 0; padding: calc(0.2rem * var(--cs, 1)) 0; gap: 2px 12px; flex-wrap: nowrap;
+html.counter #paneToday .today.more-on .set-rows { min-height: 43px; padding-bottom: 0; scroll-snap-type: y mandatory; }
+html.counter #paneToday .today.more-on .set-row { position: relative; padding-top: 0; scroll-snap-align: start; }
+html.counter #paneToday .today.more-on .set-row.tall { scroll-snap-align: none; }
+html.counter #paneToday .today.more-on .set-row .snap-top { display: block; position: absolute; top: 0; left: 0; width: 1px; height: 1px; scroll-snap-align: start; }
+html.counter #paneToday .today.more-on .set-row .w,
+html.counter #paneToday .today.more-on .set-row .ex-dl { display: inline-block; white-space: pre; } /* v0.1.4.3: pre keeps the leading space an inline-block drops ("6-8 · deload", as at 100%) */
+html.counter #paneToday .today.more-on .set-row .sn { scroll-snap-align: start; } /* the first word, tag or note of each line (layoutMore) */
+html.counter #paneToday .today.more-on .set-row .ex-name { line-height: normal; } /* v0.1.4: the font's own line height, never less than its glyph box (1.25 was under it: 1.35em on the Android test font), so a line's glyphs end where the next line's snap point starts and a sliver of the next line at the list's edge never touches them */
+html.counter #paneToday .today.more-on .more-pill:not([hidden]) { margin: 0 16px 0 0; }
+html.counter #paneToday .today.more-on .more-pill.at-end, html.counter #paneToday .today.more-on .more-pill.under-undo { visibility: hidden; } /* v0.1.4: hidden (its strip stays) at the list end and while Undo shows */
+html.counter #paneToday .set-row { min-height: calc(2.4rem * var(--cs, 1)); margin: 0; padding: calc(0.1rem * var(--cs, 1)) 0; gap: 2px 12px; flex-wrap: nowrap;
   background: transparent; border-radius: 0; border-bottom: 1px solid var(--line); }
 html.counter #paneToday .set-row:last-child { border-bottom: 0; }
-html.counter #paneToday .set-row .ex-left { flex: 1 1 auto; min-width: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 2px 8px; }
+html.counter #paneToday .set-row .ex-left { flex: 1 1 8ch; min-width: 0; display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 8px; }
 html.counter #paneToday .set-row .ex-name { font-size: var(--c-name); font-weight: 600; line-height: 1.2; overflow-wrap: anywhere; }
-html.counter #paneToday .set-row .tag { font-size: max(0.625rem, calc(0.66rem * var(--cs, 1))); }
+html.counter #paneToday .set-row .tag { font-size: max(0.625rem, calc(0.66rem * var(--cs, 1))); padding: 1px 6px; line-height: 1.2; } /* v0.1.4.1: rows 0.1rem*cs top and bottom (was 0.2rem) and 14px tag boxes (were 19px), so the longest day fits at 100% text; the Week view keeps its tags as they were */
 html.counter #paneToday .set-row .ex-sets { font-family: var(--mono); font-size: var(--c-mono); white-space: nowrap; flex-shrink: 0; }
 html.counter #paneToday .today .ex-hint { flex: 0 0 auto; }
 html.counter #paneToday .today-rest { flex: 0 0 auto; }
-/* Skip and Mark day done sit at the panel's bottom; spare space stays inside the panel, above them. The bar's top
-   --slot-h is the reserved Undo slot, which #toastSlot covers (below), so Undo shows just above the buttons and nothing moves. */
-html.counter #paneToday .today-actions { flex: 0 0 auto; margin-top: auto; padding: calc(var(--slot-h) + 4px) 16px 6px; position: sticky; bottom: 0; z-index: 1; background: var(--panel); margin: auto 1px 1px; border-radius: 0 0 15px 15px; }
+/* Skip and Mark day done sit at the panel's bottom; spare space stays inside the panel, above them. v0.1.4 (c): the bar no
+   longer reserves the Undo slot; the list runs to the buttons and #toastSlot (below) overlays the list's bottom, opacity only. */
+html.counter #paneToday .today-actions { flex: 0 0 auto; margin-top: auto; padding: 2px 16px 4px; position: sticky; bottom: 0; z-index: 1; background: var(--panel); margin: auto 1px 1px; border-radius: 0 0 15px 15px; }
 html.counter #paneToday .btn-done { min-height: var(--btn-h); font-size: max(0.9375rem, calc(1.05rem * var(--cs, 1))); }
 html.counter #paneToday #navGroup { display: contents; }
-/* Week header: the same height as the Today header. "Week and progress" + chevron is a plain label on the left and the
-   whole row is its button; Back to today sits on the right, its space always kept (hidden while today is selected) */
+/* Week header: the same height as the Today header. "This week" + chevron is a plain label on the left, its button sized
+   to its own content; Back to today sits on the right (margin-left: auto), shown only off today (Designer A+).
+   v0.1.4.3: the button no longer grows (was flex: 1 1 0), so its width does not change when Back to today comes and goes;
+   8px of its own padding after the chevron keep the A+ 8px spare */
 html.counter #paneToday #outerNav { grid-column: 2; grid-row: 1; margin: 0; min-height: 0; height: var(--hh); display: block; overflow: visible; }
-html.counter #paneToday #outerNav .nav-row { display: flex; flex-wrap: nowrap; margin: 0; padding: 0; min-height: 0; height: var(--hh); align-items: flex-start; gap: 0; overflow: visible; }
-html.counter #paneToday .outer-nav .open-plan { order: 1; flex: 1 1 0; min-width: 0; width: auto; height: 44px; min-height: 44px; margin: calc(var(--hh) - 44px) 0 0; padding: 0 0 0 16px; border: 0; border-radius: 16px 0 0 0;
+html.counter #paneToday #outerNav .nav-row { display: flex; flex-wrap: nowrap; margin: 0; padding: 0; min-height: 0; height: var(--hh); align-items: flex-start; gap: 12px; overflow: visible; } /* v0.1.4.3: 12px, the header fit rule's gap (syncCounter headRoom); Back to today keeps the right (margin-left: auto) */
+html.counter #paneToday .outer-nav .open-plan { order: 1; flex: 0 0 auto; min-width: 0; width: auto; height: 44px; min-height: 44px; margin: calc(var(--hh) - 44px) 0 0; padding: 0 8px 0 16px; border: 0; border-radius: 16px 0 0 0;
   background: transparent; box-shadow: none; color: var(--mist); font-family: inherit; font-size: var(--c-kick); font-weight: 700; letter-spacing: 0; line-height: 1.3; text-decoration: none;
-  display: flex; align-items: center; justify-content: flex-start; gap: 3px; text-align: left; white-space: nowrap; }
-html.counter #paneToday .outer-nav .open-plan > span:first-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+  display: flex; align-items: center; justify-content: flex-start; gap: 0.1875rem; text-align: left; white-space: nowrap; }
+/* v0.1.4.3 (Designer A+): "This week" (set by syncCounter), never an ellipsis; Back to today only off today, nowrap, its
+   label's right edge on the status circles' edge (10px in, the rows' circle margin); var(--gap) between them */
+html.counter #paneToday .outer-nav .open-plan > span:first-child { min-width: 0; overflow: visible; text-overflow: clip; }
 html.counter #paneToday .open-plan .chev { display: inline; color: var(--mist); }
-html.counter #paneToday #backSlot { order: 2; flex: 0 0 auto; display: flex; margin-top: calc(var(--hh) - 44px); }
+html.counter #paneToday #backSlot { order: 2; flex: 0 0 auto; display: flex; margin-top: calc(var(--hh) - 44px); margin-left: auto; }
 html.counter #paneToday #backSlot .back-today { margin: 0; width: auto; height: 44px; min-height: 44px; min-width: 44px; padding: 0 8px 0 4px; border: 0; border-radius: 12px; background: transparent;
   display: inline-flex; align-items: center; justify-content: center; font-size: var(--c-kick); white-space: nowrap; }
 html.counter #paneToday #backSlot .back-today .bt-label { display: none; }
-html.counter #paneToday #backSlot .bt-ph { visibility: hidden; }
+html.counter #paneToday #backSlot .bt-ph { display: none; }
+html.counter #paneToday #backSlot .back-today { padding-right: 10px; }
 html.counter #paneToday #weekStrip { grid-column: 2; grid-row: 2 / 4; margin-top: 0; min-height: 0; overflow: hidden; container-type: size; background: transparent; border: 0; border-radius: 0 0 16px 16px; }
 /* seven equal rows; the type follows the row (--rh): name clamp(17px, 0.40 x row, 22px),
    day label clamp(13px, 0.30 x row, 16px) (in rem, so 200% text doubles the floors); both stay on one line with an
-   ellipsis (the sizes are the panel's --c-name and --c-mono, shared with the Today panel). Status glyph 24px centered in a 44x44 box. */
+   (v0.1.4.3: names wrap to two lines, no ellipsis) (the sizes are the panel's --c-name and --c-mono, shared with the Today panel). Status glyph 24px centered in a 44x44 box. */
 html.counter #paneToday .wstrip { display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: repeat(7, minmax(0, 1fr)); grid-auto-flow: row; height: 100%; box-sizing: border-box; padding: 0; margin: 0; gap: 0; border: 0; border-radius: 0; background: transparent; overflow: hidden; }
-html.counter #paneToday .wd { min-height: 0; height: auto; flex-direction: row; align-items: center; justify-content: flex-start; gap: 8px; padding: 0 0 0 16px; text-align: left; overflow: hidden; }
-html.counter #paneToday .wd .d { flex: 0 0 3.1em; font-family: var(--mono); font-weight: 700; letter-spacing: 0.06em; font-size: var(--c-mono); line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-html.counter #paneToday .wd .ss { display: block; flex: 1 1 auto; min-width: 0; font-weight: 600; font-size: var(--c-name); line-height: 1.2; color: var(--bone); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* v0.1.4.3 (Designer A+): a day name wraps to two lines and never truncates; the line is centered in the row and the day
+   label and circle sit on the name's first line */
+html.counter #paneToday .wd { min-height: 0; height: auto; flex-direction: row; flex-wrap: wrap; align-content: center; align-items: flex-start; justify-content: flex-start; gap: 0 8px; padding: 0 0 0 16px; text-align: left; overflow: hidden; }
+html.counter #paneToday .wd .d { flex: 0 0 3.1em; font-family: var(--mono); font-weight: 700; letter-spacing: 0.06em; font-size: var(--c-mono); line-height: 1.2; white-space: nowrap; overflow: hidden;
+  margin-top: calc((var(--c-name) - var(--c-mono)) * 0.6); }
+html.counter #paneToday .wd .ss { display: block; flex: 1 1 0; min-width: 0; font-weight: 600; font-size: var(--c-name); line-height: 1.2; color: var(--bone); white-space: normal; overflow-wrap: anywhere; overflow: visible; text-overflow: clip; }
 html.counter #paneToday .wd .s { display: none; }
-html.counter #paneToday .wd .dot { flex: 0 0 24px; width: 24px; height: 24px; box-sizing: border-box; margin: 0 10px; }
+html.counter #paneToday .wd .dot { flex: 0 0 24px; width: 24px; height: 24px; box-sizing: border-box; margin: calc(var(--c-name) * 0.6 - 12px) 10px 0; }
 html.counter #paneToday .wd .dot svg { width: 14px; height: 14px; }
 /* the Undo slot: over the reserved top of the actions bar, right above Skip and Mark day done */
 html.counter #paneToday .toast-slot { grid-column: 1; grid-row: 1 / 4; align-self: end; position: relative; z-index: 2; height: var(--slot-h); box-sizing: border-box; padding: 0 16px;
-  margin: 0 1px calc(var(--btn-h) + 10px) 1px; } /* inset 1px like the actions bar, so the slot stays inside it */
+  margin: 0 1px calc(var(--btn-h) + 5px) 1px; } /* v0.1.4: ends where the buttons start (the bar's 4px bottom padding and 1px margin) */ /* inset 1px like the actions bar, so the slot stays inside it */
 html.counter #paneToday .toast-slot { pointer-events: none; } /* an empty slot never takes a tap or covers a rest day */
 html.counter #paneToday .toast-slot > * { pointer-events: auto; }
-/* 200% text: day rows keep one line with an ellipsis and the right column grows to 48% */
+/* 200% text: a narrower day label (v0.1.4.3: the 48% column is gone; names wrap) */
 html.counter.lg-text #paneToday .wd .d { flex-basis: 2.6em; letter-spacing: 0; }
 /* 200% text: a set line that does not fit beside the name goes under it (whole words, never over the tag) */
 html.counter.lg-text #paneToday .set-row { flex-wrap: wrap; }
-html.counter.lg-text #paneToday .set-row .ex-left { flex: 1 1 12em; }
+html.counter.lg-text #paneToday .set-row .ex-left { flex: 1 1 8ch; min-width: min-content; } /* v0.1.4 addendum: the sets go under the name only when the name column would be under 8ch, still right aligned. v0.1.4.3: never narrower than its longest word (names break only between words at 200%), so a word longer than 8ch sends the sets under the name instead of running into them (780x360 200%: "Overhead" over "4") */
 html.counter.lg-text #paneToday .set-row .ex-name { overflow-wrap: normal; word-break: normal; }
-html.counter.lg-text #paneToday .set-row .ex-sets { white-space: normal; flex-shrink: 1; }
+html.counter.lg-text #paneToday .set-row .ex-sets { white-space: nowrap; flex-shrink: 0; } /* v0.1.4 addendum: sets never wrap */
 html.counter #paneToday .skip-bottom { display: inline-flex; align-items: center; justify-content: center; min-height: var(--btn-h); }
 /* Counter: Update plan fits whole between the top clear zone and the bottom safe area (678x396 and 644x382): a two-line
    field, tighter gaps, and the "Plan code" label kept for screen readers only (the field's placeholder says the same) */
@@ -2542,6 +2687,61 @@ html.counter.counter-short #paneToday .wstrip { height: auto; grid-template-rows
 /* the Counter with the keyboard up at 200% text leaves ~0130px: the field drops to one line (it scrolls) so the field and
    Use this plan both stay above the keyboard */
 html.counter .upd-box.typing .code-in { height: min(2.9rem, 56px); min-height: min(2.9rem, 56px); }
+/* v0.1.4.3: the single column in a short landscape window (200% text under 700 wide, Designer option 3) has the same
+   keyboard room as the Counter, so the field drops to one line there too (667x375 at 200%: Use this plan was under the keyboard) */
+@media (orientation: landscape) and (max-height: 499.98px) { .upd-box.typing .code-in { height: min(2.9rem, 56px); min-height: min(2.9rem, 56px); } }
+
+/* ---- v0.1.4 (d): inner portrait home, a full-width Week and progress row ----
+   Today card, strip, Week and progress. (v0.1.4.3: the Up next card from (d) is gone on the owner's request; inner
+   portrait was the only layout that showed it.) */
+:where(html.L-innerp) {
+  /* Week and progress: one row from card edge to card edge (the hidden Back to today placeholder no longer takes the left
+     part), at least 44px tall, the chevron centred in its own 44x44 area at the right end */
+  #backSlot:has(> .bt-ph) { display: none; }
+  .outer-nav .open-plan { flex: 1 1 100%; padding-right: 0; }
+  .open-plan .chev-box { display: inline-flex; flex: 0 0 44px; width: 44px; height: 44px; align-items: center; justify-content: center; margin: -1px 0; }
+  /* (the -1px margins lay the 44x44 area over the button's 1px borders, so the button stays 44px tall as in v0.1.3.4) */
+}
+
+/* v0.1.4 Designer addendum 2 (owner-approved): every exercise row (Week view, Today card, Up next, the Counter). The name block
+   takes the room (grows from an 8ch basis, min-width 0) and the sets sit at its right: never wrapped, tabular, right
+   aligned and on the name's first line (baseline). Name and tag wrap inside the name block, so a long name pushes the
+   tag under it, never the sets onto a left-aligned line. Flex rather than a two-track grid: the same columns, and the
+   8ch rule (sets on their own line, still right aligned, when the name column would be narrower) needs no container
+   query (a size container broke WebKit's scroll anchoring, see syncDayCols). */
+.ex, .set-row { align-items: baseline; }
+.ex > .ex-left, .set-row > .ex-left { flex: 1 1 8ch; min-width: 0; align-items: baseline; }
+.ex > .ex-sets, .set-row > .ex-sets { margin-left: auto; text-align: right; white-space: nowrap; flex-shrink: 0; font-variant-numeric: tabular-nums; }
+.ex-left > .ex-name { min-width: 0; overflow-wrap: break-word; }
+/* v0.1.4: in the Counter's snapping list (200% text) the sets sit at the top of the name's first line, not on its
+   baseline: the sets' mono glyph box is deeper than the name's, so on the baseline it reached 3px into the name's second
+   line, and a snap to that line left the sets cut at the list's top. At the top it ends inside the first line. */
+html.counter #paneToday .today.more-on .set-row > .ex-sets { align-self: flex-start; }
+/* v0.1.4: in the Counter a tag beside the name is centred on the name's line, as in v0.1.3.4, not on its baseline: on the
+   baseline its taller line box hung 3px under the name's, and five such rows put the measured 06 size (678x466 app, the
+   longest day) 2px over at the smallest type step, so the list scrolled behind the pill's strip. The sets keep the baseline. */
+.ex > .ex-left > .tag, .set-row > .ex-left > .tag { align-self: center; } /* everywhere: the same row heights as v0.1.3.4 */
+/* and everywhere the sets' line box is no taller than their glyphs (the monospace face's normal line height is deeper than
+   the name's), so on the baseline it does not hang under the name's line and make the row taller than in v0.1.3.4 */
+.ex > .ex-sets, .set-row > .ex-sets { line-height: 1.15; }
+
+/* v0.1.4: Undo never covers list text (app5 undoRoom). While it shows in the Counter, the actions bar takes back the
+   slot's height (as in v0.1.3.4) and the pill's strip goes (the pill is hidden under Undo anyway), so the list ends just
+   above the toast. The slot's scroll margins are the safe areas, so scrolling the slot into view stops clear of them. */
+html.counter #paneToday.undo-on .today-actions { padding-top: calc(var(--slot-h) + 2px); }
+html.counter #paneToday.undo-on .more-pill:not([hidden]) { display: none; } /* with or without its strip: a list that Undo shortened must not get a pill over its rows */
+.toast-slot { scroll-margin-top: var(--safe-t, 0px); scroll-margin-bottom: var(--safe-b, 0px); }
+/* v0.1.4: the list's end room (app5 layoutMore, --end-pad) is a spacer after its rows, so the list can still shrink (a flex
+   item never shrinks below its own padding) */
+html.counter #paneToday .set-rows::after { content: ""; display: block; height: var(--end-pad, 0px); flex: 0 0 auto; } /* v0.1.4.1: the list is a flex column, so the spacer must not shrink (it is the end room the last snap point needs) */
+/* v0.1.4.1: fitCounter's ceiling pass (.fit-ceil, only while it measures) lays the card out as v0.1.3.4 did: the bar
+   reserving the Undo slot, the list's 2px top padding, 0.2rem*cs row padding and the 19px tag boxes. The scale it finds
+   is the most the real layout may use, so the type never grows past v0.1.3.4's. */
+html.counter #paneToday.fit-ceil .today-actions { padding: calc(var(--slot-h) + 4px) 16px 6px; }
+html.counter #paneToday.fit-ceil .set-rows { padding-top: 2px; }
+html.counter #paneToday.fit-ceil .set-row { padding: calc(0.2rem * var(--cs, 1)) 0; }
+html.counter #paneToday.fit-ceil .set-row .tag { padding: 2px 7px; line-height: inherit; }
+html.counter #paneToday.fit-ceil .set-row .ex-left { flex: 1 1 auto; align-items: center; }
 ~1/style>
 ~1/head>
 ~1body>
@@ -2591,7 +2791,7 @@ html.counter .upd-box.typing .code-in { height: min(2.9rem, 56px); min-height: m
       ~1div class="outer-nav" id="outerNav">
         ~1div class="nav-row" id="navRow">
         ~1div id="backSlot">~1/div>
-        ~1button type="button" class="open-plan" id="openPlan" aria-haspopup="dialog" aria-controls="planPane" aria-expanded="false">~1span>Week and progress~1/span>~1span class="chev" aria-hidden="true">▾~1/span>~1/button>
+        ~1button type="button" class="open-plan" id="openPlan" aria-haspopup="dialog" aria-controls="planPane" aria-expanded="false">~1span>Week and progress~1/span>~1span class="chev-box" aria-hidden="true">~1span class="chev">▾~1/span>~1/span>~1/button>
         ~1/div>
       ~1/div>
       ~1div class="toast-slot" id="toastSlot">~1/div>
@@ -2693,7 +2893,7 @@ html.counter .upd-box.typing .code-in { height: min(2.9rem, 56px); min-height: m
 
   /* ================= Constants ================= */
   const APP_ID = "coach-tracker";
-  const APP_VERSION = "v0.1.3.4-preview";
+  const APP_VERSION = "v0.1.4.3-preview";
   /* Storage prefix is per app, never per person. STORE_SCHEMA bumps only with a written migration. */
   const LS_PREFIX = "ct1-";
   const STORE_SCHEMA = 1;
@@ -2708,7 +2908,9 @@ html.counter .upd-box.typing .code-in { height: min(2.9rem, 56px); min-height: m
   const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
   /* In a browser tab the #p= fragment stays in the address bar, so Add to Home Screen saves a URL that still
      carries the plan (the Home Screen app on iOS starts with empty storage of its own). Processing is idempotent:
-     a link already seen on this device is ignored. In a Home Screen app the fragment is cleared after load. */
+     a link already seen on this device is ignored. In a Home Screen app the fragment is cleared after load.
+     v0.1.4: this is the iOS flow only. Off iOS (no navigator.standalone) the fragment is cleared once the plan is saved
+     (clearSavedLink, src/app6.js). */
   const KEEP_LINK_IN_TAB = true;
 
   /* ================= Storage ================= */
@@ -2748,6 +2950,13 @@ html.counter .upd-box.typing .code-in { height: min(2.9rem, 56px); min-height: m
     setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
   }
   let fatalShown = false;
+  let mutedErrors = 0;
+  function errorIsOurs(ev) {
+    if (ev.error && typeof ev.error === "object" && ev.error.stack) return true;
+    const f = String(ev.filename || "");
+    if (!f) return false;
+    try { return new URL(f, location.href).origin === location.origin; } catch (e) { return false; }
+  }
   function showFatal(err) {
     if (fatalShown || !document.body) return;
     fatalShown = true;
@@ -2772,6 +2981,11 @@ html.counter .upd-box.typing .code-in { height: min(2.9rem, 56px); min-height: m
     window.addEventListener("error", function (ev) {
       const m = String((ev && ev.message) || "");
       if (/ResizeObserver loop/.test(m) || !ev.error && !m) return; /* benign browser noise, or a resource load */
+      /* v0.1.4: only an error we can attribute shows the panel: an error object with a stack, or a source file on this
+         page's origin. A muted cross-origin error ("Script error.", no file, line 0) is never ours: every script here is
+         inline and the CSP loads nothing else, so it comes from script the browser or an extension injected (Safari's
+         page menu, Hide Distracting Items, Translate, content blockers). It is counted (About shows the count), not shown. */
+      if (!errorIsOurs(ev)) { mutedErrors++; return; }
       showFatal(ev.error || m);
     });
     window.addEventListener("unhandledrejection", function (ev) { showFatal(ev && ev.reason); });
@@ -3368,6 +3582,65 @@ html.counter .upd-box.typing .code-in { height: min(2.9rem, 56px); min-height: m
   }
 
   /* ---- Train ---- */
+  /* v0.1.4 (a): a day that opens grows to its full height in 200ms (ease-out, no bounce; at once under Reduce Motion). When
+     closing the day above it moved its top out of view (under the page head or off screen), the page scrolls so the
+     card's top sits just under the head. */
+  function revealDay(idx, opening) {
+    const card = document.querySelector('#panel-train .day[data-day="' + idx + '"]');
+    if (!card) return;
+    let sc = card.parentElement;
+    while (sc && sc !== document.body && !(/(auto|scroll)/.test(getComputedStyle(sc).overflowY) && sc.scrollHeight > sc.clientHeight)) sc = sc.parentElement;
+    if (!sc || sc === document.body) sc = document.scrollingElement;
+    const doc = sc === document.scrollingElement;
+    let head = doc ? 0 : sc.getBoundingClientRect().top;
+    const sh = sc.querySelector(".sheet-head");
+    if (sh && sh.getClientRects().length && /sticky|fixed/.test(getComputedStyle(sh).position)) head = Math.max(head, sh.getBoundingClientRect().bottom);
+    const bottom = doc ? window.innerHeight : sc.getBoundingClientRect().bottom;
+    const top = card.getBoundingClientRect().top;
+    /* opening the page at that day (Up next): also when the day's end is below the screen */
+    const cb = card.getBoundingClientRect().bottom;
+    if (top ~1 head - 0.5 || top > bottom - 44 || (opening && cb > bottom)) sc.scrollTop += top - head - 8;
+    const body = card.querySelector(".day-body");
+    let reduce = false;
+    try { reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches; } catch (e) {}
+    if (!body || reduce || opening || typeof body.animate !== "function") return;
+    const h = body.getBoundingClientRect().height;
+    if (h > 0) body.animate([{ height: "0px", opacity: 0, overflow: "hidden" }, { height: h + "px", opacity: 1, overflow: "hidden" }], { duration: 200, easing: "cubic-bezier(0.2, 0, 0, 1)" });
+  }
+
+  /* v0.1.4 (a), Designer addendum (owner-approved): two columns only when the layout viewport is wider than tall AND the week
+     list itself is at least 820px wide; one column everywhere else (every portrait view). Landscape follows the layout
+     classes (the 520 rule, frozen while a text field has focus); outside inner it is the layout viewport's own shape. A
+     ResizeObserver on the Train panel and resize / orientationchange re-check. */
+  function landscapeLayout() {
+    const r = document.documentElement;
+    if (r.classList.contains("L-innerp")) return false;
+    if (r.classList.contains("L-duo")) return true;
+    return r.clientWidth > r.clientHeight;
+  }
+  function syncDayCols() {
+    const w = document.querySelector("#panel-train .day-wrap");
+    if (w) w.classList.toggle("cols2", landscapeLayout() && w.getBoundingClientRect().width >= 820);
+  }
+  /* v0.1.4: the sticky page head's height is the pane's scroll padding, so a control brought into view (keyboard focus,
+     scrollIntoView) never ends up under the head (closing the day above can leave the next card's status there) */
+  (function watchSheetHead() {
+    const pane = document.getElementById("planPane"), head = pane && pane.querySelector(".sheet-head");
+    if (!head || typeof ResizeObserver !== "function") return;
+    let raf = 0; /* next frame, like watchDayCols: no work inside the observer callback */
+    new ResizeObserver(function () { cancelAnimationFrame(raf); raf = requestAnimationFrame(function () { pane.style.setProperty("--head-h", head.offsetHeight + "px"); }); }).observe(head);
+  })();
+  (function watchDayCols() {
+    const p = document.getElementById("panel-train");
+    /* in the next frame: toggling .cols2 inside the observer changes the panel's own height, which WebKit reports as a
+       "ResizeObserver loop completed with undelivered notifications" error */
+    let raf = 0;
+    if (p && typeof ResizeObserver === "function") new ResizeObserver(function () { cancelAnimationFrame(raf); raf = requestAnimationFrame(syncDayCols); }).observe(p);
+    else window.addEventListener("resize", syncDayCols);
+    window.addEventListener("orientationchange", function () { requestAnimationFrame(syncDayCols); });
+    if (typeof ResizeObserver === "function") window.addEventListener("resize", function () { requestAnimationFrame(syncDayCols); });
+  })();
+
   function renderTrain() {
     const panel = document.getElementById("panel-train");
     const m = weekMeta(state.week);
@@ -3407,7 +3680,8 @@ html.counter .upd-box.typing .code-in { height: min(2.9rem, 56px); min-height: m
         "~1/div>";
     }
 
-    html += '~1div class="day-grid">';
+    /* v0.1.4 (a): the week list is its own size container; one column under 820px (two above it, the open day full width) */
+    html += '~1div class="day-wrap">~1div class="day-grid">';
     DAYS.forEach(function (day, idx) {
       const today = isTodaySession(state.week, idx);
       if (day.rest) {
@@ -3456,7 +3730,7 @@ html.counter .upd-box.typing .code-in { height: min(2.9rem, 56px); min-height: m
       if (HINTS[day.key]) html += '~1div class="ex-hint">' + escapeHtml(HINTS[day.key]) + "~1/div>";
       html += "~1/div>~1/div>";
     });
-    html += "~1/div>";
+    html += "~1/div>~1/div>";
     html +=
       '~1div class="stat-bar" data-anchor>' +
         '~1span class="lbl">Total across ' + TOTAL_WEEKS + "\u00a0weeks~1/span>" +
@@ -3467,17 +3741,26 @@ html.counter .upd-box.typing .code-in { height: min(2.9rem, 56px); min-height: m
     }
     html += "~1/div>";
     panel.innerHTML = html;
+    syncDayCols();
 
     const jump = document.getElementById("jumpThisWeek");
     if (jump) jump.addEventListener("click", function () { clearWeekPick(); state.week = autoWeek(state.week); setView(null); persist(); renderAll(); });
     panel.querySelectorAll("[data-toggle]").forEach(function (btn) {
       btn.addEventListener("click", function () {
-        const key = dayKey(state.week, parseInt(btn.dataset.toggle, 10));
+        const idx = parseInt(btn.dataset.toggle, 10), key = dayKey(state.week, idx);
         const wasOpen = btn.getAttribute("aria-expanded") === "true";
+        /* v0.1.4 (a): one day open at a time; opening one closes the other (every card stays in its place in the week) */
+        if (!wasOpen) DAYS.forEach(function (d, i) { if (!d.rest && i !== idx) state.openDays[dayKey(state.week, i)] = false; });
         state.openDays[key] = !wasOpen;
         persist();
+        /* the re-render must not move the page: keep the scroll so the cards above stay put (revealDay then fixes a top
+           that left the view) */
+        const pane = document.getElementById("planPane"), keepPane = pane ? pane.scrollTop : 0, keepWin = window.scrollY;
         renderTrain();
         renderDuo();
+        if (pane && pane.scrollTop !== keepPane) pane.scrollTop = keepPane;
+        if (window.scrollY !== keepWin) window.scrollTo(window.scrollX, keepWin);
+        if (!wasOpen) revealDay(idx);
       });
     });
     panel.querySelectorAll("[data-check]").forEach(function (btn) {
@@ -3742,8 +4025,17 @@ html.counter .upd-box.typing .code-in { height: min(2.9rem, 56px); min-height: m
     clearTimeout(toastTimer); undoFn = null;
     t.classList.remove("show");
     t.setAttribute("aria-hidden", "true");
+    undoRoom();
     reserveSpace();
+    if (typeof syncMorePill === "function") syncMorePill(); /* v0.1.4 (c): the pill comes back, recounted */
     if (typeof queueNav === "function") { queueNav(); setTimeout(queueNav, 220); }
+  }
+  /* v0.1.4: Undo never covers list text. In the Counter the slot overlays the list's bottom (spec (c)), so while Undo
+     shows the actions bar takes the slot's height back (#paneToday.undo-on) and the list ends above the toast; with no
+     Undo the list still runs to the buttons. */
+  function undoRoom() {
+    const pane = document.getElementById("paneToday"), t = document.getElementById("toast");
+    if (pane) pane.classList.toggle("undo-on", t.classList.contains("show") && t.classList.contains("in-slot"));
   }
   function showUndo(msg, fn, ms) {
     const t = document.getElementById("toast");
@@ -3753,7 +4045,9 @@ html.counter .upd-box.typing .code-in { height: min(2.9rem, 56px); min-height: m
     document.getElementById("toastUndo").hidden = !fn;
     t.removeAttribute("aria-hidden");
     t.classList.add("show");
+    undoRoom();
     reserveSpace();
+    if (typeof syncMorePill === "function") syncMorePill(); /* v0.1.4 (c): the pill goes while Undo shows */
     clearTimeout(toastTimer);
     toastTimer = setTimeout(hideToast, ms || 10000);
     if (typeof queueNav === "function") { queueNav(); setTimeout(queueNav, 220); }
@@ -3797,6 +4091,8 @@ html.counter .upd-box.typing .code-in { height: min(2.9rem, 56px); min-height: m
      selected day on the left and the week as rows on the right, no page scroll. Set in JS (html.counter, syncCounter in
      app6) rather than a media query so a keyboard that shrinks the viewport while typing never flips the layout. */
   var counterOn = false;
+  /* v0.1.4.3 (Designer ruling C): the Counter header shows "Today" when "Back to today" does not fit beside "This week ▾" (syncCounter) */
+  var btShort = false;
   function renderToday() {
     const el = document.getElementById("today");
     const m = weekMeta(state.week);
@@ -3807,7 +4103,7 @@ html.counter .upd-box.typing .code-in { height: min(2.9rem, 56px); min-height: m
     const pos = train.indexOf(f.idx) + 1;
     const kicker = '~1span class="k-seg">W' + state.week + "\u00a0of\u00a0" + TOTAL_WEEKS + "~1/span>" + (N_BLOCKS > 1 ? '~1span class="k-blk">~1span class="k-c">, ~1/span>~1span class="k-seg">Block\u00a0' + m.block + "~1/span>~1/span>" : "") + (m.deload ? '~1span class="k-tail">, Deload~1/span>' : "");
     const backHtml = f.picked
-      ? '~1button type="button" class="back-today" id="backToday" aria-label="Showing ' + escapeHtml(day.short) + ", " + escapeHtml(day.label) + '. Back to today">~1span class="bt-label">Showing ' + escapeHtml(day.short) + ", " + escapeHtml(day.label) + "~1/span>~1b>Back to today~1/b>~1/button>"
+      ? '~1button type="button" class="back-today" id="backToday" aria-label="Showing ' + escapeHtml(day.short) + ", " + escapeHtml(day.label) + '. Back to today">~1span class="bt-label">Showing ' + escapeHtml(day.short) + ", " + escapeHtml(day.label) + "~1/span>~1b>" + (counterOn && btShort ? "Today" : "Back to today") + "~1/b>~1/button>"
       : '~1span class="back-today bt-ph" aria-hidden="true">~1b>Back to today~1/b>~1/span>';
     /* Back to today has one home on every screen: directly under the week strip */
     document.getElementById("backSlot").innerHTML = backHtml;
@@ -3903,30 +4199,29 @@ html.counter .upd-box.typing .code-in { height: min(2.9rem, 56px); min-height: m
   }
 
   /* v0.1.3.4 Counter: the exercise list is its own scroll area between the title block and the pinned actions. While rows
-     are below its visible end, a solid "N more" pill sits on the list's bottom edge (N = rows not fully visible below);
+     are below its visible end, an "N more" control sits under the list (v0.1.4.1: a 22px chip in a 44px tap target) (N = rows not fully visible below);
      a tap scrolls the next rows into view. Hidden at the end of the list, when nothing overflows, and outside the Counter. */
-  /* Counter at 200% text only: each word of an exercise name or its sets in its own span, so the start of every line can be
-     a snap point. Plain text everywhere else (spans shift Chromium's text widths by a fraction of a pixel) */
-  function bigCounter() { return counterOn && document.documentElement.classList.contains("lg-text"); }
+  /* Counter (every text size since v0.1.4): each word of an exercise name or its sets in its own span, so the start of every
+     line can be a snap point. Plain text everywhere else (spans shift Chromium's text widths by a fraction of a pixel) */
+  function snapCounter() { return counterOn; }
   function snapWords(t) {
-    if (!bigCounter()) return escapeHtml(t);
+    if (!snapCounter()) return escapeHtml(t);
     return String(t).split(/\s+/).filter(Boolean).map(function (w) { return '~1span class="w">' + escapeHtml(w) + "~1/span>"; }).join(" ");
   }
   function moreOn() { const c = document.getElementById("today"); return !!c && c.classList.contains("more-on"); }
-  /* v0.1.3.4b, Counter at 200% text only: when the list overflows, the card takes "more-on". The focus line goes (its room
-     pays for the pill's own 44px strip under the list), the list snaps (mandatory) to each row's top and to every line inside
+  /* v0.1.3.4b, and v0.1.4 (c) at every text size: when the list overflows, the card takes "more-on": the pill gets its own
+     44px strip under the list (at 200% text the focus line goes to pay for it; at normal text it stays), the list snaps (mandatory) to each row's top and to every line inside
      a row taller than the list (a row taller than its scroll window is not a snap area itself: browsers let an oversized
      snap area stop anywhere inside it, which is how a line was cut at the list's top), and an end padding lets the last
      snap point reach the top. Measured with the focus line and no strip; re-run on every render and after fitCounter. */
   function layoutMore() {
     const card = document.getElementById("today"), list = card && card.querySelector(".set-rows"), pill = document.getElementById("morePill");
     if (!card || !list || !pill) return;
-    const lg = bigCounter();
-    /* rendered before the text size or the layout changed: the words have the wrong markup, so render again (once: the
-       new markup matches) */
+    const lg = snapCounter();
+    /* rendered before the layout changed: the words have the wrong markup, so render again (once: the new markup matches) */
     if (lg !== !!list.querySelector(".w") && list.querySelector(".set-row")) { renderToday(); return; }
-    if (card.classList.contains("more-on") || list.style.paddingBottom) {
-      card.classList.remove("more-on"); list.style.paddingBottom = "";
+    if (card.classList.contains("more-on") || list.style.getPropertyValue("--end-pad")) {
+      card.classList.remove("more-on"); list.style.removeProperty("--end-pad");
       list.querySelectorAll(".set-row.tall").forEach(function (r) { r.classList.remove("tall"); });
     }
     if (lg && list.scrollHeight - list.clientHeight > 0.5) {
@@ -3947,7 +4242,9 @@ html.counter .upd-box.typing .code-in { height: min(2.9rem, 56px); min-height: m
       });
       const base = list.scrollHeight;
       const pad = Math.max(0, Math.ceil(last + ch - base));
-      if (pad) list.style.paddingBottom = pad + "px";
+      /* v0.1.4: the end room is a spacer after the rows (.set-rows::after), not the list's padding: a flex item cannot
+         shrink below its own padding, so a padded list could not give Undo's height back (spec (c) amendment) */
+      if (pad) list.style.setProperty("--end-pad", pad + "px");
       list.scrollTop = top;
     }
     syncMorePill();
@@ -3956,18 +4253,56 @@ html.counter .upd-box.typing .code-in { height: min(2.9rem, 56px); min-height: m
     const list = document.querySelector("#today .set-rows");
     if (!counterOn || !list || list.scrollHeight - list.clientHeight ~1= 0.5) return [];
     const rows = list.querySelectorAll(".set-row");
-    if (moreOn()) { /* rows entirely below the visible area */
-      const vb = list.getBoundingClientRect().top + list.clientTop + list.clientHeight;
+    if (moreOn()) { /* rows entirely below the visible area (v0.1.4.3: the area ends at the clip, a row boundary) */
+      const vb = listVisBottom(list);
       return Array.prototype.filter.call(rows, function (r) { return r.getBoundingClientRect().top >= vb - 1; });
     }
     if (list.scrollTop + list.clientHeight >= list.scrollHeight - 1) return [];
     const lb = list.getBoundingClientRect().bottom - list.clientTop;
     return Array.prototype.filter.call(rows, function (r) { return r.getBoundingClientRect().bottom > lb + 1; });
   }
+  /* v0.1.4 (c): the list's end is in view: the last row's bottom is inside the visible area (the end padding below it,
+     which lets the last snap point reach the top, does not count) */
+  function listAtEnd() {
+    const l = document.querySelector("#today .set-rows"), rows = l && l.querySelectorAll(".set-row");
+    if (!l || !rows.length || l.scrollTop + l.clientHeight >= l.scrollHeight - 1) return true;
+    return rows[rows.length - 1].getBoundingClientRect().bottom ~1= l.getBoundingClientRect().top + l.clientTop + l.clientHeight + 1;
+  }
+  function undoInSlot() { const t = document.getElementById("toast"); return !!t && t.classList.contains("show") && t.classList.contains("in-slot"); }
+  /* v0.1.4.3 (Designer nit, 200% text): the overflowing list (.more-on) ends at a row boundary: a row that would show only
+     partly at the bottom is clipped away whole (clip-path, so nothing moves) and counts as hidden in "N more". A row taller
+     than the list keeps its last whole line instead. */
+  function listVisBottom(list) { const lt = list.getBoundingClientRect().top + list.clientTop; return lt + list.clientHeight - (parseFloat(list.dataset.clipB) || 0); }
+  function clipRows() {
+    const list = document.querySelector("#today .set-rows");
+    if (!list) return;
+    let cut = 0;
+    if (counterOn && moreOn() && list.scrollHeight - list.clientHeight > 0.5) {
+      const lt = list.getBoundingClientRect().top + list.clientTop, vb = lt + list.clientHeight;
+      let edge = -Infinity;
+      list.querySelectorAll(".set-row").forEach(function (r) { const b = r.getBoundingClientRect(); if (b.bottom > lt + 1 && b.bottom ~1= vb + 0.5) edge = Math.max(edge, b.bottom); });
+      if (edge === -Infinity) list.querySelectorAll(".set-row .sn").forEach(function (u) { const b = u.getBoundingClientRect(); if (b.bottom > lt + 1 && b.bottom ~1= vb + 0.5) edge = Math.max(edge, b.bottom); });
+      if (edge > -Infinity && vb - edge > 0.5) cut = Math.floor((vb - edge) * 2) / 2;
+    }
+    if (cut) { list.dataset.clipB = String(cut); list.style.clipPath = "inset(0 0 " + cut + "px 0)"; }
+    else if (list.dataset.clipB) { delete list.dataset.clipB; list.style.clipPath = ""; }
+  }
   function syncMorePill() {
     const pill = document.getElementById("morePill");
+    clipRows();
     if (!pill) return;
     const n = hiddenRows().length, strip = moreOn();
+    /* v0.1.4 (c): Undo overlays the list's bottom and the pill's strip, so the pill goes while it shows (recounted after) */
+    pill.classList.toggle("under-undo", strip && undoInSlot());
+    /* the pill goes only when the list's end is in view: with no row wholly below but the last one not yet whole, it
+       stays as "More" (one tap brings the end into view) */
+    if (!n && strip && !listAtEnd()) {
+      if (pill.getAttribute("aria-label") !== "Show the rest of the list") {
+        pill.setAttribute("aria-label", "Show the rest of the list");
+        pill.innerHTML = '~1span class="mp-chip">~1span>More~1/span>~1svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">~1polyline points="6 9 12 15 18 9"/>~1/svg>~1/span>';
+      }
+      pill.classList.remove("at-end"); pill.hidden = false; return;
+    }
     if (!n) {
       if (!pill.hidden && !pill.classList.contains("at-end") && document.activeElement === pill) { const d = document.getElementById("todayDone"); if (d) d.focus({ preventScroll: true }); }
       /* with the strip the pill only goes invisible, so the list never changes height while it scrolls */
@@ -3977,7 +4312,7 @@ html.counter .upd-box.typing .code-in { height: min(2.9rem, 56px); min-height: m
     const label = n + " more exercise" + (n === 1 ? "" : "s");
     if (pill.getAttribute("aria-label") !== label) {
       pill.setAttribute("aria-label", label);
-      pill.innerHTML = '~1span>' + n + ' more~1/span>~1svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">~1polyline points="6 9 12 15 18 9"/>~1/svg>';
+      pill.innerHTML = '~1span class="mp-chip">~1span>' + n + ' more~1/span>~1svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">~1polyline points="6 9 12 15 18 9"/>~1/svg>~1/span>';
     }
     pill.classList.remove("at-end");
     pill.hidden = false;
@@ -3986,11 +4321,11 @@ html.counter .upd-box.typing .code-in { height: min(2.9rem, 56px); min-height: m
      fully visible comes to the top; when it already starts there, the list moves on by its own height less 8px */
   function moreRows() {
     const list = document.querySelector("#today .set-rows"), rows = hiddenRows();
-    if (!list || !rows.length) return;
+    if (!list || (!rows.length && !(moreOn() && !listAtEnd()))) return;
     const lt = list.getBoundingClientRect().top + list.clientTop, max = list.scrollHeight - list.clientHeight;
     if (moreOn()) {
       const next = Array.prototype.find.call(list.querySelectorAll(".set-row"), function (r) { return r.getBoundingClientRect().top > lt + 1; });
-      if (next) list.scrollTop = Math.min(max, list.scrollTop + next.getBoundingClientRect().top - lt);
+      list.scrollTop = next ? Math.min(max, list.scrollTop + next.getBoundingClientRect().top - lt) : max;
       syncMorePill();
       return;
     }
@@ -4001,6 +4336,7 @@ html.counter .upd-box.typing .code-in { height: min(2.9rem, 56px); min-height: m
     syncMorePill();
   }
 
+  function bindTail(t) { return String(t).replace(/ ([A-Za-z]|[0-9]+)$/, "\u00a0$1"); }
   function stripIcon(kind) {
     if (kind === "done") return '~1svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round">~1polyline points="20 6 9 17 4 12"/>~1/svg>';
     if (kind === "skip") return '~1svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round">~1line x1="6" y1="12" x2="18" y2="12"/>~1/svg>';
@@ -4018,7 +4354,9 @@ html.counter .upd-box.typing .code-in { height: min(2.9rem, 56px); min-height: m
       html += '~1button type="button" class="wd' + (today ? " is-today" : "") + (viewing ? " is-view" : "") + '" data-strip="' + idx + '" aria-pressed="' + viewing + '" aria-label="' + escapeHtml(day.short) + ": " + word + (today ? ", today" : "") + '. Show this day">' +
         '~1span class="d">' + escapeHtml(day.short) + "~1/span>" +
         /* Counter rows also name the session (hidden in the strip) */
-        '~1span class="ss">' + escapeHtml(day.rest ? "Rest" : day.label) + "~1/span>" +
+        /* v0.1.4.3: a trailing single letter or number stays with the word before it when the name wraps ("Full" / "body A");
+           the rendered name only, never the plan data */
+        '~1span class="ss">' + escapeHtml(day.rest ? "Rest" : bindTail(day.label)) + "~1/span>" +
         '~1span class="dot ' + st + (today ? " today" : "") + '">' + stripIcon(st) + "~1/span>" +
         '~1span class="s">' + word + "~1/span>~1/button>";
     });
@@ -4067,9 +4405,10 @@ html.counter .upd-box.typing .code-in { height: min(2.9rem, 56px); min-height: m
     if (exl) { exl.scrollTop = 0; syncMorePill(); }
     const row = list && (list.querySelector(".wd.is-view") || list.querySelector(".wd.is-today"));
     if (!row) return;
-    const r = row.getBoundingClientRect(), b = list.getBoundingClientRect();
-    if (r.top ~1 b.top + 4) list.scrollTop += r.top - b.top - 4;
-    else if (r.bottom > b.bottom - 4) list.scrollTop += r.bottom - b.bottom + 4;
+    /* v0.1.4.3 (Designer, ruling (a)): the smallest scroll from the list's top that shows the row whole, so a Sat or Sun row
+       that needs one ends at the list's bottom edge (Monday may then be partly hidden); the picked row wins over today's */
+    const r = row.getBoundingClientRect(), b = list.getBoundingClientRect(), end = r.bottom - b.top - list.clientTop + list.scrollTop;
+    list.scrollTop = Math.max(0, Math.ceil(end - list.clientHeight - 0.01));
   }
 
   function renderSheetHead() {
@@ -4159,7 +4498,7 @@ html.counter .upd-box.typing .code-in { height: min(2.9rem, 56px); min-height: m
       const el = endScroller(); if (!el) return 0;
       return el.scrollHeight - el.clientHeight - el.scrollTop;
     }
-    let atEnd = false, lastH = -1, holdUntil = 0;
+    let atEnd = false, lastH = -1, holdUntil = 0, padRaf = 0;
     document.addEventListener("scroll", function () { if (performance.now() > holdUntil) atEnd = endGap() ~1= 24; }, { passive: true, capture: true });
     if (typeof ResizeObserver !== "function") return;
     const ro = new ResizeObserver(function () {
@@ -4169,10 +4508,17 @@ html.counter .upd-box.typing .code-in { height: min(2.9rem, 56px); min-height: m
       else if (h !== lastH && atEnd) {
         const g = endGap();
         /* our own scroll must not read as the reader leaving the end while the row is still growing */
-        if (g > 0) { endScroller().scrollTop += g; holdUntil = performance.now() + 400; }
+        /* v0.1.4.2: never past the top limit the day pick uses (revealCard): a reader at the top of a home that only
+           just overflows counts as "at the end", and scrolling the whole gap put the card's top (Skip) under the status bar */
+        let d = g;
+        if (!counterOn) { const card = document.getElementById("today"); if (card && card.getClientRects().length) d = Math.min(d, Math.max(0, card.getBoundingClientRect().top - viewLimits().topLim)); }
+        if (d >= 1) { endScroller().scrollTop += d; holdUntil = performance.now() + 400; }
       }
       lastH = h;
-      if (document.getElementById("toast").classList.contains("show")) reserveSpace();
+      /* v0.1.4.3: deferred a frame. --pin-pad sizes #navEnd, which this observer watches, so setting it inside the callback
+         resized an observed element during delivery (WebKit: "ResizeObserver loop completed with undelivered notifications",
+         a floating toast during a resize) */
+      cancelAnimationFrame(padRaf); padRaf = requestAnimationFrame(function () { if (document.getElementById("toast").classList.contains("show")) reserveSpace(); });
     });
     ["navGroup", "toast", "navEnd"].forEach(function (id) { const n = document.getElementById(id); if (n) ro.observe(n); });
   })();
@@ -4262,6 +4608,8 @@ html.counter .upd-box.typing .code-in { height: min(2.9rem, 56px); min-height: m
      the visual viewport. Two panes (inner landscape) keep the CSS per-pane rule, unchanged. Positions are set before the
      first frame, so the fade-in still paints full size (only opacity and the 8px rise animate). */
   const POP_GAP = 8;
+  /* a short landscape window (the Counter's shape), from the window CSS lays out with */
+  const KB_LAND_MQ = window.matchMedia("(orientation: landscape) and (max-height: 499.98px)");
   function popLimits(kbUp) {
     const pr = document.getElementById("clearProbe").getBoundingClientRect();
     const vv = window.visualViewport, ih = window.innerHeight;
@@ -4271,7 +4619,9 @@ html.counter .upd-box.typing .code-in { height: min(2.9rem, 56px); min-height: m
     /* the 50px zone is Safari's bottom toolbar in portrait; in landscape (the Counter) Safari keeps its bars at the top.
        v0.1.3.3: with the keyboard up in the Counter there is no status band to clear (a phone in landscape shows none),
        so the panel may rise to the safe area (padding-top of #clearProbe is the resolved top inset) and use the room */
-    const top = kb && counterOn ? Math.max(8, parseFloat(getComputedStyle(document.getElementById("clearProbe")).paddingTop) || 0) : pr.top;
+    /* v0.1.4.3: the same in the single column in a short landscape window (200% text under 700 wide, Designer option 3):
+       it is the Counter's window without the Counter, so the keyboard leaves it the same ~0170px */
+    const top = kb && (counterOn || KB_LAND_MQ.matches) ? Math.max(8, parseFloat(getComputedStyle(document.getElementById("clearProbe")).paddingTop) || 0) : pr.top;
     return { top: vTop + top, bottom: vTop + vH - (kb ? 8 : (counterOn ? 0 : 50) + safeB + 8), left: Math.max(16, pr.left), right: W - Math.max(16, W - pr.right), W: W };
   }
   function placePop(box, anchor, x) {
@@ -4445,22 +4795,38 @@ html.counter .upd-box.typing .code-in { height: min(2.9rem, 56px); min-height: m
   function clearHash() {
     try { history.replaceState(null, "", window.location.pathname + window.location.search); } catch (e) {}
   }
+  /* v0.1.4 (Security Q2, approved by the maintainer): off iOS there is no navigator.standalone (Android, desktop). There a
+     Home Screen shortcut shares this storage, so keeping the plan in the address bar buys nothing and leaves it in the
+     shortcut, history and sync. Once the link's plan is confirmed written (the stored plan reads back as that plan and the seen list
+     holds the link), #p= is removed with replaceState (never a new history entry), and only if the address bar still holds
+     this same link. iOS Safari keeps today's flow (KEEP_LINK_IN_TAB): its Home Screen app starts with storage of its own. */
+  function clearSavedLink(code, fp, plan) {
+    if ("standalone" in window.navigator) return;
+    const h = readHashCode();
+    if (!h || fnv(extractCode(h)) !== fp) return;
+    let ok = false;
+    try { const seen = JSON.parse(localStorage.getItem(LS_PREFIX + "seen")); ok = Array.isArray(seen) && seen.indexOf(fp) >= 0 && localStorage.getItem(LS_PREFIX + "plan") === JSON.stringify(plan); } catch (e) { ok = false; }
+    if (ok) clearHash();
+  }
   async function handleLink(raw) {
     const code = extractCode(raw);
     const fp = fnv(code);
     if (isStandalone() || !KEEP_LINK_IN_TAB) clearHash();
-    if (PLAN && state.seen.indexOf(fp) >= 0) return; /* this link was already handled on this device */
+    if (PLAN && state.seen.indexOf(fp) >= 0) { /* this link was already handled on this device */
+      if (!("standalone" in window.navigator) && readHashCode()) { try { const r = await decodePlan(code); clearSavedLink(code, fp, r.plan); } catch (e) {} }
+      return;
+    }
     let res;
     try { res = await decodePlan(code); }
     catch (err) { showPlanError(err, "link"); return; }
-    if (!PLAN) { applyPlan(res.plan, fp); return; }
-    if (samePlan(PLAN, res.plan)) { markSeen(fp); persist(); showUndo("This plan is already loaded", null, 4000); return; }
+    if (!PLAN) { applyPlan(res.plan, fp); clearSavedLink(code, fp, res.plan); return; }
+    if (samePlan(PLAN, res.plan)) { markSeen(fp); persist(); clearSavedLink(code, fp, res.plan); showUndo("This plan is already loaded", null, 4000); return; }
     openDialog({ kind: "replace", warn: true, title: "Use the plan from this link?",
       body: "It replaces \u201c" + PLAN.meta.name + "\u201d with \u201c" + res.plan.meta.name + "\u201d. Your logged days, lifts and weigh-ins stay.",
       extra: '~1p class="dlg-note">' + res.plan.meta.weeks + "\u00a0weeks, " + res.plan.days.filter(function (d) { return !d.rest; }).length + "\u00a0training days a week. You can undo this for 10 seconds.~1/p>",
       buttons: [
         { label: "Keep current plan", cls: "ghost", id: "dlgKeep", fn: function () { markSeen(fp); persist(); } },
-        { label: "Use new plan", cls: "ic-replace", id: "dlgUse", fn: function () { applyPlan(res.plan, fp, "New plan in use"); } }
+        { label: "Use new plan", cls: "ic-replace", id: "dlgUse", fn: function () { applyPlan(res.plan, fp, "New plan in use"); clearSavedLink(code, fp, res.plan); } }
       ],
       onCancel: function () { markSeen(fp); persist(); } });
   }
@@ -4473,7 +4839,8 @@ html.counter .upd-box.typing .code-in { height: min(2.9rem, 56px); min-height: m
     const CHECK = '~1svg class="qp-check" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">~1path d="M5 12.5l4.5 4.5L19 7.5"/>~1/svg>';
     /* On iPhone a Home Screen app has its own storage. In a tab the #p= link stays in the address bar, so an icon added
        later still gets the plan, but not the date or log saved here. A pasted plan leaves no link, so the icon gets nothing. */
-    const hs = isStandalone() ? "" : readHashCode()
+    /* v0.1.4: iOS only. Off iOS the shortcut shares this storage (and the link leaves the address bar once saved) */
+    const hs = isStandalone() || !("standalone" in window.navigator) ? "" : readHashCode()
       ? "Adding this page to your Home Screen later starts fresh. Add it first, then set your date there."
       : "Adding this page to your Home Screen later starts fresh, with no plan. Add it first, then paste your plan code there.";
     openDialog({ kind: "start", title: "When do you start Week 1?",
@@ -4643,7 +5010,13 @@ html.counter .upd-box.typing .code-in { height: min(2.9rem, 56px); min-height: m
     function setDiag() {
       const r = document.documentElement.classList, m = window.LAYOUT.mode;
       const lay = m === "duo" ? "two panes" : m === "innerp" ? "inner portrait" : r.contains("counter") ? "Counter" : "phone";
-      diag.textContent = "Window " + window.innerWidth + "\u00d7" + window.innerHeight + " \u00b7 reported screen " + screen.width + "\u00d7" + screen.height + " \u00b7 layout: " + lay;
+      const de = document.documentElement, qy = function (q) { try { return window.matchMedia(q).matches ? "y" : "n"; } catch (e) { return "?"; } };
+      diag.textContent = "Window " + window.innerWidth + "\u00d7" + window.innerHeight + " \u00b7 CSS " + de.clientWidth + "\u00d7" + de.clientHeight +
+        " \u00b7 queries: landscape " + qy("(orientation: landscape)") + ", inner " + qy("(min-width: 520px) and (min-height: 520px)") +
+        ", split " + qy("(orientation: landscape) and (min-width: 560px) and (max-height: 499.98px)") +
+        (typeof weekRoomLast !== "undefined" && weekRoomLast ? ", week " + Math.round(weekRoomLast.box) + "/" + Math.round(weekRoomLast.need) + "px (12ch) " + (weekRoomLast.ok ? "y" : "n") : "") +
+        " \u00b7 reported screen " + screen.width + "\u00d7" + screen.height + " \u00b7 layout: " + lay +
+        (mutedErrors ? " \u00b7 ignored browser script errors: " + mutedErrors : "");
     }
     window.addEventListener("resize", function () { if (!page.hidden) setDiag(); });
     function setAbout(open) {
@@ -4818,20 +5191,26 @@ html.counter .upd-box.typing .code-in { height: min(2.9rem, 56px); min-height: m
     renderWeekNote();
     renderSpine();
     applyTab();
-    renderDuo();    if (counterOn) fitCounter();
+    renderDuo();    if (typeof syncCounter === "function") syncCounter(); if (counterOn) fitCounter();
   }
 
   /* ================= Counter (v0.1.3.3): the cover screen in landscape ================= */
   /* One type scale for every day: --cs is the largest step from CS_MAX down to CS_MIN at which the plan's longest day
-     (every training day of one week per block and deload kind, measured in the real card) fits the card with no scroll.
+     (every training day of one week per block and deload kind, measured in the real card) fits the card with no scroll,
+     and (v0.1.4.1) never more than the step v0.1.3.4's layout fitted (the ceiling pass, .fit-ceil in the CSS).
      The floors are in the CSS (max()): exercise names 0.875rem (14px), sets, focus and labels 0.8125rem (13px), tags
      0.625rem (10px); 0.73 is where the names reach theirs. A day that does not fit at CS_MIN (or at 200% text) scrolls
      inside the card; nothing is clipped. Re-run on plan load, resize and text-size change. */
   const CS_MAX = 1.3, CS_MIN = 0.73, CS_STEP = 0.03;
+  let fitTs = -1, fitDone = ""; /* see fitKey */
   function fitCounter() {
     const root = document.documentElement, card = document.getElementById("today");
     if (!counterOn || !PLAN || !card || !DAYS.length) { root.style.removeProperty("--cs"); root.classList.remove("counter-scroll"); return; }
     counterRows();
+    /* v0.1.4: measure without the pill's strip and the list's end room (the --end-pad spacer; layoutMore puts them back after). Since (c) a list
+       can take "more-on" at normal text, and a fit measured with them on would count the strip's 44px against the plan.
+       Defensive: no gated case changed with it (s06's longest day overflows at CS_MIN either way). */
+    card.classList.remove("more-on"); card.querySelectorAll(".set-rows").forEach(function (l) { l.style.removeProperty("--end-pad"); });
     const saveV = viewIdx, saveW = state.week, saveArm = armedKey, saveTop = card.scrollTop;
     const weeks = [], seen = {};
     for (let w = 1; w ~1= TOTAL_WEEKS; w++) { const m = weekMeta(w), k = m.block + "|" + !!m.deload; if (!seen[k]) { seen[k] = 1; weeks.push(w); } }
@@ -4844,7 +5223,11 @@ html.counter .upd-box.typing .code-in { height: min(2.9rem, 56px); min-height: m
     const over = function () { const l = exl(); return card.scrollHeight - card.clientHeight > 0.5 || (!!l && l.scrollHeight - l.clientHeight > 0.5); };
     const tall = function () { const l = exl(); return card.scrollHeight + (l ? l.scrollHeight - l.clientHeight : 0); };
     let cs = CS_MAX, fits = true;
+    const pane = document.getElementById("paneToday");
     try {
+      /* v0.1.4.1: the ceiling. The search first runs with the bar reserving the Undo slot, as every bar did in v0.1.3.4, so
+         the scale never grows past what that layout fitted (the room the slot gave back goes to long days, not bigger type) */
+      if (pane) pane.classList.add("fit-ceil");
       root.style.setProperty("--cs", String(cs));
       /* the tallest day at the largest step goes first; each failure moves the search to the day that failed */
       let worst = null, wh = -1;
@@ -4855,11 +5238,34 @@ html.counter .upd-box.typing .code-in { height: min(2.9rem, 56px); min-height: m
         if (!bad) break;
         worst = bad;
       }
-    } finally { state.week = saveW; viewIdx = saveV; armedKey = saveArm; renderToday(); }
+      /* then the real layout: every day must fit at that scale with the slot given back, or the steps go on down to CS_MIN */
+      if (pane) pane.classList.remove("fit-ceil");
+      fits = true;
+      for (;;) {
+        const bad = days.find(function (wd) { show(wd); return over(); });
+        if (!bad) break;
+        if (cs ~1= CS_MIN) { fits = false; break; }
+        cs = Math.max(CS_MIN, Math.round((cs - CS_STEP) * 100) / 100); root.style.setProperty("--cs", String(cs));
+      }
+    } finally {
+      if (pane) pane.classList.remove("fit-ceil");
+      state.week = saveW; viewIdx = saveV; armedKey = saveArm; renderToday(); }
     root.classList.toggle("counter-scroll", !fits || over());
     card.scrollTop = Math.min(saveTop, card.scrollHeight);
     layoutMore();
+    fitDone = fitKey(fitTs);
   }
+  /* v0.1.4.1: one fit per layout. A turn runs a fit from the resize handler, and the layout that fit makes trips app7's
+     ResizeObserver a frame later, which ran a second full fit of the same layout (two passes now, about 170-360ms each
+     in WebKit) and kept a turn busy past 600ms. The key is the viewport, the root font size, the card's box and the
+     root's classes, set only by a fit from those two frame callbacks; a fit from anywhere else (a plan or content
+     change, through renderAll) clears it, so the next callback fits again. */
+  function fitKey(ts) {
+    if (ts ~1 0) return "";
+    const card = document.getElementById("today"), root = document.documentElement;
+    return innerWidth + "x" + innerHeight + "|" + getComputedStyle(root).fontSize + "|" + (card ? card.clientWidth + "x" + card.clientHeight : "") + "|" + root.className;
+  }
+  function fitFresh(ts) { const k = fitKey(ts); return k !== "" && k === fitDone; }
   /* The week rows share the right column's height (repeat(7, 1fr)). When a row would be under 44px with 12px top and
      bottom padding (644x382 with a 21px bottom inset gives 42.9), the bottom padding goes (counter-tight: 44.1); measured
      with the 12px padding every time, so it comes back off when the room returns. */
@@ -4872,15 +5278,79 @@ html.counter .upd-box.typing .code-in { height: min(2.9rem, 56px); min-height: m
   }
   let counterHold = 0, fitRaf = 0;
   function textEntry() { const a = document.activeElement; return !!a && (a.tagName === "TEXTAREA" || (a.tagName === "INPUT" && !/^(button|checkbox|radio|file|submit|reset|range|color)$/i.test(a.type))); }
-  function wantCounter() { return OUTER_MQ.matches && window.innerWidth >= 600 && window.innerWidth > window.innerHeight && window.innerHeight ~1 500; }
+  /* v0.1.4.3: short landscape from a media query (the viewport the CSS lays out with), not window.innerWidth/innerHeight,
+     which a Home Screen app can report differently; its change event re-checks even when no resize fires */
+  /* v0.1.4.3 (Designer A+): from 560px wide (the owner's cover screen gives the app a 594x466 window; the status column
+     takes the rest), and only while the week column's content box holds 12ch in the day-name style at the current text
+     size, measured in the split layout itself (so 200% text at 594x466 keeps the single column) */
+  const COUNTER_MQ = window.matchMedia("(orientation: landscape) and (min-width: 560px) and (max-height: 499.98px)");
+  const WEEK_CH = 12;
+  let weekRoomLast = null;
+  function weekRoom() {
+    const root = document.documentElement, ws = document.getElementById("weekStrip");
+    if (!ws) return true;
+    const had = root.classList.contains("counter"), keep = ["counter-tight", "counter-short"].filter(function (c) { return root.classList.contains(c); });
+    if (!had) root.classList.add("counter");
+    keep.forEach(function (c) { root.classList.remove(c); });
+    const row = document.createElement("div"), name = document.createElement("span");
+    row.className = "wd"; row.setAttribute("aria-hidden", "true"); row.style.cssText = "visibility:hidden;height:0;min-height:0;pointer-events:none";
+    name.className = "ss"; name.style.cssText = "position:absolute;width:" + WEEK_CH + "ch;flex:none";
+    row.appendChild(name); ws.appendChild(row);
+    const cs = getComputedStyle(row), box = row.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight), need = name.getBoundingClientRect().width;
+    row.remove();
+    keep.forEach(function (c) { root.classList.add(c); });
+    if (!had) root.classList.remove("counter");
+    /* not laid out (no plan yet, or hidden): keep the last answer, or the query's */
+    if (!(box > 0) || !(need > 0)) return weekRoomLast == null ? true : weekRoomLast.ok;
+    weekRoomLast = { ok: box >= need - 0.01, box: box, need: need };
+    return weekRoomLast.ok;
+  }
+  /* v0.1.4.3 (Designer, option 3): 200% text (a 32px root) in a landscape window under 700 wide always gets the single
+     column, in every engine; otherwise (150%, or 200% from 700 wide) the 12ch measurement decides */
+  const NARROW_MQ = window.matchMedia("(max-width: 699.98px)");
+  function bigNarrow() { return NARROW_MQ.matches && parseFloat(getComputedStyle(document.documentElement).fontSize) >= 32 - 0.01; }
+  /* v0.1.4.3 (Designer ruling C): the week header holds "This week ▾" + 12px + Back to today's full label, or else + "Today"
+     (the accessible name stays "Back to today"); if neither fits, the single column. Measured in the split, like weekRoom */
+  const HEAD_GAP = 12;
+  let headRoomLast = null;
+  function headRoom() {
+    const root = document.documentElement, row = document.getElementById("navRow"), op = document.getElementById("openPlan"), slot = document.getElementById("backSlot");
+    if (!row || !op || !slot) return "full";
+    const had = root.classList.contains("counter");
+    if (!had) root.classList.add("counter");
+    const sd = slot.style.display; slot.style.setProperty("display", "flex", "important");
+    const oc = op.cloneNode(true); oc.removeAttribute("id"); oc.setAttribute("aria-hidden", "true"); oc.style.cssText = "position:absolute;visibility:hidden;pointer-events:none";
+    const lab = oc.querySelector("span"); if (lab) lab.textContent = "This week";
+    const bt = document.createElement("span"); bt.className = "back-today"; bt.setAttribute("aria-hidden", "true"); bt.style.cssText = "position:absolute;visibility:hidden;pointer-events:none";
+    const b = document.createElement("b"); b.textContent = "Back to today"; bt.appendChild(b);
+    row.appendChild(oc); slot.appendChild(bt);
+    const cs = getComputedStyle(row), box = row.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight), ow = oc.getBoundingClientRect().width, full = bt.getBoundingClientRect().width;
+    b.textContent = "Today"; const short = bt.getBoundingClientRect().width;
+    oc.remove(); bt.remove(); slot.style.display = sd;
+    if (!had) root.classList.remove("counter");
+    if (!(box > 0) || !(ow > 0) || !(full > 0)) return headRoomLast == null ? "full" : headRoomLast.fit;
+    headRoomLast = { fit: ow + HEAD_GAP + full ~1= box + 0.01 ? "full" : ow + HEAD_GAP + short ~1= box + 0.01 ? "short" : "none", box: box, op: ow, full: full, short: short };
+    return headRoomLast.fit;
+  }
+  function wantCounter() { return OUTER_MQ.matches && COUNTER_MQ.matches && !bigNarrow() && weekRoom() && headRoom() !== "none"; }
+  function syncBackLabel() {
+    const s = counterOn && !!headRoomLast && headRoomLast.fit === "short";
+    if (s === btShort) return;
+    btShort = s;
+    const b = document.querySelector("#backToday > b"); if (b) b.textContent = s ? "Today" : "Back to today";
+  }
+  /* the split's week heading is short ("This week"); the single column keeps "Week and progress" */
+  function counterHeading(on) { const s = document.querySelector("#openPlan > span:first-child"); if (s) s.textContent = on ? "This week" : "Week and progress"; }
   /* the layout never flips while a text field has focus (the keyboard shrinks the viewport) or just after */
   function syncCounter(force) {
     if (!force && (textEntry() || performance.now() ~1 counterHold)) return;
     const on = wantCounter();
-    if (on === counterOn && !force) return;
+    if (on === counterOn && !force) { syncBackLabel(); return; }
     const flip = on !== counterOn;
     counterOn = on;
     document.documentElement.classList.toggle("counter", on);
+    counterHeading(on);
+    syncBackLabel();
     if (!PLAN) return;
     if (flip) {
       /* a flip moves every control: a panel attached to one closes the way Cancel does (nothing changes); a prompt from
@@ -4892,8 +5362,9 @@ html.counter .upd-box.typing .code-in { height: min(2.9rem, 56px); min-height: m
     if (flip) requestAnimationFrame(function () { if (counterOn) counterReveal(); else revealCard(); });
     else if (counterOn) counterReveal();
   }
-  function queueCounter() { cancelAnimationFrame(fitRaf); fitRaf = requestAnimationFrame(function () { const was = counterOn; syncCounter(); if (counterOn && was) fitCounter(); }); }
+  function queueCounter() { cancelAnimationFrame(fitRaf); fitRaf = requestAnimationFrame(function (ts) { fitTs = ts; try { const was = counterOn; syncCounter(); if (counterOn && was && !fitFresh(ts)) fitCounter(); } finally { fitTs = -1; } }); }
   window.addEventListener("resize", queueCounter);
+  [COUNTER_MQ, NARROW_MQ].forEach(function (q) { if (q.addEventListener) q.addEventListener("change", queueCounter); else q.addListener(queueCounter); });
   document.addEventListener("focusout", function (e) { const t = e.target; if (!t || !(t.tagName === "TEXTAREA" || (t.tagName === "INPUT" && !/^(button|checkbox|radio|file|submit|reset|range|color)$/i.test(t.type)))) return; counterHold = performance.now() + 700; setTimeout(queueCounter, 750); });
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { if (counterOn) fitCounter(); });
 
@@ -4918,7 +5389,7 @@ html.counter .upd-box.typing .code-in { height: min(2.9rem, 56px); min-height: m
   window.addEventListener("resize", detectLargeText);
   /* deferred a frame so a class change never re-enters the observer in the same frame (WebKit logs a loop error) */
   var lgRaf = 0;
-  if (window.ResizeObserver) new ResizeObserver(function () { cancelAnimationFrame(lgRaf); lgRaf = requestAnimationFrame(function () { detectLargeText(); if (PLAN) syncNav(); if (counterOn) fitCounter(); }); }).observe(document.documentElement);
+  if (window.ResizeObserver) new ResizeObserver(function () { cancelAnimationFrame(lgRaf); lgRaf = requestAnimationFrame(function (ts) { detectLargeText(); syncCounter(); if (PLAN) syncNav(); if (counterOn && !fitFresh(ts)) { fitTs = ts; try { fitCounter(); } finally { fitTs = -1; } } }); }).observe(document.documentElement);
 
   /* back from the background on a new day: follow the calendar unless a week was picked on purpose */
   let shownDay = localDay();
@@ -4975,7 +5446,7 @@ html.counter .upd-box.typing .code-in { height: min(2.9rem, 56px); min-height: m
 
   /* ================= Constants ================= */
   const APP_ID = "coach-tracker";
-  const APP_VERSION = "v0.1.3.4-preview";
+  const APP_VERSION = "v0.1.4.3-preview";
   /* Storage prefix is per app, never per person. STORE_SCHEMA bumps only with a written migration. */
   const LS_PREFIX = "ct1-";
   const STORE_SCHEMA = 1;
@@ -4990,7 +5461,9 @@ html.counter .upd-box.typing .code-in { height: min(2.9rem, 56px); min-height: m
   const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
   /* In a browser tab the #p= fragment stays in the address bar, so Add to Home Screen saves a URL that still
      carries the plan (the Home Screen app on iOS starts with empty storage of its own). Processing is idempotent:
-     a link already seen on this device is ignored. In a Home Screen app the fragment is cleared after load. */
+     a link already seen on this device is ignored. In a Home Screen app the fragment is cleared after load.
+     v0.1.4: this is the iOS flow only. Off iOS (no navigator.standalone) the fragment is cleared once the plan is saved
+     (clearSavedLink, src/app6.js). */
   const KEEP_LINK_IN_TAB = true;
 
   /* ================= Storage ================= */
@@ -5030,6 +5503,13 @@ html.counter .upd-box.typing .code-in { height: min(2.9rem, 56px); min-height: m
     setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
   }
   let fatalShown = false;
+  let mutedErrors = 0;
+  function errorIsOurs(ev) {
+    if (ev.error && typeof ev.error === "object" && ev.error.stack) return true;
+    const f = String(ev.filename || "");
+    if (!f) return false;
+    try { return new URL(f, location.href).origin === location.origin; } catch (e) { return false; }
+  }
   function showFatal(err) {
     if (fatalShown || !document.body) return;
     fatalShown = true;
@@ -5054,6 +5534,11 @@ html.counter .upd-box.typing .code-in { height: min(2.9rem, 56px); min-height: m
     window.addEventListener("error", function (ev) {
       const m = String((ev && ev.message) || "");
       if (/ResizeObserver loop/.test(m) || !ev.error && !m) return; /* benign browser noise, or a resource load */
+      /* v0.1.4: only an error we can attribute shows the panel: an error object with a stack, or a source file on this
+         page's origin. A muted cross-origin error ("Script error.", no file, line 0) is never ours: every script here is
+         inline and the CSP loads nothing else, so it comes from script the browser or an extension injected (Safari's
+         page menu, Hide Distracting Items, Translate, content blockers). It is counted (About shows the count), not shown. */
+      if (!errorIsOurs(ev)) { mutedErrors++; return; }
       showFatal(ev.error || m);
     });
     window.addEventListener("unhandledrejection", function (ev) { showFatal(ev && ev.reason); });
@@ -5650,6 +6135,65 @@ html.counter .upd-box.typing .code-in { height: min(2.9rem, 56px); min-height: m
   }
 
   /* ---- Train ---- */
+  /* v0.1.4 (a): a day that opens grows to its full height in 200ms (ease-out, no bounce; at once under Reduce Motion). When
+     closing the day above it moved its top out of view (under the page head or off screen), the page scrolls so the
+     card's top sits just under the head. */
+  function revealDay(idx, opening) {
+    const card = document.querySelector('#panel-train .day[data-day="' + idx + '"]');
+    if (!card) return;
+    let sc = card.parentElement;
+    while (sc && sc !== document.body && !(/(auto|scroll)/.test(getComputedStyle(sc).overflowY) && sc.scrollHeight > sc.clientHeight)) sc = sc.parentElement;
+    if (!sc || sc === document.body) sc = document.scrollingElement;
+    const doc = sc === document.scrollingElement;
+    let head = doc ? 0 : sc.getBoundingClientRect().top;
+    const sh = sc.querySelector(".sheet-head");
+    if (sh && sh.getClientRects().length && /sticky|fixed/.test(getComputedStyle(sh).position)) head = Math.max(head, sh.getBoundingClientRect().bottom);
+    const bottom = doc ? window.innerHeight : sc.getBoundingClientRect().bottom;
+    const top = card.getBoundingClientRect().top;
+    /* opening the page at that day (Up next): also when the day's end is below the screen */
+    const cb = card.getBoundingClientRect().bottom;
+    if (top < head - 0.5 || top > bottom - 44 || (opening && cb > bottom)) sc.scrollTop += top - head - 8;
+    const body = card.querySelector(".day-body");
+    let reduce = false;
+    try { reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches; } catch (e) {}
+    if (!body || reduce || opening || typeof body.animate !== "function") return;
+    const h = body.getBoundingClientRect().height;
+    if (h > 0) body.animate([{ height: "0px", opacity: 0, overflow: "hidden" }, { height: h + "px", opacity: 1, overflow: "hidden" }], { duration: 200, easing: "cubic-bezier(0.2, 0, 0, 1)" });
+  }
+
+  /* v0.1.4 (a), Designer addendum (owner-approved): two columns only when the layout viewport is wider than tall AND the week
+     list itself is at least 820px wide; one column everywhere else (every portrait view). Landscape follows the layout
+     classes (the 520 rule, frozen while a text field has focus); outside inner it is the layout viewport's own shape. A
+     ResizeObserver on the Train panel and resize / orientationchange re-check. */
+  function landscapeLayout() {
+    const r = document.documentElement;
+    if (r.classList.contains("L-innerp")) return false;
+    if (r.classList.contains("L-duo")) return true;
+    return r.clientWidth > r.clientHeight;
+  }
+  function syncDayCols() {
+    const w = document.querySelector("#panel-train .day-wrap");
+    if (w) w.classList.toggle("cols2", landscapeLayout() && w.getBoundingClientRect().width >= 820);
+  }
+  /* v0.1.4: the sticky page head's height is the pane's scroll padding, so a control brought into view (keyboard focus,
+     scrollIntoView) never ends up under the head (closing the day above can leave the next card's status there) */
+  (function watchSheetHead() {
+    const pane = document.getElementById("planPane"), head = pane && pane.querySelector(".sheet-head");
+    if (!head || typeof ResizeObserver !== "function") return;
+    let raf = 0; /* next frame, like watchDayCols: no work inside the observer callback */
+    new ResizeObserver(function () { cancelAnimationFrame(raf); raf = requestAnimationFrame(function () { pane.style.setProperty("--head-h", head.offsetHeight + "px"); }); }).observe(head);
+  })();
+  (function watchDayCols() {
+    const p = document.getElementById("panel-train");
+    /* in the next frame: toggling .cols2 inside the observer changes the panel's own height, which WebKit reports as a
+       "ResizeObserver loop completed with undelivered notifications" error */
+    let raf = 0;
+    if (p && typeof ResizeObserver === "function") new ResizeObserver(function () { cancelAnimationFrame(raf); raf = requestAnimationFrame(syncDayCols); }).observe(p);
+    else window.addEventListener("resize", syncDayCols);
+    window.addEventListener("orientationchange", function () { requestAnimationFrame(syncDayCols); });
+    if (typeof ResizeObserver === "function") window.addEventListener("resize", function () { requestAnimationFrame(syncDayCols); });
+  })();
+
   function renderTrain() {
     const panel = document.getElementById("panel-train");
     const m = weekMeta(state.week);
@@ -5689,7 +6233,8 @@ html.counter .upd-box.typing .code-in { height: min(2.9rem, 56px); min-height: m
         "</div>";
     }
 
-    html += '<div class="day-grid">';
+    /* v0.1.4 (a): the week list is its own size container; one column under 820px (two above it, the open day full width) */
+    html += '<div class="day-wrap"><div class="day-grid">';
     DAYS.forEach(function (day, idx) {
       const today = isTodaySession(state.week, idx);
       if (day.rest) {
@@ -5738,7 +6283,7 @@ html.counter .upd-box.typing .code-in { height: min(2.9rem, 56px); min-height: m
       if (HINTS[day.key]) html += '<div class="ex-hint">' + escapeHtml(HINTS[day.key]) + "</div>";
       html += "</div></div>";
     });
-    html += "</div>";
+    html += "</div></div>";
     html +=
       '<div class="stat-bar" data-anchor>' +
         '<span class="lbl">Total across ' + TOTAL_WEEKS + "\u00a0weeks</span>" +
@@ -5749,17 +6294,26 @@ html.counter .upd-box.typing .code-in { height: min(2.9rem, 56px); min-height: m
     }
     html += "</div>";
     panel.innerHTML = html;
+    syncDayCols();
 
     const jump = document.getElementById("jumpThisWeek");
     if (jump) jump.addEventListener("click", function () { clearWeekPick(); state.week = autoWeek(state.week); setView(null); persist(); renderAll(); });
     panel.querySelectorAll("[data-toggle]").forEach(function (btn) {
       btn.addEventListener("click", function () {
-        const key = dayKey(state.week, parseInt(btn.dataset.toggle, 10));
+        const idx = parseInt(btn.dataset.toggle, 10), key = dayKey(state.week, idx);
         const wasOpen = btn.getAttribute("aria-expanded") === "true";
+        /* v0.1.4 (a): one day open at a time; opening one closes the other (every card stays in its place in the week) */
+        if (!wasOpen) DAYS.forEach(function (d, i) { if (!d.rest && i !== idx) state.openDays[dayKey(state.week, i)] = false; });
         state.openDays[key] = !wasOpen;
         persist();
+        /* the re-render must not move the page: keep the scroll so the cards above stay put (revealDay then fixes a top
+           that left the view) */
+        const pane = document.getElementById("planPane"), keepPane = pane ? pane.scrollTop : 0, keepWin = window.scrollY;
         renderTrain();
         renderDuo();
+        if (pane && pane.scrollTop !== keepPane) pane.scrollTop = keepPane;
+        if (window.scrollY !== keepWin) window.scrollTo(window.scrollX, keepWin);
+        if (!wasOpen) revealDay(idx);
       });
     });
     panel.querySelectorAll("[data-check]").forEach(function (btn) {
@@ -6024,8 +6578,17 @@ html.counter .upd-box.typing .code-in { height: min(2.9rem, 56px); min-height: m
     clearTimeout(toastTimer); undoFn = null;
     t.classList.remove("show");
     t.setAttribute("aria-hidden", "true");
+    undoRoom();
     reserveSpace();
+    if (typeof syncMorePill === "function") syncMorePill(); /* v0.1.4 (c): the pill comes back, recounted */
     if (typeof queueNav === "function") { queueNav(); setTimeout(queueNav, 220); }
+  }
+  /* v0.1.4: Undo never covers list text. In the Counter the slot overlays the list's bottom (spec (c)), so while Undo
+     shows the actions bar takes the slot's height back (#paneToday.undo-on) and the list ends above the toast; with no
+     Undo the list still runs to the buttons. */
+  function undoRoom() {
+    const pane = document.getElementById("paneToday"), t = document.getElementById("toast");
+    if (pane) pane.classList.toggle("undo-on", t.classList.contains("show") && t.classList.contains("in-slot"));
   }
   function showUndo(msg, fn, ms) {
     const t = document.getElementById("toast");
@@ -6035,7 +6598,9 @@ html.counter .upd-box.typing .code-in { height: min(2.9rem, 56px); min-height: m
     document.getElementById("toastUndo").hidden = !fn;
     t.removeAttribute("aria-hidden");
     t.classList.add("show");
+    undoRoom();
     reserveSpace();
+    if (typeof syncMorePill === "function") syncMorePill(); /* v0.1.4 (c): the pill goes while Undo shows */
     clearTimeout(toastTimer);
     toastTimer = setTimeout(hideToast, ms || 10000);
     if (typeof queueNav === "function") { queueNav(); setTimeout(queueNav, 220); }
@@ -6079,6 +6644,8 @@ html.counter .upd-box.typing .code-in { height: min(2.9rem, 56px); min-height: m
      selected day on the left and the week as rows on the right, no page scroll. Set in JS (html.counter, syncCounter in
      app6) rather than a media query so a keyboard that shrinks the viewport while typing never flips the layout. */
   var counterOn = false;
+  /* v0.1.4.3 (Designer ruling C): the Counter header shows "Today" when "Back to today" does not fit beside "This week ▾" (syncCounter) */
+  var btShort = false;
   function renderToday() {
     const el = document.getElementById("today");
     const m = weekMeta(state.week);
@@ -6089,7 +6656,7 @@ html.counter .upd-box.typing .code-in { height: min(2.9rem, 56px); min-height: m
     const pos = train.indexOf(f.idx) + 1;
     const kicker = '<span class="k-seg">W' + state.week + "\u00a0of\u00a0" + TOTAL_WEEKS + "</span>" + (N_BLOCKS > 1 ? '<span class="k-blk"><span class="k-c">, </span><span class="k-seg">Block\u00a0' + m.block + "</span></span>" : "") + (m.deload ? '<span class="k-tail">, Deload</span>' : "");
     const backHtml = f.picked
-      ? '<button type="button" class="back-today" id="backToday" aria-label="Showing ' + escapeHtml(day.short) + ", " + escapeHtml(day.label) + '. Back to today"><span class="bt-label">Showing ' + escapeHtml(day.short) + ", " + escapeHtml(day.label) + "</span><b>Back to today</b></button>"
+      ? '<button type="button" class="back-today" id="backToday" aria-label="Showing ' + escapeHtml(day.short) + ", " + escapeHtml(day.label) + '. Back to today"><span class="bt-label">Showing ' + escapeHtml(day.short) + ", " + escapeHtml(day.label) + "</span><b>" + (counterOn && btShort ? "Today" : "Back to today") + "</b></button>"
       : '<span class="back-today bt-ph" aria-hidden="true"><b>Back to today</b></span>';
     /* Back to today has one home on every screen: directly under the week strip */
     document.getElementById("backSlot").innerHTML = backHtml;
@@ -6185,30 +6752,29 @@ html.counter .upd-box.typing .code-in { height: min(2.9rem, 56px); min-height: m
   }
 
   /* v0.1.3.4 Counter: the exercise list is its own scroll area between the title block and the pinned actions. While rows
-     are below its visible end, a solid "N more" pill sits on the list's bottom edge (N = rows not fully visible below);
+     are below its visible end, an "N more" control sits under the list (v0.1.4.1: a 22px chip in a 44px tap target) (N = rows not fully visible below);
      a tap scrolls the next rows into view. Hidden at the end of the list, when nothing overflows, and outside the Counter. */
-  /* Counter at 200% text only: each word of an exercise name or its sets in its own span, so the start of every line can be
-     a snap point. Plain text everywhere else (spans shift Chromium's text widths by a fraction of a pixel) */
-  function bigCounter() { return counterOn && document.documentElement.classList.contains("lg-text"); }
+  /* Counter (every text size since v0.1.4): each word of an exercise name or its sets in its own span, so the start of every
+     line can be a snap point. Plain text everywhere else (spans shift Chromium's text widths by a fraction of a pixel) */
+  function snapCounter() { return counterOn; }
   function snapWords(t) {
-    if (!bigCounter()) return escapeHtml(t);
+    if (!snapCounter()) return escapeHtml(t);
     return String(t).split(/\s+/).filter(Boolean).map(function (w) { return '<span class="w">' + escapeHtml(w) + "</span>"; }).join(" ");
   }
   function moreOn() { const c = document.getElementById("today"); return !!c && c.classList.contains("more-on"); }
-  /* v0.1.3.4b, Counter at 200% text only: when the list overflows, the card takes "more-on". The focus line goes (its room
-     pays for the pill's own 44px strip under the list), the list snaps (mandatory) to each row's top and to every line inside
+  /* v0.1.3.4b, and v0.1.4 (c) at every text size: when the list overflows, the card takes "more-on": the pill gets its own
+     44px strip under the list (at 200% text the focus line goes to pay for it; at normal text it stays), the list snaps (mandatory) to each row's top and to every line inside
      a row taller than the list (a row taller than its scroll window is not a snap area itself: browsers let an oversized
      snap area stop anywhere inside it, which is how a line was cut at the list's top), and an end padding lets the last
      snap point reach the top. Measured with the focus line and no strip; re-run on every render and after fitCounter. */
   function layoutMore() {
     const card = document.getElementById("today"), list = card && card.querySelector(".set-rows"), pill = document.getElementById("morePill");
     if (!card || !list || !pill) return;
-    const lg = bigCounter();
-    /* rendered before the text size or the layout changed: the words have the wrong markup, so render again (once: the
-       new markup matches) */
+    const lg = snapCounter();
+    /* rendered before the layout changed: the words have the wrong markup, so render again (once: the new markup matches) */
     if (lg !== !!list.querySelector(".w") && list.querySelector(".set-row")) { renderToday(); return; }
-    if (card.classList.contains("more-on") || list.style.paddingBottom) {
-      card.classList.remove("more-on"); list.style.paddingBottom = "";
+    if (card.classList.contains("more-on") || list.style.getPropertyValue("--end-pad")) {
+      card.classList.remove("more-on"); list.style.removeProperty("--end-pad");
       list.querySelectorAll(".set-row.tall").forEach(function (r) { r.classList.remove("tall"); });
     }
     if (lg && list.scrollHeight - list.clientHeight > 0.5) {
@@ -6229,7 +6795,9 @@ html.counter .upd-box.typing .code-in { height: min(2.9rem, 56px); min-height: m
       });
       const base = list.scrollHeight;
       const pad = Math.max(0, Math.ceil(last + ch - base));
-      if (pad) list.style.paddingBottom = pad + "px";
+      /* v0.1.4: the end room is a spacer after the rows (.set-rows::after), not the list's padding: a flex item cannot
+         shrink below its own padding, so a padded list could not give Undo's height back (spec (c) amendment) */
+      if (pad) list.style.setProperty("--end-pad", pad + "px");
       list.scrollTop = top;
     }
     syncMorePill();
@@ -6238,18 +6806,56 @@ html.counter .upd-box.typing .code-in { height: min(2.9rem, 56px); min-height: m
     const list = document.querySelector("#today .set-rows");
     if (!counterOn || !list || list.scrollHeight - list.clientHeight <= 0.5) return [];
     const rows = list.querySelectorAll(".set-row");
-    if (moreOn()) { /* rows entirely below the visible area */
-      const vb = list.getBoundingClientRect().top + list.clientTop + list.clientHeight;
+    if (moreOn()) { /* rows entirely below the visible area (v0.1.4.3: the area ends at the clip, a row boundary) */
+      const vb = listVisBottom(list);
       return Array.prototype.filter.call(rows, function (r) { return r.getBoundingClientRect().top >= vb - 1; });
     }
     if (list.scrollTop + list.clientHeight >= list.scrollHeight - 1) return [];
     const lb = list.getBoundingClientRect().bottom - list.clientTop;
     return Array.prototype.filter.call(rows, function (r) { return r.getBoundingClientRect().bottom > lb + 1; });
   }
+  /* v0.1.4 (c): the list's end is in view: the last row's bottom is inside the visible area (the end padding below it,
+     which lets the last snap point reach the top, does not count) */
+  function listAtEnd() {
+    const l = document.querySelector("#today .set-rows"), rows = l && l.querySelectorAll(".set-row");
+    if (!l || !rows.length || l.scrollTop + l.clientHeight >= l.scrollHeight - 1) return true;
+    return rows[rows.length - 1].getBoundingClientRect().bottom <= l.getBoundingClientRect().top + l.clientTop + l.clientHeight + 1;
+  }
+  function undoInSlot() { const t = document.getElementById("toast"); return !!t && t.classList.contains("show") && t.classList.contains("in-slot"); }
+  /* v0.1.4.3 (Designer nit, 200% text): the overflowing list (.more-on) ends at a row boundary: a row that would show only
+     partly at the bottom is clipped away whole (clip-path, so nothing moves) and counts as hidden in "N more". A row taller
+     than the list keeps its last whole line instead. */
+  function listVisBottom(list) { const lt = list.getBoundingClientRect().top + list.clientTop; return lt + list.clientHeight - (parseFloat(list.dataset.clipB) || 0); }
+  function clipRows() {
+    const list = document.querySelector("#today .set-rows");
+    if (!list) return;
+    let cut = 0;
+    if (counterOn && moreOn() && list.scrollHeight - list.clientHeight > 0.5) {
+      const lt = list.getBoundingClientRect().top + list.clientTop, vb = lt + list.clientHeight;
+      let edge = -Infinity;
+      list.querySelectorAll(".set-row").forEach(function (r) { const b = r.getBoundingClientRect(); if (b.bottom > lt + 1 && b.bottom <= vb + 0.5) edge = Math.max(edge, b.bottom); });
+      if (edge === -Infinity) list.querySelectorAll(".set-row .sn").forEach(function (u) { const b = u.getBoundingClientRect(); if (b.bottom > lt + 1 && b.bottom <= vb + 0.5) edge = Math.max(edge, b.bottom); });
+      if (edge > -Infinity && vb - edge > 0.5) cut = Math.floor((vb - edge) * 2) / 2;
+    }
+    if (cut) { list.dataset.clipB = String(cut); list.style.clipPath = "inset(0 0 " + cut + "px 0)"; }
+    else if (list.dataset.clipB) { delete list.dataset.clipB; list.style.clipPath = ""; }
+  }
   function syncMorePill() {
     const pill = document.getElementById("morePill");
+    clipRows();
     if (!pill) return;
     const n = hiddenRows().length, strip = moreOn();
+    /* v0.1.4 (c): Undo overlays the list's bottom and the pill's strip, so the pill goes while it shows (recounted after) */
+    pill.classList.toggle("under-undo", strip && undoInSlot());
+    /* the pill goes only when the list's end is in view: with no row wholly below but the last one not yet whole, it
+       stays as "More" (one tap brings the end into view) */
+    if (!n && strip && !listAtEnd()) {
+      if (pill.getAttribute("aria-label") !== "Show the rest of the list") {
+        pill.setAttribute("aria-label", "Show the rest of the list");
+        pill.innerHTML = '<span class="mp-chip"><span>More</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>';
+      }
+      pill.classList.remove("at-end"); pill.hidden = false; return;
+    }
     if (!n) {
       if (!pill.hidden && !pill.classList.contains("at-end") && document.activeElement === pill) { const d = document.getElementById("todayDone"); if (d) d.focus({ preventScroll: true }); }
       /* with the strip the pill only goes invisible, so the list never changes height while it scrolls */
@@ -6259,7 +6865,7 @@ html.counter .upd-box.typing .code-in { height: min(2.9rem, 56px); min-height: m
     const label = n + " more exercise" + (n === 1 ? "" : "s");
     if (pill.getAttribute("aria-label") !== label) {
       pill.setAttribute("aria-label", label);
-      pill.innerHTML = '<span>' + n + ' more</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>';
+      pill.innerHTML = '<span class="mp-chip"><span>' + n + ' more</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>';
     }
     pill.classList.remove("at-end");
     pill.hidden = false;
@@ -6268,11 +6874,11 @@ html.counter .upd-box.typing .code-in { height: min(2.9rem, 56px); min-height: m
      fully visible comes to the top; when it already starts there, the list moves on by its own height less 8px */
   function moreRows() {
     const list = document.querySelector("#today .set-rows"), rows = hiddenRows();
-    if (!list || !rows.length) return;
+    if (!list || (!rows.length && !(moreOn() && !listAtEnd()))) return;
     const lt = list.getBoundingClientRect().top + list.clientTop, max = list.scrollHeight - list.clientHeight;
     if (moreOn()) {
       const next = Array.prototype.find.call(list.querySelectorAll(".set-row"), function (r) { return r.getBoundingClientRect().top > lt + 1; });
-      if (next) list.scrollTop = Math.min(max, list.scrollTop + next.getBoundingClientRect().top - lt);
+      list.scrollTop = next ? Math.min(max, list.scrollTop + next.getBoundingClientRect().top - lt) : max;
       syncMorePill();
       return;
     }
@@ -6283,6 +6889,7 @@ html.counter .upd-box.typing .code-in { height: min(2.9rem, 56px); min-height: m
     syncMorePill();
   }
 
+  function bindTail(t) { return String(t).replace(/ ([A-Za-z]|[0-9]+)$/, "\u00a0$1"); }
   function stripIcon(kind) {
     if (kind === "done") return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
     if (kind === "skip") return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"><line x1="6" y1="12" x2="18" y2="12"/></svg>';
@@ -6300,7 +6907,9 @@ html.counter .upd-box.typing .code-in { height: min(2.9rem, 56px); min-height: m
       html += '<button type="button" class="wd' + (today ? " is-today" : "") + (viewing ? " is-view" : "") + '" data-strip="' + idx + '" aria-pressed="' + viewing + '" aria-label="' + escapeHtml(day.short) + ": " + word + (today ? ", today" : "") + '. Show this day">' +
         '<span class="d">' + escapeHtml(day.short) + "</span>" +
         /* Counter rows also name the session (hidden in the strip) */
-        '<span class="ss">' + escapeHtml(day.rest ? "Rest" : day.label) + "</span>" +
+        /* v0.1.4.3: a trailing single letter or number stays with the word before it when the name wraps ("Full" / "body A");
+           the rendered name only, never the plan data */
+        '<span class="ss">' + escapeHtml(day.rest ? "Rest" : bindTail(day.label)) + "</span>" +
         '<span class="dot ' + st + (today ? " today" : "") + '">' + stripIcon(st) + "</span>" +
         '<span class="s">' + word + "</span></button>";
     });
@@ -6349,9 +6958,10 @@ html.counter .upd-box.typing .code-in { height: min(2.9rem, 56px); min-height: m
     if (exl) { exl.scrollTop = 0; syncMorePill(); }
     const row = list && (list.querySelector(".wd.is-view") || list.querySelector(".wd.is-today"));
     if (!row) return;
-    const r = row.getBoundingClientRect(), b = list.getBoundingClientRect();
-    if (r.top < b.top + 4) list.scrollTop += r.top - b.top - 4;
-    else if (r.bottom > b.bottom - 4) list.scrollTop += r.bottom - b.bottom + 4;
+    /* v0.1.4.3 (Designer, ruling (a)): the smallest scroll from the list's top that shows the row whole, so a Sat or Sun row
+       that needs one ends at the list's bottom edge (Monday may then be partly hidden); the picked row wins over today's */
+    const r = row.getBoundingClientRect(), b = list.getBoundingClientRect(), end = r.bottom - b.top - list.clientTop + list.scrollTop;
+    list.scrollTop = Math.max(0, Math.ceil(end - list.clientHeight - 0.01));
   }
 
   function renderSheetHead() {
@@ -6441,7 +7051,7 @@ html.counter .upd-box.typing .code-in { height: min(2.9rem, 56px); min-height: m
       const el = endScroller(); if (!el) return 0;
       return el.scrollHeight - el.clientHeight - el.scrollTop;
     }
-    let atEnd = false, lastH = -1, holdUntil = 0;
+    let atEnd = false, lastH = -1, holdUntil = 0, padRaf = 0;
     document.addEventListener("scroll", function () { if (performance.now() > holdUntil) atEnd = endGap() <= 24; }, { passive: true, capture: true });
     if (typeof ResizeObserver !== "function") return;
     const ro = new ResizeObserver(function () {
@@ -6451,10 +7061,17 @@ html.counter .upd-box.typing .code-in { height: min(2.9rem, 56px); min-height: m
       else if (h !== lastH && atEnd) {
         const g = endGap();
         /* our own scroll must not read as the reader leaving the end while the row is still growing */
-        if (g > 0) { endScroller().scrollTop += g; holdUntil = performance.now() + 400; }
+        /* v0.1.4.2: never past the top limit the day pick uses (revealCard): a reader at the top of a home that only
+           just overflows counts as "at the end", and scrolling the whole gap put the card's top (Skip) under the status bar */
+        let d = g;
+        if (!counterOn) { const card = document.getElementById("today"); if (card && card.getClientRects().length) d = Math.min(d, Math.max(0, card.getBoundingClientRect().top - viewLimits().topLim)); }
+        if (d >= 1) { endScroller().scrollTop += d; holdUntil = performance.now() + 400; }
       }
       lastH = h;
-      if (document.getElementById("toast").classList.contains("show")) reserveSpace();
+      /* v0.1.4.3: deferred a frame. --pin-pad sizes #navEnd, which this observer watches, so setting it inside the callback
+         resized an observed element during delivery (WebKit: "ResizeObserver loop completed with undelivered notifications",
+         a floating toast during a resize) */
+      cancelAnimationFrame(padRaf); padRaf = requestAnimationFrame(function () { if (document.getElementById("toast").classList.contains("show")) reserveSpace(); });
     });
     ["navGroup", "toast", "navEnd"].forEach(function (id) { const n = document.getElementById(id); if (n) ro.observe(n); });
   })();
@@ -6544,6 +7161,8 @@ html.counter .upd-box.typing .code-in { height: min(2.9rem, 56px); min-height: m
      the visual viewport. Two panes (inner landscape) keep the CSS per-pane rule, unchanged. Positions are set before the
      first frame, so the fade-in still paints full size (only opacity and the 8px rise animate). */
   const POP_GAP = 8;
+  /* a short landscape window (the Counter's shape), from the window CSS lays out with */
+  const KB_LAND_MQ = window.matchMedia("(orientation: landscape) and (max-height: 499.98px)");
   function popLimits(kbUp) {
     const pr = document.getElementById("clearProbe").getBoundingClientRect();
     const vv = window.visualViewport, ih = window.innerHeight;
@@ -6553,7 +7172,9 @@ html.counter .upd-box.typing .code-in { height: min(2.9rem, 56px); min-height: m
     /* the 50px zone is Safari's bottom toolbar in portrait; in landscape (the Counter) Safari keeps its bars at the top.
        v0.1.3.3: with the keyboard up in the Counter there is no status band to clear (a phone in landscape shows none),
        so the panel may rise to the safe area (padding-top of #clearProbe is the resolved top inset) and use the room */
-    const top = kb && counterOn ? Math.max(8, parseFloat(getComputedStyle(document.getElementById("clearProbe")).paddingTop) || 0) : pr.top;
+    /* v0.1.4.3: the same in the single column in a short landscape window (200% text under 700 wide, Designer option 3):
+       it is the Counter's window without the Counter, so the keyboard leaves it the same ~170px */
+    const top = kb && (counterOn || KB_LAND_MQ.matches) ? Math.max(8, parseFloat(getComputedStyle(document.getElementById("clearProbe")).paddingTop) || 0) : pr.top;
     return { top: vTop + top, bottom: vTop + vH - (kb ? 8 : (counterOn ? 0 : 50) + safeB + 8), left: Math.max(16, pr.left), right: W - Math.max(16, W - pr.right), W: W };
   }
   function placePop(box, anchor, x) {
@@ -6727,22 +7348,38 @@ html.counter .upd-box.typing .code-in { height: min(2.9rem, 56px); min-height: m
   function clearHash() {
     try { history.replaceState(null, "", window.location.pathname + window.location.search); } catch (e) {}
   }
+  /* v0.1.4 (Security Q2, approved by the maintainer): off iOS there is no navigator.standalone (Android, desktop). There a
+     Home Screen shortcut shares this storage, so keeping the plan in the address bar buys nothing and leaves it in the
+     shortcut, history and sync. Once the link's plan is confirmed written (the stored plan reads back as that plan and the seen list
+     holds the link), #p= is removed with replaceState (never a new history entry), and only if the address bar still holds
+     this same link. iOS Safari keeps today's flow (KEEP_LINK_IN_TAB): its Home Screen app starts with storage of its own. */
+  function clearSavedLink(code, fp, plan) {
+    if ("standalone" in window.navigator) return;
+    const h = readHashCode();
+    if (!h || fnv(extractCode(h)) !== fp) return;
+    let ok = false;
+    try { const seen = JSON.parse(localStorage.getItem(LS_PREFIX + "seen")); ok = Array.isArray(seen) && seen.indexOf(fp) >= 0 && localStorage.getItem(LS_PREFIX + "plan") === JSON.stringify(plan); } catch (e) { ok = false; }
+    if (ok) clearHash();
+  }
   async function handleLink(raw) {
     const code = extractCode(raw);
     const fp = fnv(code);
     if (isStandalone() || !KEEP_LINK_IN_TAB) clearHash();
-    if (PLAN && state.seen.indexOf(fp) >= 0) return; /* this link was already handled on this device */
+    if (PLAN && state.seen.indexOf(fp) >= 0) { /* this link was already handled on this device */
+      if (!("standalone" in window.navigator) && readHashCode()) { try { const r = await decodePlan(code); clearSavedLink(code, fp, r.plan); } catch (e) {} }
+      return;
+    }
     let res;
     try { res = await decodePlan(code); }
     catch (err) { showPlanError(err, "link"); return; }
-    if (!PLAN) { applyPlan(res.plan, fp); return; }
-    if (samePlan(PLAN, res.plan)) { markSeen(fp); persist(); showUndo("This plan is already loaded", null, 4000); return; }
+    if (!PLAN) { applyPlan(res.plan, fp); clearSavedLink(code, fp, res.plan); return; }
+    if (samePlan(PLAN, res.plan)) { markSeen(fp); persist(); clearSavedLink(code, fp, res.plan); showUndo("This plan is already loaded", null, 4000); return; }
     openDialog({ kind: "replace", warn: true, title: "Use the plan from this link?",
       body: "It replaces \u201c" + PLAN.meta.name + "\u201d with \u201c" + res.plan.meta.name + "\u201d. Your logged days, lifts and weigh-ins stay.",
       extra: '<p class="dlg-note">' + res.plan.meta.weeks + "\u00a0weeks, " + res.plan.days.filter(function (d) { return !d.rest; }).length + "\u00a0training days a week. You can undo this for 10 seconds.</p>",
       buttons: [
         { label: "Keep current plan", cls: "ghost", id: "dlgKeep", fn: function () { markSeen(fp); persist(); } },
-        { label: "Use new plan", cls: "ic-replace", id: "dlgUse", fn: function () { applyPlan(res.plan, fp, "New plan in use"); } }
+        { label: "Use new plan", cls: "ic-replace", id: "dlgUse", fn: function () { applyPlan(res.plan, fp, "New plan in use"); clearSavedLink(code, fp, res.plan); } }
       ],
       onCancel: function () { markSeen(fp); persist(); } });
   }
@@ -6755,7 +7392,8 @@ html.counter .upd-box.typing .code-in { height: min(2.9rem, 56px); min-height: m
     const CHECK = '<svg class="qp-check" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
     /* On iPhone a Home Screen app has its own storage. In a tab the #p= link stays in the address bar, so an icon added
        later still gets the plan, but not the date or log saved here. A pasted plan leaves no link, so the icon gets nothing. */
-    const hs = isStandalone() ? "" : readHashCode()
+    /* v0.1.4: iOS only. Off iOS the shortcut shares this storage (and the link leaves the address bar once saved) */
+    const hs = isStandalone() || !("standalone" in window.navigator) ? "" : readHashCode()
       ? "Adding this page to your Home Screen later starts fresh. Add it first, then set your date there."
       : "Adding this page to your Home Screen later starts fresh, with no plan. Add it first, then paste your plan code there.";
     openDialog({ kind: "start", title: "When do you start Week 1?",
@@ -6925,7 +7563,13 @@ html.counter .upd-box.typing .code-in { height: min(2.9rem, 56px); min-height: m
     function setDiag() {
       const r = document.documentElement.classList, m = window.LAYOUT.mode;
       const lay = m === "duo" ? "two panes" : m === "innerp" ? "inner portrait" : r.contains("counter") ? "Counter" : "phone";
-      diag.textContent = "Window " + window.innerWidth + "\u00d7" + window.innerHeight + " \u00b7 reported screen " + screen.width + "\u00d7" + screen.height + " \u00b7 layout: " + lay;
+      const de = document.documentElement, qy = function (q) { try { return window.matchMedia(q).matches ? "y" : "n"; } catch (e) { return "?"; } };
+      diag.textContent = "Window " + window.innerWidth + "\u00d7" + window.innerHeight + " \u00b7 CSS " + de.clientWidth + "\u00d7" + de.clientHeight +
+        " \u00b7 queries: landscape " + qy("(orientation: landscape)") + ", inner " + qy("(min-width: 520px) and (min-height: 520px)") +
+        ", split " + qy("(orientation: landscape) and (min-width: 560px) and (max-height: 499.98px)") +
+        (typeof weekRoomLast !== "undefined" && weekRoomLast ? ", week " + Math.round(weekRoomLast.box) + "/" + Math.round(weekRoomLast.need) + "px (12ch) " + (weekRoomLast.ok ? "y" : "n") : "") +
+        " \u00b7 reported screen " + screen.width + "\u00d7" + screen.height + " \u00b7 layout: " + lay +
+        (mutedErrors ? " \u00b7 ignored browser script errors: " + mutedErrors : "");
     }
     window.addEventListener("resize", function () { if (!page.hidden) setDiag(); });
     function setAbout(open) {
@@ -7100,20 +7744,26 @@ html.counter .upd-box.typing .code-in { height: min(2.9rem, 56px); min-height: m
     renderWeekNote();
     renderSpine();
     applyTab();
-    renderDuo();    if (counterOn) fitCounter();
+    renderDuo();    if (typeof syncCounter === "function") syncCounter(); if (counterOn) fitCounter();
   }
 
   /* ================= Counter (v0.1.3.3): the cover screen in landscape ================= */
   /* One type scale for every day: --cs is the largest step from CS_MAX down to CS_MIN at which the plan's longest day
-     (every training day of one week per block and deload kind, measured in the real card) fits the card with no scroll.
+     (every training day of one week per block and deload kind, measured in the real card) fits the card with no scroll,
+     and (v0.1.4.1) never more than the step v0.1.3.4's layout fitted (the ceiling pass, .fit-ceil in the CSS).
      The floors are in the CSS (max()): exercise names 0.875rem (14px), sets, focus and labels 0.8125rem (13px), tags
      0.625rem (10px); 0.73 is where the names reach theirs. A day that does not fit at CS_MIN (or at 200% text) scrolls
      inside the card; nothing is clipped. Re-run on plan load, resize and text-size change. */
   const CS_MAX = 1.3, CS_MIN = 0.73, CS_STEP = 0.03;
+  let fitTs = -1, fitDone = ""; /* see fitKey */
   function fitCounter() {
     const root = document.documentElement, card = document.getElementById("today");
     if (!counterOn || !PLAN || !card || !DAYS.length) { root.style.removeProperty("--cs"); root.classList.remove("counter-scroll"); return; }
     counterRows();
+    /* v0.1.4: measure without the pill's strip and the list's end room (the --end-pad spacer; layoutMore puts them back after). Since (c) a list
+       can take "more-on" at normal text, and a fit measured with them on would count the strip's 44px against the plan.
+       Defensive: no gated case changed with it (s06's longest day overflows at CS_MIN either way). */
+    card.classList.remove("more-on"); card.querySelectorAll(".set-rows").forEach(function (l) { l.style.removeProperty("--end-pad"); });
     const saveV = viewIdx, saveW = state.week, saveArm = armedKey, saveTop = card.scrollTop;
     const weeks = [], seen = {};
     for (let w = 1; w <= TOTAL_WEEKS; w++) { const m = weekMeta(w), k = m.block + "|" + !!m.deload; if (!seen[k]) { seen[k] = 1; weeks.push(w); } }
@@ -7126,7 +7776,11 @@ html.counter .upd-box.typing .code-in { height: min(2.9rem, 56px); min-height: m
     const over = function () { const l = exl(); return card.scrollHeight - card.clientHeight > 0.5 || (!!l && l.scrollHeight - l.clientHeight > 0.5); };
     const tall = function () { const l = exl(); return card.scrollHeight + (l ? l.scrollHeight - l.clientHeight : 0); };
     let cs = CS_MAX, fits = true;
+    const pane = document.getElementById("paneToday");
     try {
+      /* v0.1.4.1: the ceiling. The search first runs with the bar reserving the Undo slot, as every bar did in v0.1.3.4, so
+         the scale never grows past what that layout fitted (the room the slot gave back goes to long days, not bigger type) */
+      if (pane) pane.classList.add("fit-ceil");
       root.style.setProperty("--cs", String(cs));
       /* the tallest day at the largest step goes first; each failure moves the search to the day that failed */
       let worst = null, wh = -1;
@@ -7137,11 +7791,34 @@ html.counter .upd-box.typing .code-in { height: min(2.9rem, 56px); min-height: m
         if (!bad) break;
         worst = bad;
       }
-    } finally { state.week = saveW; viewIdx = saveV; armedKey = saveArm; renderToday(); }
+      /* then the real layout: every day must fit at that scale with the slot given back, or the steps go on down to CS_MIN */
+      if (pane) pane.classList.remove("fit-ceil");
+      fits = true;
+      for (;;) {
+        const bad = days.find(function (wd) { show(wd); return over(); });
+        if (!bad) break;
+        if (cs <= CS_MIN) { fits = false; break; }
+        cs = Math.max(CS_MIN, Math.round((cs - CS_STEP) * 100) / 100); root.style.setProperty("--cs", String(cs));
+      }
+    } finally {
+      if (pane) pane.classList.remove("fit-ceil");
+      state.week = saveW; viewIdx = saveV; armedKey = saveArm; renderToday(); }
     root.classList.toggle("counter-scroll", !fits || over());
     card.scrollTop = Math.min(saveTop, card.scrollHeight);
     layoutMore();
+    fitDone = fitKey(fitTs);
   }
+  /* v0.1.4.1: one fit per layout. A turn runs a fit from the resize handler, and the layout that fit makes trips app7's
+     ResizeObserver a frame later, which ran a second full fit of the same layout (two passes now, about 170-360ms each
+     in WebKit) and kept a turn busy past 600ms. The key is the viewport, the root font size, the card's box and the
+     root's classes, set only by a fit from those two frame callbacks; a fit from anywhere else (a plan or content
+     change, through renderAll) clears it, so the next callback fits again. */
+  function fitKey(ts) {
+    if (ts < 0) return "";
+    const card = document.getElementById("today"), root = document.documentElement;
+    return innerWidth + "x" + innerHeight + "|" + getComputedStyle(root).fontSize + "|" + (card ? card.clientWidth + "x" + card.clientHeight : "") + "|" + root.className;
+  }
+  function fitFresh(ts) { const k = fitKey(ts); return k !== "" && k === fitDone; }
   /* The week rows share the right column's height (repeat(7, 1fr)). When a row would be under 44px with 12px top and
      bottom padding (644x382 with a 21px bottom inset gives 42.9), the bottom padding goes (counter-tight: 44.1); measured
      with the 12px padding every time, so it comes back off when the room returns. */
@@ -7154,15 +7831,79 @@ html.counter .upd-box.typing .code-in { height: min(2.9rem, 56px); min-height: m
   }
   let counterHold = 0, fitRaf = 0;
   function textEntry() { const a = document.activeElement; return !!a && (a.tagName === "TEXTAREA" || (a.tagName === "INPUT" && !/^(button|checkbox|radio|file|submit|reset|range|color)$/i.test(a.type))); }
-  function wantCounter() { return OUTER_MQ.matches && window.innerWidth >= 600 && window.innerWidth > window.innerHeight && window.innerHeight < 500; }
+  /* v0.1.4.3: short landscape from a media query (the viewport the CSS lays out with), not window.innerWidth/innerHeight,
+     which a Home Screen app can report differently; its change event re-checks even when no resize fires */
+  /* v0.1.4.3 (Designer A+): from 560px wide (the owner's cover screen gives the app a 594x466 window; the status column
+     takes the rest), and only while the week column's content box holds 12ch in the day-name style at the current text
+     size, measured in the split layout itself (so 200% text at 594x466 keeps the single column) */
+  const COUNTER_MQ = window.matchMedia("(orientation: landscape) and (min-width: 560px) and (max-height: 499.98px)");
+  const WEEK_CH = 12;
+  let weekRoomLast = null;
+  function weekRoom() {
+    const root = document.documentElement, ws = document.getElementById("weekStrip");
+    if (!ws) return true;
+    const had = root.classList.contains("counter"), keep = ["counter-tight", "counter-short"].filter(function (c) { return root.classList.contains(c); });
+    if (!had) root.classList.add("counter");
+    keep.forEach(function (c) { root.classList.remove(c); });
+    const row = document.createElement("div"), name = document.createElement("span");
+    row.className = "wd"; row.setAttribute("aria-hidden", "true"); row.style.cssText = "visibility:hidden;height:0;min-height:0;pointer-events:none";
+    name.className = "ss"; name.style.cssText = "position:absolute;width:" + WEEK_CH + "ch;flex:none";
+    row.appendChild(name); ws.appendChild(row);
+    const cs = getComputedStyle(row), box = row.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight), need = name.getBoundingClientRect().width;
+    row.remove();
+    keep.forEach(function (c) { root.classList.add(c); });
+    if (!had) root.classList.remove("counter");
+    /* not laid out (no plan yet, or hidden): keep the last answer, or the query's */
+    if (!(box > 0) || !(need > 0)) return weekRoomLast == null ? true : weekRoomLast.ok;
+    weekRoomLast = { ok: box >= need - 0.01, box: box, need: need };
+    return weekRoomLast.ok;
+  }
+  /* v0.1.4.3 (Designer, option 3): 200% text (a 32px root) in a landscape window under 700 wide always gets the single
+     column, in every engine; otherwise (150%, or 200% from 700 wide) the 12ch measurement decides */
+  const NARROW_MQ = window.matchMedia("(max-width: 699.98px)");
+  function bigNarrow() { return NARROW_MQ.matches && parseFloat(getComputedStyle(document.documentElement).fontSize) >= 32 - 0.01; }
+  /* v0.1.4.3 (Designer ruling C): the week header holds "This week ▾" + 12px + Back to today's full label, or else + "Today"
+     (the accessible name stays "Back to today"); if neither fits, the single column. Measured in the split, like weekRoom */
+  const HEAD_GAP = 12;
+  let headRoomLast = null;
+  function headRoom() {
+    const root = document.documentElement, row = document.getElementById("navRow"), op = document.getElementById("openPlan"), slot = document.getElementById("backSlot");
+    if (!row || !op || !slot) return "full";
+    const had = root.classList.contains("counter");
+    if (!had) root.classList.add("counter");
+    const sd = slot.style.display; slot.style.setProperty("display", "flex", "important");
+    const oc = op.cloneNode(true); oc.removeAttribute("id"); oc.setAttribute("aria-hidden", "true"); oc.style.cssText = "position:absolute;visibility:hidden;pointer-events:none";
+    const lab = oc.querySelector("span"); if (lab) lab.textContent = "This week";
+    const bt = document.createElement("span"); bt.className = "back-today"; bt.setAttribute("aria-hidden", "true"); bt.style.cssText = "position:absolute;visibility:hidden;pointer-events:none";
+    const b = document.createElement("b"); b.textContent = "Back to today"; bt.appendChild(b);
+    row.appendChild(oc); slot.appendChild(bt);
+    const cs = getComputedStyle(row), box = row.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight), ow = oc.getBoundingClientRect().width, full = bt.getBoundingClientRect().width;
+    b.textContent = "Today"; const short = bt.getBoundingClientRect().width;
+    oc.remove(); bt.remove(); slot.style.display = sd;
+    if (!had) root.classList.remove("counter");
+    if (!(box > 0) || !(ow > 0) || !(full > 0)) return headRoomLast == null ? "full" : headRoomLast.fit;
+    headRoomLast = { fit: ow + HEAD_GAP + full <= box + 0.01 ? "full" : ow + HEAD_GAP + short <= box + 0.01 ? "short" : "none", box: box, op: ow, full: full, short: short };
+    return headRoomLast.fit;
+  }
+  function wantCounter() { return OUTER_MQ.matches && COUNTER_MQ.matches && !bigNarrow() && weekRoom() && headRoom() !== "none"; }
+  function syncBackLabel() {
+    const s = counterOn && !!headRoomLast && headRoomLast.fit === "short";
+    if (s === btShort) return;
+    btShort = s;
+    const b = document.querySelector("#backToday > b"); if (b) b.textContent = s ? "Today" : "Back to today";
+  }
+  /* the split's week heading is short ("This week"); the single column keeps "Week and progress" */
+  function counterHeading(on) { const s = document.querySelector("#openPlan > span:first-child"); if (s) s.textContent = on ? "This week" : "Week and progress"; }
   /* the layout never flips while a text field has focus (the keyboard shrinks the viewport) or just after */
   function syncCounter(force) {
     if (!force && (textEntry() || performance.now() < counterHold)) return;
     const on = wantCounter();
-    if (on === counterOn && !force) return;
+    if (on === counterOn && !force) { syncBackLabel(); return; }
     const flip = on !== counterOn;
     counterOn = on;
     document.documentElement.classList.toggle("counter", on);
+    counterHeading(on);
+    syncBackLabel();
     if (!PLAN) return;
     if (flip) {
       /* a flip moves every control: a panel attached to one closes the way Cancel does (nothing changes); a prompt from
@@ -7174,8 +7915,9 @@ html.counter .upd-box.typing .code-in { height: min(2.9rem, 56px); min-height: m
     if (flip) requestAnimationFrame(function () { if (counterOn) counterReveal(); else revealCard(); });
     else if (counterOn) counterReveal();
   }
-  function queueCounter() { cancelAnimationFrame(fitRaf); fitRaf = requestAnimationFrame(function () { const was = counterOn; syncCounter(); if (counterOn && was) fitCounter(); }); }
+  function queueCounter() { cancelAnimationFrame(fitRaf); fitRaf = requestAnimationFrame(function (ts) { fitTs = ts; try { const was = counterOn; syncCounter(); if (counterOn && was && !fitFresh(ts)) fitCounter(); } finally { fitTs = -1; } }); }
   window.addEventListener("resize", queueCounter);
+  [COUNTER_MQ, NARROW_MQ].forEach(function (q) { if (q.addEventListener) q.addEventListener("change", queueCounter); else q.addListener(queueCounter); });
   document.addEventListener("focusout", function (e) { const t = e.target; if (!t || !(t.tagName === "TEXTAREA" || (t.tagName === "INPUT" && !/^(button|checkbox|radio|file|submit|reset|range|color)$/i.test(t.type)))) return; counterHold = performance.now() + 700; setTimeout(queueCounter, 750); });
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { if (counterOn) fitCounter(); });
 
@@ -7200,7 +7942,7 @@ html.counter .upd-box.typing .code-in { height: min(2.9rem, 56px); min-height: m
   window.addEventListener("resize", detectLargeText);
   /* deferred a frame so a class change never re-enters the observer in the same frame (WebKit logs a loop error) */
   var lgRaf = 0;
-  if (window.ResizeObserver) new ResizeObserver(function () { cancelAnimationFrame(lgRaf); lgRaf = requestAnimationFrame(function () { detectLargeText(); if (PLAN) syncNav(); if (counterOn) fitCounter(); }); }).observe(document.documentElement);
+  if (window.ResizeObserver) new ResizeObserver(function () { cancelAnimationFrame(lgRaf); lgRaf = requestAnimationFrame(function (ts) { detectLargeText(); syncCounter(); if (PLAN) syncNav(); if (counterOn && !fitFresh(ts)) { fitTs = ts; try { fitCounter(); } finally { fitTs = -1; } } }); }).observe(document.documentElement);
 
   /* back from the background on a new day: follow the calendar unless a week was picked on purpose */
   let shownDay = localDay();

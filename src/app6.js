@@ -31,6 +31,8 @@
      the visual viewport. Two panes (inner landscape) keep the CSS per-pane rule, unchanged. Positions are set before the
      first frame, so the fade-in still paints full size (only opacity and the 8px rise animate). */
   const POP_GAP = 8;
+  /* a short landscape window (the Counter's shape), from the window CSS lays out with */
+  const KB_LAND_MQ = window.matchMedia("(orientation: landscape) and (max-height: 499.98px)");
   function popLimits(kbUp) {
     const pr = document.getElementById("clearProbe").getBoundingClientRect();
     const vv = window.visualViewport, ih = window.innerHeight;
@@ -40,7 +42,9 @@
     /* the 50px zone is Safari's bottom toolbar in portrait; in landscape (the Counter) Safari keeps its bars at the top.
        v0.1.3.3: with the keyboard up in the Counter there is no status band to clear (a phone in landscape shows none),
        so the panel may rise to the safe area (padding-top of #clearProbe is the resolved top inset) and use the room */
-    const top = kb && counterOn ? Math.max(8, parseFloat(getComputedStyle(document.getElementById("clearProbe")).paddingTop) || 0) : pr.top;
+    /* v0.1.4.3: the same in the single column in a short landscape window (200% text under 700 wide, Designer option 3):
+       it is the Counter's window without the Counter, so the keyboard leaves it the same ~170px */
+    const top = kb && (counterOn || KB_LAND_MQ.matches) ? Math.max(8, parseFloat(getComputedStyle(document.getElementById("clearProbe")).paddingTop) || 0) : pr.top;
     return { top: vTop + top, bottom: vTop + vH - (kb ? 8 : (counterOn ? 0 : 50) + safeB + 8), left: Math.max(16, pr.left), right: W - Math.max(16, W - pr.right), W: W };
   }
   function placePop(box, anchor, x) {
@@ -214,22 +218,38 @@
   function clearHash() {
     try { history.replaceState(null, "", window.location.pathname + window.location.search); } catch (e) {}
   }
+  /* v0.1.4 (Security Q2, approved by the maintainer): off iOS there is no navigator.standalone (Android, desktop). There a
+     Home Screen shortcut shares this storage, so keeping the plan in the address bar buys nothing and leaves it in the
+     shortcut, history and sync. Once the link's plan is confirmed written (the stored plan reads back as that plan and the seen list
+     holds the link), #p= is removed with replaceState (never a new history entry), and only if the address bar still holds
+     this same link. iOS Safari keeps today's flow (KEEP_LINK_IN_TAB): its Home Screen app starts with storage of its own. */
+  function clearSavedLink(code, fp, plan) {
+    if ("standalone" in window.navigator) return;
+    const h = readHashCode();
+    if (!h || fnv(extractCode(h)) !== fp) return;
+    let ok = false;
+    try { const seen = JSON.parse(localStorage.getItem(LS_PREFIX + "seen")); ok = Array.isArray(seen) && seen.indexOf(fp) >= 0 && localStorage.getItem(LS_PREFIX + "plan") === JSON.stringify(plan); } catch (e) { ok = false; }
+    if (ok) clearHash();
+  }
   async function handleLink(raw) {
     const code = extractCode(raw);
     const fp = fnv(code);
     if (isStandalone() || !KEEP_LINK_IN_TAB) clearHash();
-    if (PLAN && state.seen.indexOf(fp) >= 0) return; /* this link was already handled on this device */
+    if (PLAN && state.seen.indexOf(fp) >= 0) { /* this link was already handled on this device */
+      if (!("standalone" in window.navigator) && readHashCode()) { try { const r = await decodePlan(code); clearSavedLink(code, fp, r.plan); } catch (e) {} }
+      return;
+    }
     let res;
     try { res = await decodePlan(code); }
     catch (err) { showPlanError(err, "link"); return; }
-    if (!PLAN) { applyPlan(res.plan, fp); return; }
-    if (samePlan(PLAN, res.plan)) { markSeen(fp); persist(); showUndo("This plan is already loaded", null, 4000); return; }
+    if (!PLAN) { applyPlan(res.plan, fp); clearSavedLink(code, fp, res.plan); return; }
+    if (samePlan(PLAN, res.plan)) { markSeen(fp); persist(); clearSavedLink(code, fp, res.plan); showUndo("This plan is already loaded", null, 4000); return; }
     openDialog({ kind: "replace", warn: true, title: "Use the plan from this link?",
       body: "It replaces \u201c" + PLAN.meta.name + "\u201d with \u201c" + res.plan.meta.name + "\u201d. Your logged days, lifts and weigh-ins stay.",
       extra: '<p class="dlg-note">' + res.plan.meta.weeks + "\u00a0weeks, " + res.plan.days.filter(function (d) { return !d.rest; }).length + "\u00a0training days a week. You can undo this for 10 seconds.</p>",
       buttons: [
         { label: "Keep current plan", cls: "ghost", id: "dlgKeep", fn: function () { markSeen(fp); persist(); } },
-        { label: "Use new plan", cls: "ic-replace", id: "dlgUse", fn: function () { applyPlan(res.plan, fp, "New plan in use"); } }
+        { label: "Use new plan", cls: "ic-replace", id: "dlgUse", fn: function () { applyPlan(res.plan, fp, "New plan in use"); clearSavedLink(code, fp, res.plan); } }
       ],
       onCancel: function () { markSeen(fp); persist(); } });
   }
@@ -242,7 +262,8 @@
     const CHECK = '<svg class="qp-check" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
     /* On iPhone a Home Screen app has its own storage. In a tab the #p= link stays in the address bar, so an icon added
        later still gets the plan, but not the date or log saved here. A pasted plan leaves no link, so the icon gets nothing. */
-    const hs = isStandalone() ? "" : readHashCode()
+    /* v0.1.4: iOS only. Off iOS the shortcut shares this storage (and the link leaves the address bar once saved) */
+    const hs = isStandalone() || !("standalone" in window.navigator) ? "" : readHashCode()
       ? "Adding this page to your Home Screen later starts fresh. Add it first, then set your date there."
       : "Adding this page to your Home Screen later starts fresh, with no plan. Add it first, then paste your plan code there.";
     openDialog({ kind: "start", title: "When do you start Week 1?",
@@ -412,7 +433,13 @@
     function setDiag() {
       const r = document.documentElement.classList, m = window.LAYOUT.mode;
       const lay = m === "duo" ? "two panes" : m === "innerp" ? "inner portrait" : r.contains("counter") ? "Counter" : "phone";
-      diag.textContent = "Window " + window.innerWidth + "\u00d7" + window.innerHeight + " \u00b7 reported screen " + screen.width + "\u00d7" + screen.height + " \u00b7 layout: " + lay;
+      const de = document.documentElement, qy = function (q) { try { return window.matchMedia(q).matches ? "y" : "n"; } catch (e) { return "?"; } };
+      diag.textContent = "Window " + window.innerWidth + "\u00d7" + window.innerHeight + " \u00b7 CSS " + de.clientWidth + "\u00d7" + de.clientHeight +
+        " \u00b7 queries: landscape " + qy("(orientation: landscape)") + ", inner " + qy("(min-width: 520px) and (min-height: 520px)") +
+        ", split " + qy("(orientation: landscape) and (min-width: 560px) and (max-height: 499.98px)") +
+        (typeof weekRoomLast !== "undefined" && weekRoomLast ? ", week " + Math.round(weekRoomLast.box) + "/" + Math.round(weekRoomLast.need) + "px (12ch) " + (weekRoomLast.ok ? "y" : "n") : "") +
+        " \u00b7 reported screen " + screen.width + "\u00d7" + screen.height + " \u00b7 layout: " + lay +
+        (mutedErrors ? " \u00b7 ignored browser script errors: " + mutedErrors : "");
     }
     window.addEventListener("resize", function () { if (!page.hidden) setDiag(); });
     function setAbout(open) {
@@ -587,20 +614,26 @@
     renderWeekNote();
     renderSpine();
     applyTab();
-    renderDuo();    if (counterOn) fitCounter();
+    renderDuo();    if (typeof syncCounter === "function") syncCounter(); if (counterOn) fitCounter();
   }
 
   /* ================= Counter (v0.1.3.3): the cover screen in landscape ================= */
   /* One type scale for every day: --cs is the largest step from CS_MAX down to CS_MIN at which the plan's longest day
-     (every training day of one week per block and deload kind, measured in the real card) fits the card with no scroll.
+     (every training day of one week per block and deload kind, measured in the real card) fits the card with no scroll,
+     and (v0.1.4.1) never more than the step v0.1.3.4's layout fitted (the ceiling pass, .fit-ceil in the CSS).
      The floors are in the CSS (max()): exercise names 0.875rem (14px), sets, focus and labels 0.8125rem (13px), tags
      0.625rem (10px); 0.73 is where the names reach theirs. A day that does not fit at CS_MIN (or at 200% text) scrolls
      inside the card; nothing is clipped. Re-run on plan load, resize and text-size change. */
   const CS_MAX = 1.3, CS_MIN = 0.73, CS_STEP = 0.03;
+  let fitTs = -1, fitDone = ""; /* see fitKey */
   function fitCounter() {
     const root = document.documentElement, card = document.getElementById("today");
     if (!counterOn || !PLAN || !card || !DAYS.length) { root.style.removeProperty("--cs"); root.classList.remove("counter-scroll"); return; }
     counterRows();
+    /* v0.1.4: measure without the pill's strip and the list's end room (the --end-pad spacer; layoutMore puts them back after). Since (c) a list
+       can take "more-on" at normal text, and a fit measured with them on would count the strip's 44px against the plan.
+       Defensive: no gated case changed with it (s06's longest day overflows at CS_MIN either way). */
+    card.classList.remove("more-on"); card.querySelectorAll(".set-rows").forEach(function (l) { l.style.removeProperty("--end-pad"); });
     const saveV = viewIdx, saveW = state.week, saveArm = armedKey, saveTop = card.scrollTop;
     const weeks = [], seen = {};
     for (let w = 1; w <= TOTAL_WEEKS; w++) { const m = weekMeta(w), k = m.block + "|" + !!m.deload; if (!seen[k]) { seen[k] = 1; weeks.push(w); } }
@@ -613,7 +646,11 @@
     const over = function () { const l = exl(); return card.scrollHeight - card.clientHeight > 0.5 || (!!l && l.scrollHeight - l.clientHeight > 0.5); };
     const tall = function () { const l = exl(); return card.scrollHeight + (l ? l.scrollHeight - l.clientHeight : 0); };
     let cs = CS_MAX, fits = true;
+    const pane = document.getElementById("paneToday");
     try {
+      /* v0.1.4.1: the ceiling. The search first runs with the bar reserving the Undo slot, as every bar did in v0.1.3.4, so
+         the scale never grows past what that layout fitted (the room the slot gave back goes to long days, not bigger type) */
+      if (pane) pane.classList.add("fit-ceil");
       root.style.setProperty("--cs", String(cs));
       /* the tallest day at the largest step goes first; each failure moves the search to the day that failed */
       let worst = null, wh = -1;
@@ -624,11 +661,34 @@
         if (!bad) break;
         worst = bad;
       }
-    } finally { state.week = saveW; viewIdx = saveV; armedKey = saveArm; renderToday(); }
+      /* then the real layout: every day must fit at that scale with the slot given back, or the steps go on down to CS_MIN */
+      if (pane) pane.classList.remove("fit-ceil");
+      fits = true;
+      for (;;) {
+        const bad = days.find(function (wd) { show(wd); return over(); });
+        if (!bad) break;
+        if (cs <= CS_MIN) { fits = false; break; }
+        cs = Math.max(CS_MIN, Math.round((cs - CS_STEP) * 100) / 100); root.style.setProperty("--cs", String(cs));
+      }
+    } finally {
+      if (pane) pane.classList.remove("fit-ceil");
+      state.week = saveW; viewIdx = saveV; armedKey = saveArm; renderToday(); }
     root.classList.toggle("counter-scroll", !fits || over());
     card.scrollTop = Math.min(saveTop, card.scrollHeight);
     layoutMore();
+    fitDone = fitKey(fitTs);
   }
+  /* v0.1.4.1: one fit per layout. A turn runs a fit from the resize handler, and the layout that fit makes trips app7's
+     ResizeObserver a frame later, which ran a second full fit of the same layout (two passes now, about 170-360ms each
+     in WebKit) and kept a turn busy past 600ms. The key is the viewport, the root font size, the card's box and the
+     root's classes, set only by a fit from those two frame callbacks; a fit from anywhere else (a plan or content
+     change, through renderAll) clears it, so the next callback fits again. */
+  function fitKey(ts) {
+    if (ts < 0) return "";
+    const card = document.getElementById("today"), root = document.documentElement;
+    return innerWidth + "x" + innerHeight + "|" + getComputedStyle(root).fontSize + "|" + (card ? card.clientWidth + "x" + card.clientHeight : "") + "|" + root.className;
+  }
+  function fitFresh(ts) { const k = fitKey(ts); return k !== "" && k === fitDone; }
   /* The week rows share the right column's height (repeat(7, 1fr)). When a row would be under 44px with 12px top and
      bottom padding (644x382 with a 21px bottom inset gives 42.9), the bottom padding goes (counter-tight: 44.1); measured
      with the 12px padding every time, so it comes back off when the room returns. */
@@ -641,15 +701,79 @@
   }
   let counterHold = 0, fitRaf = 0;
   function textEntry() { const a = document.activeElement; return !!a && (a.tagName === "TEXTAREA" || (a.tagName === "INPUT" && !/^(button|checkbox|radio|file|submit|reset|range|color)$/i.test(a.type))); }
-  function wantCounter() { return OUTER_MQ.matches && window.innerWidth >= 600 && window.innerWidth > window.innerHeight && window.innerHeight < 500; }
+  /* v0.1.4.3: short landscape from a media query (the viewport the CSS lays out with), not window.innerWidth/innerHeight,
+     which a Home Screen app can report differently; its change event re-checks even when no resize fires */
+  /* v0.1.4.3 (Designer A+): from 560px wide (the owner's cover screen gives the app a 594x466 window; the status column
+     takes the rest), and only while the week column's content box holds 12ch in the day-name style at the current text
+     size, measured in the split layout itself (so 200% text at 594x466 keeps the single column) */
+  const COUNTER_MQ = window.matchMedia("(orientation: landscape) and (min-width: 560px) and (max-height: 499.98px)");
+  const WEEK_CH = 12;
+  let weekRoomLast = null;
+  function weekRoom() {
+    const root = document.documentElement, ws = document.getElementById("weekStrip");
+    if (!ws) return true;
+    const had = root.classList.contains("counter"), keep = ["counter-tight", "counter-short"].filter(function (c) { return root.classList.contains(c); });
+    if (!had) root.classList.add("counter");
+    keep.forEach(function (c) { root.classList.remove(c); });
+    const row = document.createElement("div"), name = document.createElement("span");
+    row.className = "wd"; row.setAttribute("aria-hidden", "true"); row.style.cssText = "visibility:hidden;height:0;min-height:0;pointer-events:none";
+    name.className = "ss"; name.style.cssText = "position:absolute;width:" + WEEK_CH + "ch;flex:none";
+    row.appendChild(name); ws.appendChild(row);
+    const cs = getComputedStyle(row), box = row.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight), need = name.getBoundingClientRect().width;
+    row.remove();
+    keep.forEach(function (c) { root.classList.add(c); });
+    if (!had) root.classList.remove("counter");
+    /* not laid out (no plan yet, or hidden): keep the last answer, or the query's */
+    if (!(box > 0) || !(need > 0)) return weekRoomLast == null ? true : weekRoomLast.ok;
+    weekRoomLast = { ok: box >= need - 0.01, box: box, need: need };
+    return weekRoomLast.ok;
+  }
+  /* v0.1.4.3 (Designer, option 3): 200% text (a 32px root) in a landscape window under 700 wide always gets the single
+     column, in every engine; otherwise (150%, or 200% from 700 wide) the 12ch measurement decides */
+  const NARROW_MQ = window.matchMedia("(max-width: 699.98px)");
+  function bigNarrow() { return NARROW_MQ.matches && parseFloat(getComputedStyle(document.documentElement).fontSize) >= 32 - 0.01; }
+  /* v0.1.4.3 (Designer ruling C): the week header holds "This week ▾" + 12px + Back to today's full label, or else + "Today"
+     (the accessible name stays "Back to today"); if neither fits, the single column. Measured in the split, like weekRoom */
+  const HEAD_GAP = 12;
+  let headRoomLast = null;
+  function headRoom() {
+    const root = document.documentElement, row = document.getElementById("navRow"), op = document.getElementById("openPlan"), slot = document.getElementById("backSlot");
+    if (!row || !op || !slot) return "full";
+    const had = root.classList.contains("counter");
+    if (!had) root.classList.add("counter");
+    const sd = slot.style.display; slot.style.setProperty("display", "flex", "important");
+    const oc = op.cloneNode(true); oc.removeAttribute("id"); oc.setAttribute("aria-hidden", "true"); oc.style.cssText = "position:absolute;visibility:hidden;pointer-events:none";
+    const lab = oc.querySelector("span"); if (lab) lab.textContent = "This week";
+    const bt = document.createElement("span"); bt.className = "back-today"; bt.setAttribute("aria-hidden", "true"); bt.style.cssText = "position:absolute;visibility:hidden;pointer-events:none";
+    const b = document.createElement("b"); b.textContent = "Back to today"; bt.appendChild(b);
+    row.appendChild(oc); slot.appendChild(bt);
+    const cs = getComputedStyle(row), box = row.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight), ow = oc.getBoundingClientRect().width, full = bt.getBoundingClientRect().width;
+    b.textContent = "Today"; const short = bt.getBoundingClientRect().width;
+    oc.remove(); bt.remove(); slot.style.display = sd;
+    if (!had) root.classList.remove("counter");
+    if (!(box > 0) || !(ow > 0) || !(full > 0)) return headRoomLast == null ? "full" : headRoomLast.fit;
+    headRoomLast = { fit: ow + HEAD_GAP + full <= box + 0.01 ? "full" : ow + HEAD_GAP + short <= box + 0.01 ? "short" : "none", box: box, op: ow, full: full, short: short };
+    return headRoomLast.fit;
+  }
+  function wantCounter() { return OUTER_MQ.matches && COUNTER_MQ.matches && !bigNarrow() && weekRoom() && headRoom() !== "none"; }
+  function syncBackLabel() {
+    const s = counterOn && !!headRoomLast && headRoomLast.fit === "short";
+    if (s === btShort) return;
+    btShort = s;
+    const b = document.querySelector("#backToday > b"); if (b) b.textContent = s ? "Today" : "Back to today";
+  }
+  /* the split's week heading is short ("This week"); the single column keeps "Week and progress" */
+  function counterHeading(on) { const s = document.querySelector("#openPlan > span:first-child"); if (s) s.textContent = on ? "This week" : "Week and progress"; }
   /* the layout never flips while a text field has focus (the keyboard shrinks the viewport) or just after */
   function syncCounter(force) {
     if (!force && (textEntry() || performance.now() < counterHold)) return;
     const on = wantCounter();
-    if (on === counterOn && !force) return;
+    if (on === counterOn && !force) { syncBackLabel(); return; }
     const flip = on !== counterOn;
     counterOn = on;
     document.documentElement.classList.toggle("counter", on);
+    counterHeading(on);
+    syncBackLabel();
     if (!PLAN) return;
     if (flip) {
       /* a flip moves every control: a panel attached to one closes the way Cancel does (nothing changes); a prompt from
@@ -661,7 +785,8 @@
     if (flip) requestAnimationFrame(function () { if (counterOn) counterReveal(); else revealCard(); });
     else if (counterOn) counterReveal();
   }
-  function queueCounter() { cancelAnimationFrame(fitRaf); fitRaf = requestAnimationFrame(function () { const was = counterOn; syncCounter(); if (counterOn && was) fitCounter(); }); }
+  function queueCounter() { cancelAnimationFrame(fitRaf); fitRaf = requestAnimationFrame(function (ts) { fitTs = ts; try { const was = counterOn; syncCounter(); if (counterOn && was && !fitFresh(ts)) fitCounter(); } finally { fitTs = -1; } }); }
   window.addEventListener("resize", queueCounter);
+  [COUNTER_MQ, NARROW_MQ].forEach(function (q) { if (q.addEventListener) q.addEventListener("change", queueCounter); else q.addListener(queueCounter); });
   document.addEventListener("focusout", function (e) { const t = e.target; if (!t || !(t.tagName === "TEXTAREA" || (t.tagName === "INPUT" && !/^(button|checkbox|radio|file|submit|reset|range|color)$/i.test(t.type)))) return; counterHold = performance.now() + 700; setTimeout(queueCounter, 750); });
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { if (counterOn) fitCounter(); });
